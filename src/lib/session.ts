@@ -1,5 +1,6 @@
 import 'server-only';
 import { cookies } from 'next/headers';
+import type { Session } from 'next-auth';
 import { auth } from '@/auth';
 import {
   ForbiddenError,
@@ -29,7 +30,16 @@ export interface Context {
 
 /** De ingelogde gebruiker, of null. */
 export async function currentUser(): Promise<User | null> {
-  const session = await auth();
+  let session: Session | null = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    // Zonder AUTH_SECRET werpt Auth.js in productie. Dan is er niemand
+    // ingelogd; de bezoeker komt op /login en leest daar wat er ontbreekt,
+    // in plaats van een kale foutpagina te krijgen.
+    console.error('[bloeiwijzer] sessie uitlezen mislukt', error);
+    return null;
+  }
   if (!session?.user?.id) return null;
   return getUser(session.user.id);
 }

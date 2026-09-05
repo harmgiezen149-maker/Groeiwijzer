@@ -5,9 +5,11 @@ import { signIn } from 'next-auth/react';
 
 export function LoginForm({
   providers,
+  problemen,
   callbackUrl,
 }: {
   providers: { google: boolean; resend: boolean; dev: boolean };
+  problemen: string[];
   callbackUrl: string;
 }) {
   const [email, setEmail] = useState('');
@@ -70,12 +72,15 @@ export function LoginForm({
         </form>
       ) : null}
 
-      {nothingConfigured ? (
-        <p className="bw-card p-4 text-[13px] text-[var(--ink-soft)]">
-          Er is nog geen inlogmethode ingesteld. Zet <code>AUTH_GOOGLE_ID</code> en{' '}
-          <code>AUTH_GOOGLE_SECRET</code>, of <code>AUTH_RESEND_KEY</code> en{' '}
-          <code>RESEND_FROM</code> in de omgeving.
-        </p>
+      {nothingConfigured || problemen.length ? (
+        <div className="bw-card p-4 text-[13px] text-[var(--ink-soft)]">
+          <p className="mb-1.5 font-semibold">Nog in te stellen</p>
+          <ul className="list-disc pl-4">
+            {problemen.map((probleem) => (
+              <li key={probleem}>{probleem}</li>
+            ))}
+          </ul>
+        </div>
       ) : null}
     </div>
   );

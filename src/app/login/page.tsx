@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { auth, availableProviders } from '@/auth';
+import { auth, availableProviders, configuratieProblemen } from '@/auth';
 import { LoginForm } from './LoginForm';
 
 export const metadata = { title: 'Inloggen — Bloeiwijzer' };
@@ -9,7 +9,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ check?: string; error?: string; callbackUrl?: string }>;
 }) {
-  const session = await auth();
+  const session = await auth().catch(() => null);
   if (session?.user?.id) redirect('/');
   const params = await searchParams;
 
@@ -39,7 +39,11 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        <LoginForm providers={availableProviders} callbackUrl={params.callbackUrl ?? '/'} />
+        <LoginForm
+          providers={availableProviders}
+          problemen={configuratieProblemen()}
+          callbackUrl={params.callbackUrl ?? '/'}
+        />
       </div>
     </main>
   );

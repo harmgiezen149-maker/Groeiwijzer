@@ -106,3 +106,30 @@ export const authConfig: NextAuthConfig = {
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+
+/**
+ * Wat er ontbreekt om te kunnen inloggen. Wordt op /login getoond, zodat een
+ * verse deploy zonder omgevingsvariabelen uitlegt wat er moet gebeuren in
+ * plaats van stil te blijven staan.
+ */
+export function configuratieProblemen(): string[] {
+  const problemen: string[] = [];
+  if (!process.env.AUTH_SECRET && process.env.NODE_ENV === 'production') {
+    problemen.push('AUTH_SECRET ontbreekt.');
+  }
+  if (!usingUpstash) {
+    problemen.push(
+      'UPSTASH_REDIS_REST_URL en UPSTASH_REDIS_REST_TOKEN ontbreken; gegevens blijven niet bewaard.',
+    );
+  }
+  if (providers.length === 0) {
+    problemen.push(
+      'Er is geen inlogmethode: zet AUTH_GOOGLE_ID en AUTH_GOOGLE_SECRET, of AUTH_RESEND_KEY en RESEND_FROM.',
+    );
+  } else if (!availableProviders.resend && (resendKey || process.env.RESEND_FROM)) {
+    problemen.push(
+      'De inloglink per e-mail staat uit: die vraagt AUTH_RESEND_KEY, RESEND_FROM én Upstash.',
+    );
+  }
+  return problemen;
+}
