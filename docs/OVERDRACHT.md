@@ -730,13 +730,34 @@ hieronder alleen de plekken waar de bouw afwijkt of aanvult.
 | 13 | Label scannen zonder sessie | live |
 | 14 | Plant op dood: weg uit agenda, blijft in archief | live |
 | 15 | Ongeldige JSON: één nieuwe poging, dan leeg profiel | unittest met gemockt model |
-| 16 | Volledige flow op 375 px met één hand | nog te doen op een echt toestel |
+| 16 | Volledige flow op 375 px met één hand | doorlopen in Chromium op 375×667 met aanraakbediening; zie hieronder |
+
+### Scenario 16 — de doorloop op 375 px
+
+`scripts/telefoon-doorloop.mjs` speelt de hele flow af op 375×667 met
+aanraakbediening: inloggen, lege staat, plant toevoegen, taak instellen,
+opslaan, afvinken, ongedaan maken, overslaan met reden, en daarna elk scherm
+plus een gekozen dag in de agenda. Per scherm wordt gecontroleerd op
+horizontaal scrollen, raakvlakken onder 44 px, invoervelden onder 16 px
+(waardoor iOS inzoomt), JS-fouten en mislukte verzoeken.
+
+De doorloop is schoon. Wat hij onderweg aan het licht bracht en wat daarop
+is aangepast:
+
+| Bevinding | Aanpassing |
+|---|---|
+| De labels in de takeneditor hoorden nergens bij | Elk veld een eigen id, met `htmlFor` |
+| Filterpillen en snelkeuzes waren 34 px hoog | Optisch 34 px gehouden, raakvlak via `::after` op 44 px |
+| Uitklapregels van een taakkaart waren 43 px | `.bw-regel` zet ze op 44 px |
+| `/favicon.ico` gaf 404 | Bloemicoon toegevoegd als `src/app/icon.png` |
+
+Wat een script niet ziet: hoe het voelt met natte handen en of de teksten
+kloppen in de tuin. Dat blijft iets om zelf te doen.
 
 ### Nog open
 
-1. Het ontwerp uit Claude Design (§11, fase 6).
-2. Scenario 16: zelf uitproberen op de telefoon.
-3. `api.open-meteo.com` is in de bouwomgeving geblokkeerd; de live call is
+1. Zelf uitproberen op je eigen toestel (scenario 16, het handmatige deel).
+2. `api.open-meteo.com` is in de bouwomgeving geblokkeerd; de live call is
    daar niet te verifiëren. De foutafhandeling wel: valt de dienst weg, dan
    gebruikt de app de laatste verwachting.
-4. Aankoopdatum en boodschappenlijst (§17.4) — bewust nog niet gebouwd.
+3. Aankoopdatum en boodschappenlijst (§17.4) — bewust nog niet gebouwd.

@@ -200,7 +200,7 @@ function OccurrenceRow({
           />
           <button
             type="button"
-            className="flex min-w-0 flex-1 items-center gap-2 text-left text-[13.5px]"
+            className="bw-regel flex min-w-0 flex-1 items-center gap-2 text-left text-[13.5px]"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
@@ -231,7 +231,7 @@ function OccurrenceRow({
 
           <button
             type="button"
-            className="min-w-0 flex-1 text-left"
+            className="bw-regel min-w-0 flex-1 text-left"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
@@ -349,7 +349,7 @@ function SkipDialog({
   return (
     <Venster ref={ref} titel="Overslaan">
       <p className="text-[13px] text-[var(--ink-quiet)]">{titel}</p>
-      <div className="flex flex-wrap gap-2">
+      <div className="bw-pillen">
         {SKIP_REASONS.map((optie) => (
           <button
             key={optie}

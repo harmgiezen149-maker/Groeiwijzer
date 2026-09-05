@@ -78,6 +78,7 @@ export function TaakEditor({
                 {open === index ? (
                   <TaakVelden
                     taak={taak}
+                    index={index}
                     outdoor={outdoor}
                     onChange={(patch) => wijzig(index, patch)}
                   />
@@ -121,14 +122,19 @@ export function TaakEditor({
 
 function TaakVelden({
   taak,
+  index,
   outdoor,
   onChange,
 }: {
   taak: TaakConcept;
+  index: number;
   outdoor: boolean;
   onChange: (patch: Partial<TaakConcept>) => void;
 }) {
   const s = taak.schedule;
+  // Elk veld een eigen id: zonder koppeling weet een schermlezer niet welk
+  // label bij welk veld hoort, en werkt tikken op het label ook niet.
+  const veld = (naam: string) => `taak-${index}-${naam}`;
 
   function zetPlanning(patch: Partial<Schedule>) {
     onChange({ schedule: { ...s, ...patch } as Schedule });
@@ -138,8 +144,11 @@ function TaakVelden({
     <div className="mt-3 flex flex-col gap-3 border-t border-[var(--line)] pt-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="bw-label">Soort werk</label>
+          <label className="bw-label" htmlFor={veld('type')}>
+            Soort werk
+          </label>
           <select
+            id={veld('type')}
             className="bw-select"
             value={taak.type}
             onChange={(e) => onChange({ type: e.target.value as TaskType })}
@@ -152,8 +161,11 @@ function TaakVelden({
           </select>
         </div>
         <div>
-          <label className="bw-label">Belang</label>
+          <label className="bw-label" htmlFor={veld('belang')}>
+            Belang
+          </label>
           <select
+            id={veld('belang')}
             className="bw-select"
             value={taak.importance}
             onChange={(e) => onChange({ importance: e.target.value as Importance })}
@@ -168,8 +180,11 @@ function TaakVelden({
       </div>
 
       <div>
-        <label className="bw-label">Titel</label>
+        <label className="bw-label" htmlFor={veld('titel')}>
+            Titel
+          </label>
         <input
+          id={veld('titel')}
           className="bw-input"
           value={taak.title}
           onChange={(e) => onChange({ title: e.target.value })}
@@ -178,8 +193,11 @@ function TaakVelden({
       </div>
 
       <div>
-        <label className="bw-label">Uitleg</label>
+        <label className="bw-label" htmlFor={veld('uitleg')}>
+            Uitleg
+          </label>
         <textarea
+          id={veld('uitleg')}
           className="bw-textarea"
           value={taak.instructions}
           onChange={(e) => onChange({ instructions: e.target.value })}
@@ -188,8 +206,11 @@ function TaakVelden({
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <label className="bw-label">Herhaling</label>
+          <label className="bw-label" htmlFor={veld('herhaling')}>
+            Herhaling
+          </label>
           <select
+            id={veld('herhaling')}
             className="bw-select"
             value={s.kind}
             onChange={(e) => onChange({ schedule: nieuwePlanning(e.target.value, s) })}
@@ -201,8 +222,11 @@ function TaakVelden({
           </select>
         </div>
         <div>
-          <label className="bw-label">Van</label>
+          <label className="bw-label" htmlFor={veld('van')}>
+            Van
+          </label>
           <select
+            id={veld('van')}
             className="bw-select"
             value={s.startMonth}
             onChange={(e) => zetPlanning({ startMonth: Number(e.target.value) as Month })}
@@ -215,8 +239,11 @@ function TaakVelden({
           </select>
         </div>
         <div>
-          <label className="bw-label">Tot en met</label>
+          <label className="bw-label" htmlFor={veld('tot')}>
+            Tot en met
+          </label>
           <select
+            id={veld('tot')}
             className="bw-select"
             value={s.endMonth}
             onChange={(e) => zetPlanning({ endMonth: Number(e.target.value) as Month })}
@@ -232,12 +259,15 @@ function TaakVelden({
 
       {s.kind === 'jaarvenster' ? (
         <div>
-          <label className="bw-label">Hoe vaak binnen dat venster</label>
+          <label className="bw-label" htmlFor={veld('aantal')}>
+            Hoe vaak binnen dat venster
+          </label>
           <input
             className="bw-input"
             type="number"
             min={1}
             max={24}
+            id={veld('aantal')}
             value={s.timesPerWindow}
             onChange={(e) => zetPlanning({ timesPerWindow: Number(e.target.value) })}
           />
@@ -246,12 +276,15 @@ function TaakVelden({
 
       {s.kind === 'interval' ? (
         <div>
-          <label className="bw-label">Om de hoeveel dagen</label>
+          <label className="bw-label" htmlFor={veld('dagen')}>
+            Om de hoeveel dagen
+          </label>
           <input
             className="bw-input"
             type="number"
             min={1}
             max={365}
+            id={veld('dagen')}
             value={s.intervalDays}
             onChange={(e) => zetPlanning({ intervalDays: Number(e.target.value) })}
           />
@@ -261,23 +294,29 @@ function TaakVelden({
       {s.kind === 'meerjaarlijks' ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="bw-label">Om de hoeveel jaar</label>
+            <label className="bw-label" htmlFor={veld('jaren')}>
+            Om de hoeveel jaar
+          </label>
             <input
               className="bw-input"
               type="number"
               min={2}
               max={20}
+              id={veld('jaren')}
               value={s.everyYears}
               onChange={(e) => zetPlanning({ everyYears: Number(e.target.value) })}
             />
           </div>
           <div>
-            <label className="bw-label">Startjaar</label>
+            <label className="bw-label" htmlFor={veld('startjaar')}>
+            Startjaar
+          </label>
             <input
               className="bw-input"
               type="number"
               min={1900}
               max={2200}
+              id={veld('startjaar')}
               value={s.anchorYear}
               onChange={(e) => zetPlanning({ anchorYear: Number(e.target.value) })}
             />
@@ -288,7 +327,7 @@ function TaakVelden({
       {outdoor ? (
         <fieldset>
           <legend className="bw-label">Weerregels</legend>
-          <div className="flex flex-wrap gap-2">
+          <div className="bw-pillen">
             {WEATHER_RULE_IDS.map((regel) => {
               const aan = taak.weatherRules.includes(regel);
               return (

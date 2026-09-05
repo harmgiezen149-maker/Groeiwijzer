@@ -352,7 +352,7 @@ export function Instellingen({
           >
             Exporteren als JSON
           </a>
-          <div className="flex flex-wrap gap-2">
+          <div className="bw-pillen">
             {(['planten', 'taken', 'agenda', 'logboek'] as const).map((onderdeel) => (
               <a
                 key={onderdeel}
@@ -370,7 +370,7 @@ export function Instellingen({
       {/* -------------------------------------------------------- meer */}
       <section>
         <h2 className="bw-sectie mb-2">Meer</h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="bw-pillen">
           <Link href="/labels" className="bw-pil">
             QR-labels printen
           </Link>

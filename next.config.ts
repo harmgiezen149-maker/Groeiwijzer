@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     ],
   },
   eslint: { ignoreDuringBuilds: false },
+  // De ontwikkelindicator staat linksonder precies over de onderbalk heen,
+  // wat het testen op een smal scherm in de weg zit.
+  devIndicators: false,
 };
 
 export default nextConfig;

@@ -307,8 +307,11 @@ body {
   margin-bottom: 0.3rem;
 }
 
-/* Filterpil. Actief is donker, zoals in het ontwerp. */
+/* Filterpil. Actief is donker, zoals in het ontwerp.
+   De pil blijft optisch 34 px, maar krijgt via ::after een raakvlak van
+   44 px: §11 vraagt dat, en een dikkere pil zou het ontwerp platslaan. */
 .bw-pil {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -322,6 +325,19 @@ body {
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
+}
+.bw-pil::after {
+  content: '';
+  position: absolute;
+  inset: -5px -2px;
+  border-radius: var(--pill);
+}
+/* Waar pillen onder elkaar kunnen komen, moeten de raakvlakken elkaar niet
+   overlappen: vandaar minstens 12 px tussenruimte. */
+.bw-pillen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .bw-pil[aria-pressed='true'],
 .bw-pil[data-actief='true'],
@@ -463,6 +479,11 @@ body {
   border-top: 1px solid var(--line);
   background: var(--paper);
   box-shadow: var(--shadow-nav);
+}
+
+/* Uitklapregel van een taakkaart: het hele blok is één raakvlak. */
+.bw-regel {
+  min-height: var(--tap);
 }
 
 /* Kalender. */
