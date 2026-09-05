@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: 'Jouw tuin, plant voor plant, maand voor maand.',
   applicationName: 'Bloeiwijzer',
   appleWebApp: { capable: true, title: 'Bloeiwijzer', statusBarStyle: 'default' },
+  manifest: '/manifest.webmanifest',
 };
 
 export const viewport: Viewport = {

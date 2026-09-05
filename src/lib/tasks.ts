@@ -95,3 +95,20 @@ export async function tasksByPlant(
   );
   return new Map(entries);
 }
+
+/**
+ * Taak met een vaste id, voor taken die de app zelf beheert (weer-gestuurd).
+ * Idempotent: bestaat hij al, dan blijft de tekst van de gebruiker staan.
+ */
+export async function ensureTask(
+  gardenId: string,
+  plantId: string,
+  taskId: string,
+  input: Omit<CareTask, 'id' | 'plantId'>,
+): Promise<CareTask> {
+  const bestaand = await getTask(gardenId, plantId, taskId);
+  if (bestaand) return bestaand;
+  const task: CareTask = { ...input, id: taskId, plantId };
+  await db().hset(g.plantTasks(gardenId, plantId), taskId, task);
+  return task;
+}

@@ -14,6 +14,9 @@ const DEFAULT_LOCATIONS: Omit<Location, 'id'>[] = [
   { name: 'Binnen', outdoor: false, sun: 'halfschaduw', sortOrder: 3 },
 ];
 
+/** Registratie van alle tuinen, zodat de geplande taken erlangs kunnen. */
+const ALL_GARDENS = 'gardens:all';
+
 export class ForbiddenError extends Error {
   status = 403;
   constructor(message = 'Geen toegang tot deze tuin') {
@@ -82,6 +85,7 @@ export async function createGarden(owner: User, name: string): Promise<Garden> {
     createdAt: now(),
   };
   await db().set(gardenKey.root(garden.id), garden);
+  await db().sadd(ALL_GARDENS, garden.id);
   await addMember(garden.id, owner.id, 'eigenaar');
   await seedDefaultLocations(garden.id);
   return garden;
@@ -110,6 +114,12 @@ export async function listGardensForUser(userId: string): Promise<Garden[]> {
   return gardens
     .filter((x): x is Garden => x !== null)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+export async function listAllGardens(): Promise<Garden[]> {
+  const ids = await db().smembers(ALL_GARDENS);
+  const gardens = await Promise.all(ids.map((id) => getGarden(id)));
+  return gardens.filter((x): x is Garden => x !== null);
 }
 
 /* -------------------------------------------------------------- lidmaatschap */

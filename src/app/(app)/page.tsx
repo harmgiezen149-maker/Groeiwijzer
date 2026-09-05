@@ -7,6 +7,9 @@ import { MONTH_NAMES, parseYmd, todayInAmsterdam } from '@/lib/dates';
 import { OccurrenceList } from '@/components/OccurrenceList';
 import { MonthCalendar } from '@/components/MonthCalendar';
 import { LegeStaat } from '@/components/LegeStaat';
+import { WeerBanner } from '@/components/WeerBanner';
+import { weatherFor } from '@/lib/weather';
+import { applyWeather } from '@/lib/weather-apply';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +19,10 @@ export default async function StartPagina() {
   const { year, month } = parseYmd(today);
 
   await ensureGenerated(garden.id, year);
+
+  // De verwachting is zes uur gecached, dus dit kost hooguit vier calls per dag.
+  const weer = await weatherFor(garden);
+  await applyWeather(garden, weer);
 
   const [dezeMaand, ditJaar, planten] = await Promise.all([
     agendaForMonth(garden.id, year, month).then((items) => toRows(garden.id, items)),
@@ -32,8 +39,14 @@ export default async function StartPagina() {
     .filter((row) => row.windowStart > today && !dezeMaand.some((d) => d.id === row.id))
     .slice(0, 12);
 
+  const meldingen = Object.values(weer.rules).filter(
+    (regel) => regel.id !== 'geen-vorst' || dezeMaand.some((rij) => rij.taskType === 'snoeien'),
+  );
+
   return (
     <div className="flex flex-col gap-6">
+      <WeerBanner rules={meldingen} />
+
       <section>
         <h1 className="mb-1 text-2xl font-bold tracking-tight">
           {MONTH_NAMES[month - 1]}

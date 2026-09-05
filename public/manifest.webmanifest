@@ -1,0 +1,16 @@
+{
+  "name": "Bloeiwijzer",
+  "short_name": "Bloeiwijzer",
+  "description": "Jouw tuin, plant voor plant, maand voor maand.",
+  "lang": "nl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fffbf2",
+  "theme_color": "#fffbf2",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

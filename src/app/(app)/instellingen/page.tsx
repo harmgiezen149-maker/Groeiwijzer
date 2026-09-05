@@ -2,6 +2,7 @@ import { requireContext } from '@/lib/session';
 import { listMembers } from '@/lib/garden';
 import { Instellingen } from './Instellingen';
 import { signOutAction } from '@/app/actions';
+import { PushAanmelden } from '@/components/PushAanmelden';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Instellingen — Bloeiwijzer' };
@@ -26,6 +27,18 @@ export default async function InstellingenPagina() {
           email: m.user?.email ?? '',
         }))}
       />
+
+      <section className="bw-card p-4">
+        <h2 className="mb-2 text-lg font-bold">Meldingen op dit apparaat</h2>
+        <p className="mb-3 text-sm text-[var(--ink-soft)]">
+          Pushmeldingen komen alleen bij nachtvorst en spoed, hooguit één per dag.
+        </p>
+        <PushAanmelden
+          vapidPublicKey={
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? process.env.VAPID_PUBLIC_KEY ?? null
+          }
+        />
+      </section>
 
       <section className="bw-card p-4">
         <h2 className="mb-2 text-lg font-bold">Account</h2>

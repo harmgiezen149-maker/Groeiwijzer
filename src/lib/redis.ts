@@ -302,7 +302,10 @@ export function db(): Store {
         '[bloeiwijzer] UPSTASH_REDIS_REST_URL/TOKEN ontbreken — er wordt een tijdelijke store gebruikt die niet blijft bestaan.',
       );
     }
-    store = new MemoryStore(process.env.NODE_ENV === 'production' ? null : '.dev-data/redis.json');
+    // Alleen tijdens `next dev` naar schijf; in tests blijft alles in geheugen.
+    store = new MemoryStore(
+      process.env.NODE_ENV === 'development' ? '.dev-data/redis.json' : null,
+    );
   }
   return store;
 }
