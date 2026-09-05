@@ -21,7 +21,10 @@ export function toErrorResponse(error: unknown): NextResponse {
     return NextResponse.json({ error: error.message }, { status: 404 });
   }
   const e = error as ErrorLike;
-  if (typeof e?.status === 'number' && e.status >= 400 && e.status < 500) {
+  // Een zelf gezette status hoort bij een zelf geschreven melding: die mag de
+  // gebruiker zien. Bij 5xx blijft de fout ook in het logboek staan.
+  if (typeof e?.status === 'number' && e.status >= 400 && e.status < 600) {
+    if (e.status >= 500) console.error('[bloeiwijzer] dienst niet beschikbaar', error);
     return NextResponse.json({ error: e.message ?? 'Verzoek geweigerd' }, { status: e.status });
   }
   console.error('[bloeiwijzer] onverwachte fout', error);

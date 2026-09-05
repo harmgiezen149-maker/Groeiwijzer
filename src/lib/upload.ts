@@ -4,6 +4,19 @@ import { newId } from './ids';
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
+/** Vercel Blob is gekoppeld. */
+export const blobEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+/**
+ * Op Vercel is de schijf alleen-lezen; daar kan alleen Blob de foto bewaren.
+ * Lokaal mag `public/uploads` het overnemen, zodat de flow te bouwen is
+ * zonder token.
+ */
+export const fotoOpslagBeschikbaar = blobEnabled || !process.env.VERCEL;
+
+export const GEEN_OPSLAG =
+  'Foto-opslag is niet ingesteld. Koppel Vercel Blob aan het project; dan wordt de foto bewaard.';
+
 const SIGNATURES: { type: string; ext: string; test: (b: Uint8Array) => boolean }[] = [
   {
     type: 'image/jpeg',
@@ -48,7 +61,9 @@ export interface StoredFile {
 
 /**
  * Slaat een afbeelding op. Met BLOB_READ_WRITE_TOKEN gaat dat naar Vercel Blob;
- * zonder token (lokale bouw) naar `public/uploads`, zodat de flow te testen is.
+ * zonder token en buiten Vercel naar `public/uploads`, zodat de flow lokaal te
+ * testen is. Op Vercel zonder Blob is er geen plek om te schrijven: dan een
+ * duidelijke melding in plaats van een schijffout.
  */
 export async function storeImage(
   bytes: Uint8Array,
@@ -63,7 +78,11 @@ export async function storeImage(
   const { type, ext } = sniffImage(bytes);
   const name = `${prefix}/${newId()}.${ext}`;
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!fotoOpslagBeschikbaar) {
+    throw Object.assign(new Error(GEEN_OPSLAG), { status: 503 });
+  }
+
+  if (blobEnabled) {
     const blob = await put(name, Buffer.from(bytes), {
       access: 'public',
       contentType: type,
@@ -78,4 +97,24 @@ export async function storeImage(
   await fs.mkdir(path.dirname(target), { recursive: true });
   await fs.writeFile(target, bytes);
   return { url: `/uploads/${name}`, contentType: type, size: bytes.byteLength };
+}
+
+/**
+ * Zelfde als storeImage, maar zonder te werpen. Herkenning mag niet stuklopen
+ * op een ontbrekende foto-opslag: de soort en het zorgprofiel zijn de kern,
+ * de bewaarde foto is een extra (§6.1).
+ */
+export async function tryStoreImage(
+  bytes: Uint8Array,
+  prefix: string,
+): Promise<{ stored: StoredFile | null; note?: string }> {
+  if (!fotoOpslagBeschikbaar) {
+    return { stored: null, note: `${GEEN_OPSLAG} De herkenning gaat gewoon door.` };
+  }
+  try {
+    return { stored: await storeImage(bytes, prefix) };
+  } catch (error) {
+    console.warn('[bloeiwijzer] foto bewaren mislukt', error);
+    return { stored: null, note: 'De foto kon niet worden bewaard; de herkenning gaat door.' };
+  }
 }

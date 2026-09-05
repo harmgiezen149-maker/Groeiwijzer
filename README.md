@@ -29,7 +29,7 @@ blijft werken:
 | `AUTH_GOOGLE_*` / `AUTH_RESEND_KEY` | Alleen de ontwikkelaarslogin |
 | `ANTHROPIC_API_KEY` | Geen zorgprofiel-voorstel; taken zelf invullen |
 | `PLANTNET_API_KEY` | Herkenning draait alleen op Claude, met melding |
-| `BLOB_READ_WRITE_TOKEN` | Foto's landen in `public/uploads` |
+| `BLOB_READ_WRITE_TOKEN` | Lokaal: foto's landen in `public/uploads`. Op Vercel: foto's worden niet bewaard, de herkenning gaat wel door |
 | `RESEND_API_KEY` | Geen maandbericht en geen uitnodigingsmail (link tonen) |
 | `VAPID_*` | Geen pushmeldingen |
 
