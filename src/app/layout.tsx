@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Karla } from 'next/font/google';
+import { Bricolage_Grotesque, Karla } from 'next/font/google';
 import './globals.css';
 
-/* Fraunces voor de koppen (met de WONK-as aan, zoals in het ontwerp),
+/* Bricolage Grotesque voor de koppen: levendig en een beetje eigenwijs,
    Karla voor alles wat je leest. */
-const fraunces = Fraunces({
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
-  axes: ['SOFT', 'WONK'],
   display: 'swap',
-  variable: '--font-fraunces',
+  variable: '--font-bricolage',
 });
 
 const karla = Karla({
@@ -35,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl" className={`${fraunces.variable} ${karla.variable}`}>
+    <html lang="nl" className={`${bricolage.variable} ${karla.variable}`}>
       <body className="antialiased">{children}</body>
     </html>
   );

@@ -30,11 +30,10 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className="flex min-h-[var(--tap)] items-center px-2 text-[11px] sm:text-xs"
-                style={{
-                  color: active ? 'var(--dahlia)' : 'var(--ink-muted)',
-                  fontWeight: active ? 700 : 500,
-                }}
+                className={`flex min-h-[var(--tap)] items-center px-2 text-[11px] sm:text-xs ${
+                  active ? 'bw-nav-actief' : ''
+                }`}
+                style={active ? { fontWeight: 700 } : { color: 'var(--ink-muted)', fontWeight: 500 }}
               >
                 {item.label}
               </Link>

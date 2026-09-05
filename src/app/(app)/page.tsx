@@ -9,6 +9,7 @@ import { applyWeather } from '@/lib/weather-apply';
 import { OccurrenceList } from '@/components/OccurrenceList';
 import { MonthCalendar } from '@/components/MonthCalendar';
 import { WeerBanner } from '@/components/WeerBanner';
+import { LocatieTegels } from '@/components/LocatieTegels';
 import { LegeStaat } from '@/components/LegeStaat';
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +48,8 @@ export default async function StartPagina() {
       <h1 className="bw-titel">Deze maand</h1>
 
       <WeerBanner rules={meldingen} />
+
+      <LocatieTegels rows={dezeMaand.filter((rij) => rij.status === 'open')} />
 
       <OccurrenceList rows={dezeMaand} emptyText="Geen open taken deze maand." />
 

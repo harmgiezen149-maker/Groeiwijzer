@@ -82,14 +82,16 @@ export default async function AgendaPagina({
         </Link>
       </header>
 
-      <MonthCalendar
-        year={jaar}
-        month={maand}
-        rows={rijen}
-        today={jaar === nu.year && maand === nu.month ? vandaag : undefined}
-        selected={dag}
-        hrefForDay={(datum) => link({ dag: datum ?? undefined })}
-      />
+      <div className="bw-card px-0 py-3.5">
+        <MonthCalendar
+          year={jaar}
+          month={maand}
+          rows={rijen}
+          today={jaar === nu.year && maand === nu.month ? vandaag : undefined}
+          selected={dag}
+          hrefForDay={(datum) => link({ dag: datum ?? undefined })}
+        />
+      </div>
 
       <AgendaFilters
         types={TASK_TYPES.map((t) => ({ value: t, label: TASK_LABEL[t] }))}

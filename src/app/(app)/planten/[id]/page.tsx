@@ -54,7 +54,12 @@ export default async function PlantPagina({ params }: { params: Promise<{ id: st
 
   return (
     <div className="-mx-5 flex flex-col">
-      <PlantFoto url={plant.photoUrl} alt="" vierkant className="h-[200px] w-full object-cover" />
+      <PlantFoto
+        url={plant.photoUrl}
+        alt=""
+        vierkant
+        className={`w-full object-cover ${plant.photoUrl ? 'h-[200px]' : 'h-[104px]'}`}
+      />
 
       <div className="flex flex-col gap-5 px-5 pt-4">
         <header>

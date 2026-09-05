@@ -70,3 +70,30 @@ uitgewerkte bloem-animatie. `prefers-reduced-motion` wordt gerespecteerd.
 
 De legenda noemt zeven taaktypen. De app kent er tien. Toegevoegd in dezelfde
 familie: delen `#0F7C78`, planten `#7A9E3C`, overig `#8A8371`.
+
+## Richting A — Bloemenveld (september 2026)
+
+Het eerste ontwerp bleek in gebruik vlak: kleur zat alleen in bolletjes van
+acht pixels. Richting A uit `docs/ontwerp/kleurrichtingen/` is doorgevoerd:
+
+- **Kleur als vlak.** Locatietegels in pasteltinten met de telling erin, en per
+  taak een bloemvorm in de kleur van het taaktype met het pictogram erin. Wit
+  op de volle tinten haalt geen AA (leaf 3,9:1, cornflower 3,6:1), dus de
+  tegels zijn pastel met een donkere inkt uit dezelfde familie (`--tint-*` en
+  `--op-*`, alle boven 6:1).
+- **Pictogram naast kleur.** Kleur is nu ook decoratie, dus elk taaktype heeft
+  een eigen lijntekening — kleur alleen zou te weinig onderscheid geven (§11).
+- **Displayletter.** Fraunces is vervangen door Bricolage Grotesque: dezelfde
+  rol, meer karakter, en zwaarder gezet (800 in plaats van 600).
+- **Bloesem op de achtergrond.** Een aquarel bovenaan de pagina, met een
+  gradient die hem laat wegvloeien in het crème. Vast, dus hij schuift niet
+  mee, en weg op papier. Twee maten (`bloesem-klein.webp` 12 kB tot 760 px,
+  `bloesem.webp` 30 kB daarboven).
+- **Kalender zonder tint.** In het voorstel kleurde elke dag met werk mee. Bij
+  echte vensters van een hele maand kleurt dan de hele kalender; de stippen per
+  taaktype dragen die informatie al. Alleen die zijn gebleven.
+
+Meegenomen tijdens dezelfde ronde, want de meetlat van §11 gold er al voor:
+de filterpillen op Agenda en Planten hadden een raakvlak van 34 px (het
+onzichtbare keuzeveld lag op de pil, niet erachter), en de kalenderdagen op de
+agenda 40 px. Beide staan nu op 44.

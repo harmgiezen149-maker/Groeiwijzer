@@ -7,6 +7,7 @@ import type { AgendaRow } from '@/lib/dto';
 import { SKIP_REASONS, TASK_COLOR, TASK_LABEL, WEATHER_FLAG_LABEL } from '@/lib/ui';
 import { formatRange } from '@/lib/dates';
 import { PlantFoto } from './PlantFoto';
+import { TaakIcoon } from './TaakIcoon';
 
 type Groepering = 'locatie' | 'geen';
 
@@ -204,7 +205,9 @@ function OccurrenceRow({
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
-            <i aria-hidden className="bw-stip" style={{ background: kleur }} />
+            <span className="bw-taakblob bw-taakblob-klein" style={{ background: kleur }}>
+              <TaakIcoon type={row.taskType} size={16} />
+            </span>
             <span className="truncate">
               {zonderPlantnaam ? (
                 row.title
@@ -219,14 +222,22 @@ function OccurrenceRow({
         </div>
       ) : (
         <div className="flex items-center gap-3 p-2.5">
-          {zonderPlantnaam ? (
-            <i
-              aria-hidden
-              className="bw-stip ml-2 size-2.5"
-              style={{ background: kleur }}
-            />
+          {zonderPlantnaam || !row.photoUrl ? (
+            <span className="bw-taakblob" style={{ background: kleur }}>
+              <TaakIcoon type={row.taskType} />
+            </span>
           ) : (
-            <PlantFoto url={row.photoUrl} alt="" className="size-14 shrink-0" />
+            /* Met foto: die blijft leidend, met de taakkleur als klein
+               bloemetje in de hoek. */
+            <span className="relative shrink-0">
+              <PlantFoto url={row.photoUrl} alt="" className="size-14" />
+              <span
+                className="bw-taakblob absolute -bottom-1 -right-1 size-6"
+                style={{ background: kleur, boxShadow: '0 0 0 2px var(--paper-raised)' }}
+              >
+                <TaakIcoon type={row.taskType} size={13} />
+              </span>
+            </span>
           )}
 
           <button
@@ -239,9 +250,6 @@ function OccurrenceRow({
               {zonderPlantnaam ? row.title : row.plantName}
             </span>
             <span className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-[var(--ink-quiet)]">
-              {zonderPlantnaam ? null : (
-                <i aria-hidden className="bw-stip" style={{ background: kleur }} />
-              )}
               <span className="truncate">
                 {zonderPlantnaam ? formatRange(row.windowStart, row.windowEnd) : row.title}
               </span>

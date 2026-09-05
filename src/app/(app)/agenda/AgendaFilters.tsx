@@ -62,13 +62,13 @@ function PilSelect({
 }) {
   const gekozen = opties.find((o) => o.value === value);
   return (
-    <span className="relative shrink-0">
+    <span className="relative inline-flex min-h-[var(--tap)] shrink-0 items-center">
       <span className="bw-pil" aria-hidden data-actief={Boolean(value)}>
         {gekozen?.label ?? label}
       </span>
       <select
         aria-label={label}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        className="absolute inset-0 h-full w-full cursor-pointer text-base opacity-0"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >

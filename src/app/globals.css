@@ -40,6 +40,21 @@
   --cornflower: #4e7fd4;     /* water en weer */
   --cornflower-dark: #33589b;
   --wijnrood: #a13a5c;       /* uitloggen, verwijderen */
+  --lila: #7a5cd6;           /* vierde locatiekleur */
+
+  /* Pasteltegels. Wit op de volle kleuren haalt geen AA (leaf 3,9:1,
+     cornflower 3,6:1); een lichte tint met een donkere inkt uit dezelfde
+     familie is even kleurrijk en leest wel. */
+  --tint-dahlia: #ffd3e3;
+  --tint-zinnia: #ffe0c2;
+  --tint-leaf: #bfe6cd;
+  --tint-cornflower: #cfe0fb;
+  --tint-lila: #e2d8fb;
+  --op-dahlia: #8f1750;      /*  6,6:1 op de tint */
+  --op-zinnia: #7a3a0c;      /*  6,9:1 */
+  --op-leaf: #0f5133;        /*  8,1:1 */
+  --op-cornflower: #274a86;  /*  7,2:1 */
+  --op-lila: #452c9e;        /*  7,4:1 */
 
   /* Taaktypen — kleur is informatie, geen decoratie.
      Deze kleuren staan altijd op een bolletje of een balkje,
@@ -78,13 +93,11 @@
   --shadow-vandaag: 0 3px 8px rgb(35 55 43 / 0.3);
 
   /* Typografie */
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-bricolage), "Trebuchet MS", ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-karla), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Arial, sans-serif;
-  --wonk: "WONK" 1, "SOFT" 0;
+  --wonk: normal;
 
-  /* Bloemmotief op de inlogschermen. */
-  --bloemen: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg fill='%2323372B' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='18' r='7'/%3E%3Ccircle cx='30' cy='42' r='7'/%3E%3Ccircle cx='19' cy='30' r='7'/%3E%3Ccircle cx='41' cy='30' r='7'/%3E%3Ccircle cx='30' cy='30' r='6'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 @theme inline {
@@ -110,12 +123,48 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-body {
+html {
   background: var(--paper);
+}
+
+body {
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.5;
+}
+
+/* Bloesem achter alles: een band bovenin die wegvloeit in het crème, met
+   twee zachte gloeden voor de warmte. Vast, dus hij schuift niet mee. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 42% at 12% 0%, #ffd0e24d 0%, transparent 62%),
+    radial-gradient(80% 40% at 92% 8%, #ffdcbc59 0%, transparent 66%),
+    linear-gradient(
+      180deg,
+      #fffbf226 0%,
+      #fffbf280 34%,
+      #fffbf2e6 58%,
+      var(--paper) 76%
+    ),
+    url("/bloesem-klein.webp") 50% 0 / 100% auto no-repeat,
+    var(--paper);
+}
+
+@media (min-width: 760px) {
+  body::before {
+    background-image:
+      radial-gradient(70% 46% at 14% 0%, #ffd0e24d 0%, transparent 62%),
+      radial-gradient(60% 44% at 90% 6%, #ffdcbc59 0%, transparent 66%),
+      linear-gradient(180deg, #fffbf226 0%, #fffbf280 34%, #fffbf2e6 58%, var(--paper) 76%),
+      url("/bloesem.webp");
+  }
 }
 
 ::selection {
@@ -144,32 +193,29 @@ body {
 
 .bw-titel {
   font-family: var(--font-display);
-  font-variation-settings: var(--wonk);
-  font-weight: 600;
-  font-size: 26px;
+  font-weight: 800;
+  font-size: 30px;
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
 .bw-titel-groot {
   font-family: var(--font-display);
-  font-variation-settings: var(--wonk);
-  font-weight: 600;
-  font-size: 24px;
+  font-weight: 800;
+  font-size: 26px;
   line-height: 1.1;
 }
 .bw-titel-klein {
   font-family: var(--font-display);
-  font-variation-settings: var(--wonk);
-  font-weight: 600;
-  font-size: 18px;
+  font-weight: 700;
+  font-size: 17px;
   line-height: 1.2;
 }
 @media (min-width: 768px) {
   .bw-titel {
-    font-size: 34px;
+    font-size: 38px;
   }
   .bw-titel-groot {
-    font-size: 30px;
+    font-size: 32px;
   }
 }
 
@@ -177,15 +223,14 @@ body {
 .bw-sectie {
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 
+/* Inlog- en uitnodigingsscherm: laat de bloesem van de achtergrond staan. */
 .bw-bloemen {
-  background-color: var(--paper);
-  background-image: var(--bloemen);
-  background-size: 60px 60px;
+  background: transparent;
 }
 
 /* --------------------------------------------------- componentprimitieven */
@@ -377,14 +422,51 @@ body {
   border-radius: var(--blob);
   box-shadow: var(--shadow-blob);
   object-fit: cover;
-  background: repeating-linear-gradient(
-    135deg,
-    #ede6d3 0 8px,
-    #e3dac4 8px 16px
-  );
 }
 .bw-blob-2 { border-radius: var(--blob-2); }
 .bw-blob-3 { border-radius: var(--blob-3); }
+
+/* Taakbadge: de taaktypekleur als bloemvorm met het pictogram erin.
+   Kleur is hier decoratie én informatie, dus het pictogram is de tweede
+   aanwijzing — kleur alleen zou te weinig zijn (§11). */
+.bw-taakblob {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: var(--blob);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.bw-taakblob-klein {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--blob-2);
+}
+.bw-taakblob:nth-of-type(2n) { border-radius: var(--blob-2); }
+.bw-taakblob:nth-of-type(3n) { border-radius: var(--blob-3); }
+
+/* Locatietegel: pastelvlak met de telling erin. */
+.bw-tegel {
+  border-radius: var(--radius-md);
+  padding: 10px 11px;
+  min-height: var(--tap);
+  display: block;
+  text-align: left;
+}
+.bw-tegel-getal {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
+}
+.bw-tegel-naam {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
 
 /* Afvinkknop: cirkel met dahliarand, 44 px raakvlak. */
 .bw-vink {
@@ -474,11 +556,17 @@ body {
   box-shadow: var(--shadow-card);
 }
 
-/* Onderbalk. */
+/* Onderbalk: het actieve item krijgt een dahliapil. */
 .bw-onderbalk {
   border-top: 1px solid var(--line);
-  background: var(--paper);
+  background: var(--paper-raised);
   box-shadow: var(--shadow-nav);
+}
+.bw-nav-actief {
+  background: var(--dahlia);
+  color: #fff;
+  border-radius: var(--pill);
+  padding-inline: 0.85rem;
 }
 
 /* Uitklapregel van een taakkaart: het hele blok is één raakvlak. */
@@ -496,7 +584,8 @@ body {
      van tachtig pixels leest niet prettiger. */
   aspect-ratio: 1;
   width: 100%;
-  max-width: 40px;
+  /* Op de agenda is elke dag een link, dus de cel haalt zelf de 44 px. */
+  max-width: 44px;
   margin-inline: auto;
   font-size: 12px;
   line-height: 1;
@@ -564,6 +653,8 @@ dialog::backdrop {
 @media print {
   .bw-geen-print { display: none !important; }
   body { background: #fff; }
+  /* Geen bloesem op papier: dat kost inkt en leest niet beter. */
+  body::before { display: none; }
   .bw-labelvel {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
