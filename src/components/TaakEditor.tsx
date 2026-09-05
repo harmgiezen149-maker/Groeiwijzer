@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MONTH_NAMES } from '@/lib/dates';
+import { beschrijfPlanningTekst } from '@/lib/schedule-text';
 import { IMPORTANCE_LABEL, TASK_COLOR, TASK_LABEL } from '@/lib/ui';
 import { TASK_TYPES, WEATHER_RULE_IDS } from '@/lib/types';
 import type { CareTask, Importance, Month, Schedule, TaskType, WeatherRuleId } from '@/lib/types';
@@ -69,7 +70,7 @@ export function TaakEditor({
                       {taak.title || TASK_LABEL[taak.type]}
                     </span>
                     <span className="block text-sm text-[var(--ink-soft)]">
-                      {beschrijfPlanning(taak.schedule)} · {IMPORTANCE_LABEL[taak.importance]}
+                      {beschrijfPlanningTekst(taak.schedule)} · {IMPORTANCE_LABEL[taak.importance]}
                     </span>
                   </span>
                 </label>
@@ -339,18 +340,3 @@ function nieuwePlanning(kind: string, huidig: Schedule): Schedule {
   }
 }
 
-export function beschrijfPlanning(schedule: Schedule): string {
-  const venster = `${MONTH_NAMES[schedule.startMonth - 1]}–${MONTH_NAMES[schedule.endMonth - 1]}`;
-  switch (schedule.kind) {
-    case 'jaarvenster':
-      return schedule.timesPerWindow === 1
-        ? `1× per jaar, ${venster}`
-        : `${schedule.timesPerWindow}× per jaar, ${venster}`;
-    case 'interval':
-      return `elke ${schedule.intervalDays} dagen, ${venster}`;
-    case 'meerjaarlijks':
-      return `om de ${schedule.everyYears} jaar, ${venster}`;
-    case 'weer-gestuurd':
-      return `als het weer erom vraagt, ${venster}`;
-  }
-}

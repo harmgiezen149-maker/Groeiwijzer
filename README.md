@@ -43,6 +43,18 @@ npm run typecheck  # tsc --noEmit
 npm run lint       # eslint
 ```
 
+## Wat er staat
+
+| Fase | Onderwerp | Stand |
+|---|---|---|
+| 0 | Fundament, auth, tuin en lidmaatschap | klaar |
+| 1 | Locaties, planten, foto's, uitnodigingen | klaar |
+| 2 | Zorgprofiel, occurrence-generator, agenda, afvinken | klaar |
+| 3 | PlantNet plus Claude op foto, URL-import | klaar |
+| 4 | Weer, weerregels, maandbericht, pushmeldingen | klaar |
+| 5 | Jaaroverzicht, export, QR-labels, PWA | klaar |
+| 6 | Ontwerp uit Claude Design doorvoeren | wacht op het ontwerp |
+
 ## Opbouw
 
 ```
@@ -57,6 +69,15 @@ Twee regels die overal gelden:
    `gardenId` uit een request wordt nooit vertrouwd zonder die controle.
 2. **Elke Redis-sleutel komt uit `src/lib/keys.ts`.** Nooit met de hand
    samenstellen.
+
+### Schermen
+
+`/` deze maand · `/agenda` maandkalender · `/planten` en `/planten/[id]` ·
+`/planten/nieuw` (foto, link, zelf invullen) · `/locaties` · `/jaar/[jaar]` ·
+`/labels` printvel · `/instellingen` · `/uitnodiging/[token]` ·
+`/q/[gardenId]/[labelCode]` na het scannen van een label.
+
+### Ontwerp
 
 Kleur, ruimte en vorm staan uitsluitend in `src/app/globals.css`. Componenten
 gebruiken variabelen, nooit losse kleurwaarden, zodat het definitieve ontwerp

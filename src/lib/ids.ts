@@ -22,5 +22,5 @@ export function newToken(length = 32): string {
 }
 
 export function isLabelCode(value: string): boolean {
-  return new RegExp(`^[${ALPHABET}]{4}$`).test(value.toUpperCase());
+  return new RegExp(`^[${ALPHABET}]{4,8}$`).test(value.toUpperCase());
 }

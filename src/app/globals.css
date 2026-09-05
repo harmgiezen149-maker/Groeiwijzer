@@ -225,3 +225,21 @@ body {
   .bw-geen-print { display: none !important; }
   body { background: #fff; }
 }
+
+/* Printvel met QR-labels (§9). */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  .bw-labelvel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6mm;
+  }
+  .bw-label {
+    break-inside: avoid;
+    border-color: #999;
+  }
+}

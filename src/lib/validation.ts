@@ -44,32 +44,57 @@ export const scheduleSchema = z.discriminatedUnion('kind', [
   }),
 ]);
 
-export const careTaskInput = z.object({
+/*
+ * Losse veldschema's zonder standaardwaarden. Een patch mag nooit een veld
+ * terugzetten dat niet is meegestuurd: `.partial()` op een schema met
+ * `.default()` doet dat wél, en dan zou een statuswijziging bijvoorbeeld
+ * frostSensitive stilletjes op false zetten.
+ */
+const taakVelden = {
   type: z.enum(TASK_TYPES),
   title: z.string().trim().min(1).max(80),
-  instructions: z.string().trim().max(1200).default(''),
+  instructions: z.string().trim().max(1200),
   schedule: scheduleSchema,
-  weatherRules: z.array(z.enum(WEATHER_RULE_IDS)).max(5).default([]),
-  importance: z.enum(['noodzakelijk', 'aanbevolen', 'optioneel']).default('aanbevolen'),
-  source: z.enum(['ai', 'handmatig']).default('handmatig'),
-  enabled: z.boolean().default(true),
+  weatherRules: z.array(z.enum(WEATHER_RULE_IDS)).max(5),
+  importance: z.enum(['noodzakelijk', 'aanbevolen', 'optioneel']),
+  source: z.enum(['ai', 'handmatig']),
+  enabled: z.boolean(),
+};
+
+export const careTaskInput = z.object({
+  ...taakVelden,
+  instructions: taakVelden.instructions.default(''),
+  weatherRules: taakVelden.weatherRules.default([]),
+  importance: taakVelden.importance.default('aanbevolen'),
+  source: taakVelden.source.default('handmatig'),
+  enabled: taakVelden.enabled.default(true),
 });
 
-export const plantInput = z.object({
+export const careTaskPatch = z.object(taakVelden).partial();
+
+const plantVelden = {
   locationId: z.string().trim().min(1, 'Kies een locatie'),
   commonName: z.string().trim().min(1, 'Geef de plant een naam').max(80),
   scientificName: z.string().trim().max(120).optional(),
   cultivar: z.string().trim().max(80).optional(),
   category: z.enum(PLANT_CATEGORIES),
   photoUrl: z.string().trim().max(500).optional(),
-  quantity: z.coerce.number().int().min(1).max(999).default(1),
+  quantity: z.coerce.number().int().min(1).max(999),
   plantedAt: z.string().trim().max(10).optional(),
   hardiness: z.string().trim().max(120).optional(),
-  frostSensitive: z.boolean().default(false),
-  droughtSensitive: z.boolean().default(false),
+  frostSensitive: z.boolean(),
+  droughtSensitive: z.boolean(),
   notes: z.string().trim().max(2000).optional(),
-  source: z.enum(['foto', 'url', 'handmatig']).default('handmatig'),
+  source: z.enum(['foto', 'url', 'handmatig']),
   sourceUrl: z.string().trim().max(500).optional(),
+};
+
+export const plantInput = z.object({
+  ...plantVelden,
+  quantity: plantVelden.quantity.default(1),
+  frostSensitive: plantVelden.frostSensitive.default(false),
+  droughtSensitive: plantVelden.droughtSensitive.default(false),
+  source: plantVelden.source.default('handmatig'),
   tasks: z.array(careTaskInput).max(8).optional(),
   identification: z
     .object({
@@ -79,9 +104,9 @@ export const plantInput = z.object({
     .optional(),
 });
 
-export const plantPatch = plantInput
+export const plantPatch = z
+  .object(plantVelden)
   .partial()
-  .omit({ tasks: true, identification: true })
   .extend({
     status: z.enum(['levend', 'dood', 'verwijderd']).optional(),
     statusReason: z.string().trim().max(300).optional(),

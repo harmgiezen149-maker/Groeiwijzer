@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/client';
 import { WEATHER_RULE_IDS } from '@/lib/types';
@@ -80,6 +81,24 @@ export function Instellingen({
         </p>
       ) : null}
       {melding ? <p className="bw-card p-3 text-sm">{melding}</p> : null}
+
+      <section className="bw-card flex flex-col gap-2 p-4">
+        <h2 className="text-lg font-bold">Meer</h2>
+        <nav className="flex flex-wrap gap-2">
+          <Link href="/locaties" className="bw-btn bw-btn-secondary text-sm">
+            Locaties
+          </Link>
+          <Link href="/labels" className="bw-btn bw-btn-secondary text-sm">
+            QR-labels printen
+          </Link>
+          <Link href={`/jaar/${new Date().getFullYear()}`} className="bw-btn bw-btn-secondary text-sm">
+            Jaaroverzicht
+          </Link>
+          <Link href="/planten?archief=1" className="bw-btn bw-btn-secondary text-sm">
+            Archief
+          </Link>
+        </nav>
+      </section>
 
       <section className="bw-card flex flex-col gap-3 p-4">
         <h2 className="text-lg font-bold">De tuin</h2>
@@ -301,9 +320,21 @@ export function Instellingen({
         >
           Agenda opnieuw opbouwen
         </button>
-        <a className="bw-btn bw-btn-secondary self-start" href="/api/export" download>
-          Alles exporteren als JSON
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <a className="bw-btn bw-btn-secondary" href="/api/export" download>
+            Alles als JSON
+          </a>
+          {(['planten', 'taken', 'agenda', 'logboek'] as const).map((onderdeel) => (
+            <a
+              key={onderdeel}
+              className="bw-btn bw-btn-secondary text-sm"
+              href={`/api/export?onderdeel=${onderdeel}`}
+              download
+            >
+              {onderdeel} (CSV)
+            </a>
+          ))}
+        </div>
       </section>
     </div>
   );
