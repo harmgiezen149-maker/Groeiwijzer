@@ -107,6 +107,7 @@ het venster en de uitleg, maar hij verschijnt alleen als de droogteregel
 aanslaat. Die regel geldt voor buitenplanten die droogtegevoelig zijn of een
 waterbeurt in hun profiel hebben.
 
-Gevolg om te weten: kamerplanten krijgen zo geen enkele waterherinnering meer,
-want binnen geldt geen enkele weerregel (§4.1). Wie dat wel wil, kan met de
-hand een taak van een ander type aanmaken.
+Binnen geldt geen enkele weerregel (§4.1), dus daar doet de kalender het:
+kamerplanten krijgen één waterherinnering per week, het jaar rond. Wat iemand
+zelf heeft ingesteld blijft staan — alleen taken uit een AI-profiel worden
+omgeschreven.

@@ -109,9 +109,10 @@ src/app/       routes (App Router); (app)/ is het ingelogde deel
 src/components/ herbruikbare interface-onderdelen
 ```
 
-Water geven staat niet in de agenda. Een schema van "elke drie dagen" levert
-honderden regels per zomer op en overstemt de rest; de taak blijft op de plant
-staan als weer-gestuurd en komt naar boven zodra de droogteregel aanslaat.
+Water geven loopt anders dan de rest. Buiten stuurt het weer: een schema van
+"elke drie dagen" levert honderden regels per zomer op, dus de taak staat als
+weer-gestuurd op de plant en komt naar boven zodra de droogteregel aanslaat.
+Binnen geldt geen weerregel, dus daar is het één herinnering per week.
 
 Herkennen op foto is bewust twee aanroepen: `/api/plants/identify` doet
 PlantNet en bewaart de foto, `/api/plants/suggest-care` maakt daarna het

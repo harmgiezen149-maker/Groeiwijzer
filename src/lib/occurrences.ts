@@ -3,7 +3,8 @@ import { db } from './redis';
 import { g } from './keys';
 import { getMeta, setMeta, NotFoundError } from './garden';
 import { listLivePlants, listPlants, requirePlant } from './plants';
-import { alleenBijDroogte, isKalenderWater, listTasks, updateTask } from './tasks';
+import { listLocations } from './locations';
+import { listTasks, updateTask, waterPlanning } from './tasks';
 import { mergeOccurrences, plannedOccurrences } from './schedule';
 import { rangeOverlapsMonth } from './dates';
 import { addLog } from './log';
@@ -18,9 +19,10 @@ export async function loadYear(
 
 /**
  * Hoger nummer betekent: de agenda van dit jaar opnieuw opbouwen, ook als hij
- * al gedraaid heeft. Versie 2 haalde het kalendermatige water geven eruit.
+ * al gedraaid heeft. Versie 2 haalde het kalendermatige water geven eruit;
+ * versie 3 gaf kamerplanten hun wekelijkse beurt terug.
  */
-export const GENERATOR_VERSIE = 2;
+export const GENERATOR_VERSIE = 3;
 
 /**
  * Genereert de occurrences van een jaar (§7.1). Idempotent: bestaande id's
@@ -32,18 +34,25 @@ export async function generateOccurrences(
   gardenId: string,
   year: number,
 ): Promise<{ added: number; removed: number }> {
-  const plants = await listLivePlants(gardenId);
+  const [plants, locations] = await Promise.all([
+    listLivePlants(gardenId),
+    listLocations(gardenId),
+  ]);
+  const buitenPerLocatie = new Map(locations.map((l) => [l.id, l.outdoor]));
   const generatedAt = new Date().toISOString();
 
   const planned: TaskOccurrence[] = [];
   const liveTaskIds = new Set<string>();
   for (const plant of plants) {
+    const buiten = buitenPerLocatie.get(plant.locationId) !== false;
     for (const taak of await listTasks(gardenId, plant.id)) {
       let task = taak;
-      // Oudere profielen hebben water nog als kalendertaak; die schrijven we
-      // één keer om naar weer-gestuurd, zodat de plant zijn kennis houdt.
-      if (isKalenderWater(task)) {
-        task = await updateTask(gardenId, plant.id, task.id, alleenBijDroogte(task));
+      // Water geven loopt buiten op het weer en binnen op de week. Profielen
+      // van eerder worden hier één keer omgeschreven; de plant houdt zijn
+      // uitleg, alleen het ritme verandert.
+      const beter = waterPlanning(task, buiten);
+      if (beter) {
+        task = await updateTask(gardenId, plant.id, task.id, beter);
       }
       liveTaskIds.add(`${plant.id}:${task.id}`);
       planned.push(...plannedOccurrences(task, year, generatedAt));

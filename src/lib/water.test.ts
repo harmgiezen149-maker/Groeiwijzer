@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { upsertUser, createGarden } from './garden';
 import { listLocations } from './locations';
 import { createPlant } from './plants';
-import { createTasks, listTasks, alleenBijDroogte, isKalenderWater } from './tasks';
+import { createTasks, listTasks, alleenBijDroogte, waterPlanning } from './tasks';
 import { generateOccurrences, loadYear } from './occurrences';
 
 /**
@@ -13,14 +13,14 @@ import { generateOccurrences, loadYear } from './occurrences';
 
 const JAAR = new Date().getFullYear();
 
-async function tuinMetWatertaak() {
+async function tuinMetWatertaak(binnen = false) {
   const user = await upsertUser({ email: `water-${Math.random()}@voorbeeld.nl` });
   const garden = await createGarden(user, 'Testtuin');
-  const buiten = (await listLocations(garden.id)).find((l) => l.outdoor)!;
+  const locatie = (await listLocations(garden.id)).find((l) => l.outdoor !== binnen)!;
   const plant = await createPlant(garden.id, {
-    locationId: buiten.id,
-    commonName: 'Winterheide',
-    category: 'struik',
+    locationId: locatie.id,
+    commonName: binnen ? 'Krulvaren' : 'Winterheide',
+    category: binnen ? 'kamerplant' : 'struik',
     quantity: 1,
     frostSensitive: false,
     droughtSensitive: true,
@@ -52,16 +52,48 @@ async function tuinMetWatertaak() {
 }
 
 describe('water geven', () => {
-  it('herkent een kalendermatige waterbeurt', () => {
-    const schedule = { kind: 'interval', startMonth: 4, endMonth: 9, intervalDays: 3 } as const;
-    expect(isKalenderWater({ type: 'water', schedule })).toBe(true);
-    expect(isKalenderWater({ type: 'snoeien', schedule })).toBe(false);
+  const kalender = { kind: 'interval', startMonth: 4, endMonth: 9, intervalDays: 3 } as const;
+
+  it('stuurt water buiten op het weer en binnen op de week', () => {
+    const buiten = waterPlanning(
+      { type: 'water', source: 'ai', schedule: kalender, weatherRules: [] },
+      true,
+    );
+    expect(buiten?.schedule.kind).toBe('weer-gestuurd');
+
+    const binnen = waterPlanning(
+      { type: 'water', source: 'ai', schedule: kalender, weatherRules: [] },
+      false,
+    );
+    expect(binnen?.schedule).toEqual({
+      kind: 'interval',
+      startMonth: 1,
+      endMonth: 12,
+      intervalDays: 7,
+    });
+  });
+
+  it('laat andere taken en eigen instellingen met rust', () => {
     expect(
-      isKalenderWater({
-        type: 'water',
-        schedule: { kind: 'weer-gestuurd', startMonth: 4, endMonth: 9 },
-      }),
-    ).toBe(false);
+      waterPlanning({ type: 'snoeien', source: 'ai', schedule: kalender, weatherRules: [] }, true),
+    ).toBeNull();
+    expect(
+      waterPlanning(
+        { type: 'water', source: 'handmatig', schedule: kalender, weatherRules: [] },
+        true,
+      ),
+    ).toBeNull();
+    expect(
+      waterPlanning(
+        {
+          type: 'water',
+          source: 'ai',
+          schedule: { kind: 'weer-gestuurd', startMonth: 4, endMonth: 9 },
+          weatherRules: ['droogte'],
+        },
+        true,
+      ),
+    ).toBeNull();
   });
 
   it('houdt het venster vast bij het omzetten naar droogte', () => {
@@ -83,6 +115,26 @@ describe('water geven', () => {
     const water = taken.find((t) => t.type === 'water')!;
     expect(rijen.some((r) => r.taskId === water.id)).toBe(false);
     expect(rijen.some((r) => r.taskId === taken.find((t) => t.type === 'snoeien')!.id)).toBe(true);
+  });
+
+  it('geeft een kamerplant elke week een herinnering', async () => {
+    const { garden, plant } = await tuinMetWatertaak(true);
+    await generateOccurrences(garden.id, JAAR);
+
+    const water = (await listTasks(garden.id, plant.id)).find((t) => t.type === 'water')!;
+    expect(water.schedule).toEqual({
+      kind: 'interval',
+      startMonth: 1,
+      endMonth: 12,
+      intervalDays: 7,
+    });
+
+    const beurten = Object.values(await loadYear(garden.id, JAAR)).filter(
+      (r) => r.taskId === water.id,
+    );
+    // Het jaar rond, dus rond de tweeënvijftig.
+    expect(beurten.length).toBeGreaterThanOrEqual(50);
+    expect(beurten.length).toBeLessThanOrEqual(53);
   });
 
   it('schrijft een bestaande waterbeurt om naar weer-gestuurd', async () => {

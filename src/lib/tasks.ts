@@ -8,14 +8,16 @@ import type { CareTask } from './types';
 export const MAX_TASKS_PER_PLANT = 8;
 
 /**
- * Water geven staat niet in de agenda. Een schema van "elke drie dagen"
- * levert honderd regels per zomer op en dat overstemt de rest; het weer
- * bepaalt beter wanneer er extra water nodig is dan de kalender (§7.2).
- * De taak blijft wel op de plant staan, als weer-gestuurd.
+ * Water geven wordt anders gepland dan de rest (§7.2).
+ *
+ * Buiten: door het weer. Een schema van "elke drie dagen" levert honderd
+ * regels per zomer op en dat overstemt de rest, terwijl de regenmeter beter
+ * weet wanneer er water bij moet.
+ *
+ * Binnen: geen enkele weerregel geldt daar, dus daar doet de kalender het —
+ * één herinnering per week, het jaar rond.
  */
-export function isKalenderWater(task: Pick<CareTask, 'type' | 'schedule'>): boolean {
-  return task.type === 'water' && task.schedule.kind !== 'weer-gestuurd';
-}
+export const WATER_INTERVAL_BINNEN = 7;
 
 /** Dezelfde taak, maar dan gestuurd door droogte in plaats van de kalender. */
 export function alleenBijDroogte<T extends Pick<CareTask, 'schedule' | 'weatherRules'>>(
@@ -32,6 +34,43 @@ export function alleenBijDroogte<T extends Pick<CareTask, 'schedule' | 'weatherR
       ? task.weatherRules
       : [...task.weatherRules, 'droogte'],
   };
+}
+
+/** Elke week, het hele jaar door. Voor kamerplanten. */
+export function elkeWeek<T extends Pick<CareTask, 'schedule' | 'weatherRules'>>(task: T): T {
+  return {
+    ...task,
+    schedule: {
+      kind: 'interval',
+      startMonth: 1,
+      endMonth: 12,
+      intervalDays: WATER_INTERVAL_BINNEN,
+    },
+    weatherRules: [],
+  };
+}
+
+/**
+ * Hoe de waterbeurt van deze plant hoort te lopen. Geeft null terug als er
+ * niets aan te passen valt: geen watertaak, met de hand gezet, of al goed.
+ */
+export function waterPlanning<T extends Pick<CareTask, 'type' | 'source' | 'schedule' | 'weatherRules'>>(
+  task: T,
+  buiten: boolean,
+): T | null {
+  if (task.type !== 'water') return null;
+  // Wat iemand zelf heeft ingesteld blijft staan.
+  if (task.source !== 'ai') return null;
+
+  if (buiten) {
+    return task.schedule.kind === 'weer-gestuurd' ? null : alleenBijDroogte(task);
+  }
+  const goed =
+    task.schedule.kind === 'interval' &&
+    task.schedule.intervalDays === WATER_INTERVAL_BINNEN &&
+    task.schedule.startMonth === 1 &&
+    task.schedule.endMonth === 12;
+  return goed ? null : elkeWeek(task);
 }
 
 export async function listTasks(gardenId: string, plantId: string): Promise<CareTask[]> {

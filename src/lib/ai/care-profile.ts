@@ -1,7 +1,7 @@
 import 'server-only';
 import { AI_MODEL, aiEnabled, anthropic, textOf } from './client';
 import { careProfileSchema, type CareProfile } from './schema';
-import { alleenBijDroogte } from '../tasks';
+import { alleenBijDroogte, elkeWeek } from '../tasks';
 import type { PlantCandidate } from '../types';
 
 /** Vaste systeeminstructie voor het zorgprofiel (OVERDRACHT §6.5). */
@@ -13,7 +13,9 @@ export function systemPrompt(outdoor: boolean): string {
     'Maanden zijn getallen van 1 tot en met 12. Maximaal 8 taken per plant.',
     'Het veld instructions bevat 2 tot 5 zinnen in het Nederlands, praktisch en concreet.',
     'Weet je iets niet, gebruik dan null. Nooit gokken.',
-    'Water geven hoort niet in de kalender: geef zo\'n taak kind "weer-gestuurd" met weatherRule "droogte", zodat hij alleen verschijnt als het droog is.',
+    outdoor
+      ? 'Water geven hoort niet in de kalender: geef zo\'n taak kind "weer-gestuurd" met weatherRule "droogte", zodat hij alleen verschijnt als het droog is.'
+      : 'Water geven binnen loopt op de week: geef zo\'n taak kind "interval" met intervalDays 7, januari tot en met december.',
     outdoor
       ? 'De plant staat buiten; weerafhankelijke taken zijn toegestaan.'
       : 'De plant staat BINNEN. Geef geen taken die op buitenweer slaan: geen winterbescherming, geen vorstbescherming, en geen weerregels die met vorst of hitte buiten te maken hebben.',
@@ -194,17 +196,22 @@ function buildUserMessage(input: ProfileInput, herhaling: boolean): UserBlock[] 
  * geven laat zich door het weer sturen in plaats van door de kalender.
  */
 function normalise(profile: CareProfile, outdoor: boolean): CareProfile {
-  const tasks = profile.tasks.map((task) =>
-    task.type === 'water' && task.schedule.kind !== 'weer-gestuurd'
-      ? alleenBijDroogte(task)
-      : task,
-  );
-  if (outdoor) return { ...profile, tasks };
+  if (outdoor) {
+    return {
+      ...profile,
+      tasks: profile.tasks.map((task) =>
+        task.type === 'water' && task.schedule.kind !== 'weer-gestuurd'
+          ? alleenBijDroogte(task)
+          : task,
+      ),
+    };
+  }
   return {
     ...profile,
     frostSensitive: false,
-    tasks: tasks
+    tasks: profile.tasks
       .filter((task) => task.type !== 'winterbescherming')
-      .map((task) => ({ ...task, weatherRules: [] })),
+      // Binnen geldt geen weerregel, dus water geven loopt daar op de week.
+      .map((task) => (task.type === 'water' ? elkeWeek(task) : { ...task, weatherRules: [] })),
   };
 }
