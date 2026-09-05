@@ -281,25 +281,31 @@ function escapeRe(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export const usingUpstash = Boolean(
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
-);
+/**
+ * De gegevens van de Redis-database. Upstash zelf gebruikt de namen
+ * UPSTASH_REDIS_REST_*, maar de Upstash-integratie in de Vercel-marktplaats
+ * zet dezelfde waarden neer als KV_REST_API_*. Beide worden hier herkend, zodat
+ * het niet uitmaakt langs welke weg de database is aangemaakt.
+ */
+export function upstashConfig(): { url: string; token: string } | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+  return url && token ? { url, token } : null;
+}
+
+export const usingUpstash = upstashConfig() !== null;
 
 let store: Store | null = null;
 
 export function db(): Store {
   if (store) return store;
-  if (usingUpstash) {
-    store = new UpstashStore(
-      new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      }),
-    );
+  const config = upstashConfig();
+  if (config) {
+    store = new UpstashStore(new Redis(config));
   } else {
     if (process.env.NODE_ENV === 'production') {
       console.warn(
-        '[bloeiwijzer] UPSTASH_REDIS_REST_URL/TOKEN ontbreken — er wordt een tijdelijke store gebruikt die niet blijft bestaan.',
+        '[bloeiwijzer] Geen Redis-gegevens gevonden (UPSTASH_REDIS_REST_* of KV_REST_API_*) — er wordt een tijdelijke store gebruikt die niet blijft bestaan.',
       );
     }
     // Alleen tijdens `next dev` naar schijf; in tests blijft alles in geheugen.

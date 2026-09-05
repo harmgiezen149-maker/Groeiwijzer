@@ -25,7 +25,7 @@ blijft werken:
 
 | Ontbreekt | Gevolg |
 |---|---|
-| `UPSTASH_REDIS_REST_*` | Lokale store in `.dev-data/`, niet gedeeld |
+| `UPSTASH_REDIS_REST_*` (of `KV_REST_API_*`) | Lokale store in `.dev-data/`, niet gedeeld |
 | `AUTH_GOOGLE_*` / `AUTH_RESEND_KEY` | Alleen de ontwikkelaarslogin |
 | `ANTHROPIC_API_KEY` | Geen zorgprofiel-voorstel; taken zelf invullen |
 | `PLANTNET_API_KEY` | Herkenning draait alleen op Claude, met melding |
@@ -50,7 +50,7 @@ Minimaal nodig om te kunnen inloggen en gegevens te bewaren:
 | Variabele | Waar vandaan |
 |---|---|
 | `AUTH_SECRET` | `openssl rand -base64 32` |
-| `UPSTASH_REDIS_REST_URL` en `UPSTASH_REDIS_REST_TOKEN` | Upstash-console, na het aanmaken van een Redis-database |
+| `UPSTASH_REDIS_REST_URL` en `UPSTASH_REDIS_REST_TOKEN` | Upstash-console, na het aanmaken van een Redis-database. Koppel je Upstash via de marktplaats van Vercel, dan heten ze `KV_REST_API_URL` en `KV_REST_API_TOKEN`; die worden ook herkend, je hoeft dan niets te dupliceren |
 | `AUTH_GOOGLE_ID` en `AUTH_GOOGLE_SECRET` | Google Cloud Console → OAuth-client. Redirect-URI: `https://bloeiwijzer.vercel.app/api/auth/callback/google` |
 | `NEXT_PUBLIC_APP_URL` | `https://bloeiwijzer.vercel.app` |
 

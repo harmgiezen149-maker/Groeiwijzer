@@ -5,7 +5,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { UpstashRedisAdapter } from '@auth/upstash-redis-adapter';
 import { Redis } from '@upstash/redis';
 import { ensureGardenForUser, getUser, upsertUser } from '@/lib/garden';
-import { usingUpstash } from '@/lib/redis';
+import { upstashConfig, usingUpstash } from '@/lib/redis';
 
 /** Inloggen zonder externe sleutels: alleen buiten productie, voor lokale bouw. */
 export const devLoginEnabled =
@@ -62,13 +62,7 @@ if (devLoginEnabled) {
 
 export const authConfig: NextAuthConfig = {
   adapter: usingUpstash
-    ? UpstashRedisAdapter(
-        new Redis({
-          url: process.env.UPSTASH_REDIS_REST_URL!,
-          token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-        }),
-        { baseKeyPrefix: 'auth:' },
-      )
+    ? UpstashRedisAdapter(new Redis(upstashConfig()!), { baseKeyPrefix: 'auth:' })
     : undefined,
   providers,
   session: { strategy: 'jwt' },
@@ -119,7 +113,9 @@ export function configuratieProblemen(): string[] {
   }
   if (!usingUpstash) {
     problemen.push(
-      'UPSTASH_REDIS_REST_URL en UPSTASH_REDIS_REST_TOKEN ontbreken; gegevens blijven niet bewaard.',
+      'Er is geen Redis-database gekoppeld (UPSTASH_REDIS_REST_URL en ' +
+        'UPSTASH_REDIS_REST_TOKEN, of KV_REST_API_URL en KV_REST_API_TOKEN); ' +
+        'gegevens blijven niet bewaard.',
     );
   }
   if (providers.length === 0) {
@@ -127,9 +123,12 @@ export function configuratieProblemen(): string[] {
       'Er is geen inlogmethode: zet AUTH_GOOGLE_ID en AUTH_GOOGLE_SECRET, of AUTH_RESEND_KEY en RESEND_FROM.',
     );
   } else if (!availableProviders.resend && (resendKey || process.env.RESEND_FROM)) {
-    problemen.push(
-      'De inloglink per e-mail staat uit: die vraagt AUTH_RESEND_KEY, RESEND_FROM én Upstash.',
-    );
+    const mist = [
+      !resendKey ? 'AUTH_RESEND_KEY' : null,
+      !process.env.RESEND_FROM ? 'RESEND_FROM' : null,
+      !usingUpstash ? 'een Redis-database' : null,
+    ].filter(Boolean);
+    problemen.push(`De inloglink per e-mail staat uit; er ontbreekt nog ${mist.join(' en ')}.`);
   }
   return problemen;
 }

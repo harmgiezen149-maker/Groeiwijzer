@@ -1,7 +1,7 @@
 import 'server-only';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { usingUpstash } from './redis';
+import { upstashConfig, usingUpstash } from './redis';
 
 /** Kostenbeheersing op de AI-endpoints: 20 per uur en 60 per dag (§13). */
 const LIMITS = [
@@ -13,10 +13,7 @@ let limiters: Ratelimit[] | null = null;
 
 function upstashLimiters(): Ratelimit[] {
   if (limiters) return limiters;
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+  const redis = new Redis(upstashConfig()!);
   limiters = [
     new Ratelimit({
       redis,
