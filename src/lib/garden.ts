@@ -111,9 +111,23 @@ export async function saveGarden(garden: Garden): Promise<void> {
 export async function listGardensForUser(userId: string): Promise<Garden[]> {
   const ids = await db().smembers(userKey.gardens(userId));
   const gardens = await Promise.all(ids.map((id) => getGarden(id)));
-  return gardens
+  const gevonden = gardens
     .filter((x): x is Garden => x !== null)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  await Promise.all(gevonden.map((garden) => registerGarden(garden.id)));
+  return gevonden;
+}
+
+/**
+ * Zorgt dat een tuin in het register staat. Zelfherstellend voor tuinen die
+ * ouder zijn dan het register; per serverinstantie hooguit één keer per tuin.
+ */
+const geregistreerd = new Set<string>();
+
+export async function registerGarden(gardenId: string): Promise<void> {
+  if (geregistreerd.has(gardenId)) return;
+  geregistreerd.add(gardenId);
+  await db().sadd(ALL_GARDENS, gardenId);
 }
 
 export async function listAllGardens(): Promise<Garden[]> {

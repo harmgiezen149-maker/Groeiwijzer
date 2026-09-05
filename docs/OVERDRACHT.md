@@ -693,3 +693,50 @@ Deze punten blokkeren de bouw niet:
 3. **Het uiteindelijke ontwerp** (zie §11).
 4. **Aankoopdatum en boodschappenlijst voor tuinspullen:** gewenst, maar pas in fase 6.
 5. **Prijzen en kosten:** expliciet niet gewenst. Niet bouwen, ook niet "vast een veldje".
+
+---
+
+## Bijlage — uitvoering (toegevoegd door Claude Code)
+
+Dit document is de opdracht. Hoe hij is uitgevoerd staat in `README.md`;
+hieronder alleen de plekken waar de bouw afwijkt of aanvult.
+
+| Onderwerp | Wat er gebeurd is |
+|---|---|
+| Redis | Achter een smalle interface. Zonder `UPSTASH_*` schrijft de app naar `.dev-data/`, zodat er zonder sleutels te bouwen en te testen valt. Productie draait op Upstash. |
+| Inloggen | Naast Google en magic link is er een ontwikkelaarslogin, alleen buiten productie (of met `ALLOW_DEV_LOGIN=1`). |
+| Foto's | Zonder `BLOB_READ_WRITE_TOKEN` landen uploads in `public/uploads`. |
+| Tuinregister | Er is een set `gardens:all` bijgekomen; zonder die lijst kunnen de cron-taken niet langs alle tuinen. Hij vult zichzelf aan voor oudere tuinen. |
+| Weer-gestuurde taken | Krijgen een vaste taak-id (`weer-vorst`, `weer-droogte`) en een occurrence-id op basis van de dag, zodat één vorstnacht één taak oplevert hoe vaak de cron ook draait. |
+| Weerregels uitzetten | `Garden.disabledWeatherRules` is toegevoegd; §10 vraagt om weerregels aan of uit in de instellingen. |
+| Model | `ANTHROPIC_MODEL` is instelbaar. De standaard is `claude-sonnet-4-6` uit §2; er zijn inmiddels nieuwere modellen. |
+
+### Testscenario's uit §15
+
+| # | Onderwerp | Hoe gedekt |
+|---|---|---|
+| 1 | Snoeivenster feb–mrt staat in maart, niet in juni | unittest + live |
+| 2 | Afvinken: weg uit agenda, in logboek met naam, volgend jaar terug | live |
+| 3 | Venster nov–feb over de jaargrens | unittest + live |
+| 4 | Twee keer genereren: geen dubbelingen | unittest + live |
+| 5 | Overslaan zonder reden geweigerd | live |
+| 6 | Kamerplant krijgt bij vorst niets | integratietest |
+| 7 | Vorst: snoeien ongunstig, urgente taak, één melding | integratietest |
+| 8 | Zeven droge dagen en 25 °C geeft een watertaak | integratietest |
+| 9 | Tweede gebruiker accepteert, vinkt af, logboek toont wie | live, twee sessies |
+| 10 | Vreemde `gardenId` geeft 403 op elke route | live |
+| 11 | Verlopen of hergebruikt token | live |
+| 12 | Maandbericht met de juiste aantallen per lid | live, via de cron-route |
+| 13 | Label scannen zonder sessie | live |
+| 14 | Plant op dood: weg uit agenda, blijft in archief | live |
+| 15 | Ongeldige JSON: één nieuwe poging, dan leeg profiel | unittest met gemockt model |
+| 16 | Volledige flow op 375 px met één hand | nog te doen op een echt toestel |
+
+### Nog open
+
+1. Het ontwerp uit Claude Design (§11, fase 6).
+2. Scenario 16: zelf uitproberen op de telefoon.
+3. `api.open-meteo.com` is in de bouwomgeving geblokkeerd; de live call is
+   daar niet te verifiëren. De foutafhandeling wel: valt de dienst weg, dan
+   gebruikt de app de laatste verwachting.
+4. Aankoopdatum en boodschappenlijst (§17.4) — bewust nog niet gebouwd.
