@@ -5,7 +5,12 @@ import { generateOccurrences } from '@/lib/occurrences';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-/** 1 januari: de occurrences voor het nieuwe jaar klaarzetten. */
+/**
+ * De occurrences voor het lopende jaar klaarzetten. Staat niet meer in
+ * vercel.json: de dagelijkse weertaak doet dit inmiddels zelf, en het Hobby-plan
+ * staat maar twee geplande taken toe. De route blijft bestaan om hem met de
+ * hand of vanuit een eigen planner aan te roepen.
+ */
 export const GET = withCron(async () => {
   const jaar = new Date().getFullYear();
   const gardens = await listAllGardens();
