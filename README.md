@@ -109,6 +109,12 @@ src/app/       routes (App Router); (app)/ is het ingelogde deel
 src/components/ herbruikbare interface-onderdelen
 ```
 
+Herkennen op foto is bewust twee aanroepen: `/api/plants/identify` doet
+PlantNet en bewaart de foto, `/api/plants/suggest-care` maakt daarna het
+onderhoudsvoorstel bij die foto. Samen in één verzoek liepen ze over de
+tijdslimiet van een serverfunctie; los blijft elke stap ruim binnen de tijd en
+ziet de gebruiker de soort al terwijl het voorstel nog loopt.
+
 Twee regels die overal gelden:
 
 1. **Elke serveractie begint met `assertMember(userId, gardenId)`.** Een

@@ -94,6 +94,7 @@ export function NieuwePlant({
   const [meldingen, setMeldingen] = useState<string[]>([]);
   const [fout, setFout] = useState<string | null>(null);
   const [bezig, setBezig] = useState(false);
+  const [voortgang, setVoortgang] = useState<string | null>(null);
   const [url, setUrl] = useState('');
   const [alleTaken, setAlleTaken] = useState(false);
 
@@ -119,31 +120,76 @@ export function NieuwePlant({
     setStap('bevestigen');
   }
 
+  /**
+   * Twee stappen: eerst de soort en de foto, daarna het onderhoudsvoorstel.
+   * Zo blijft elke aanroep ruim binnen de tijd die een serverfunctie heeft, en
+   * ziet de gebruiker de soort al terwijl het profiel nog loopt.
+   */
   async function herkenFoto(file: File) {
     setBezig(true);
     setFout(null);
     setMeldingen([]);
+    setVoortgang('Foto versturen…');
     try {
       const verkleind = await verkleinAfbeelding(file);
       const form = new FormData();
       form.append('file', verkleind, 'plant.jpg');
       form.append('locationId', locationId);
+      setVoortgang('Soort zoeken…');
       const res = await fetch('/api/plants/identify', { method: 'POST', body: form });
-      const data = (await res.json()) as {
+      const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         photoUrl?: string;
+        photoRef?: string;
         candidates?: PlantCandidate[];
-        profile?: Profiel | null;
         notes?: string[];
       };
       if (!res.ok) throw new Error(data.error ?? 'Herkennen lukte niet');
-      setKandidaten(data.candidates ?? []);
-      setGekozenKandidaat(data.profile?.commonName ?? data.candidates?.[0]?.name ?? null);
-      setMeldingen(data.notes ?? []);
-      pasProfielToe(data.profile ?? null, { photoUrl: data.photoUrl });
+
+      const gevonden = data.candidates ?? [];
+      const eerste = gevonden[0]?.name ?? null;
+      setKandidaten(gevonden);
+      setGekozenKandidaat(eerste);
+      const meldingen = [...(data.notes ?? [])];
+
+      setVoortgang(eerste ? `${eerste} — onderhoud voorstellen…` : 'Onderhoud voorstellen…');
+      try {
+        const profiel = await api<{ profile: Profiel | null; note?: string }>(
+          '/api/plants/suggest-care',
+          {
+            method: 'POST',
+            json: {
+              locationId,
+              photoRef: data.photoRef,
+              name: eerste ?? undefined,
+              candidates: gevonden.map((c) => ({
+                name: c.name,
+                scientificName: c.scientificName,
+                score: c.score,
+              })),
+            },
+          },
+        );
+        if (profiel.note) meldingen.push(profiel.note);
+        setMeldingen(meldingen);
+        pasProfielToe(profiel.profile, { photoUrl: data.photoUrl });
+      } catch (error) {
+        // De soort en de foto zijn er al; alleen het voorstel ontbreekt.
+        meldingen.push(
+          error instanceof Error ? error.message : 'Het onderhoudsvoorstel lukte niet.',
+        );
+        setMeldingen(meldingen);
+        setConcept((huidig) => ({
+          ...huidig,
+          commonName: eerste ?? huidig.commonName,
+          photoUrl: data.photoUrl,
+        }));
+        setStap('bevestigen');
+      }
     } catch (error) {
       setFout(error instanceof Error ? error.message : 'Herkennen lukte niet');
     } finally {
+      setVoortgang(null);
       setBezig(false);
     }
   }
@@ -344,7 +390,11 @@ export function NieuwePlant({
                 if (file) void herkenFoto(file);
               }}
             />
-            {bezig ? <p className="text-[13.5px]">Bezig met herkennen…</p> : null}
+            {bezig ? (
+              <p className="text-[13.5px]" role="status">
+                {voortgang ?? 'Bezig met herkennen…'}
+              </p>
+            ) : null}
           </div>
         ) : null}
 

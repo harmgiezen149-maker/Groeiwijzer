@@ -53,6 +53,12 @@ export interface ProfileResult {
   note?: string;
 }
 
+/** Hoeveel tijd het profiel nog mag kosten voordat de route zelf omvalt. */
+export interface Budget {
+  /** Tijdstip (Date.now()) waarop we moeten stoppen. */
+  deadline: number;
+}
+
 export interface ProfileInput {
   name?: string;
   category?: string;
@@ -63,6 +69,8 @@ export interface ProfileInput {
   pageText?: string;
   imageBase64?: string;
   imageMediaType?: 'image/jpeg' | 'image/png' | 'image/webp';
+  /** Zonder budget geldt de standaard van 50 seconden. */
+  budget?: Budget;
 }
 
 /**
@@ -75,17 +83,32 @@ export async function requestCareProfile(input: ProfileInput): Promise<ProfileRe
     return { profile: null, note: 'Er is geen AI-sleutel ingesteld. Vul het onderhoud zelf in.' };
   }
 
+  const deadline = input.budget?.deadline ?? Date.now() + 50_000;
   const blocks: Parameters<typeof buildUserMessage>[0] = input;
   let laatsteFout = '';
+  let tijdOp = false;
 
   for (let poging = 0; poging < 2; poging++) {
+    const resterend = deadline - Date.now();
+    // Een tweede poging heeft alleen zin als er nog echt tijd is.
+    if (resterend < (poging === 0 ? 5_000 : 20_000)) {
+      tijdOp = poging > 0 || resterend <= 0;
+      break;
+    }
     try {
-      const message = await anthropic().messages.create({
-        model: AI_MODEL,
-        max_tokens: 3000,
-        system: systemPrompt(input.outdoor),
-        messages: [{ role: 'user', content: buildUserMessage(blocks, poging > 0) }],
-      });
+      // Streamen houdt de verbinding open bij een lang antwoord; de eigen
+      // deadline is korter dan die van de route, zodat we altijd zelf
+      // antwoorden in plaats van in een time-out te lopen.
+      const stream = anthropic().messages.stream(
+        {
+          model: AI_MODEL,
+          max_tokens: 3000,
+          system: systemPrompt(input.outdoor),
+          messages: [{ role: 'user', content: buildUserMessage(blocks, poging > 0) }],
+        },
+        { timeout: resterend, maxRetries: 0 },
+      );
+      const message = await stream.finalMessage();
       const parsed = careProfileSchema.safeParse(JSON.parse(textOf(message)));
       if (parsed.success) {
         return { profile: normalise(parsed.data, input.outdoor) };
@@ -93,15 +116,21 @@ export async function requestCareProfile(input: ProfileInput): Promise<ProfileRe
       laatsteFout = parsed.error.issues[0]?.message ?? 'schema klopt niet';
     } catch (error) {
       laatsteFout = error instanceof Error ? error.message : 'onbekende fout';
+      if (/timed out|timeout|abort/i.test(laatsteFout)) {
+        tijdOp = true;
+        break;
+      }
       // Een netwerk- of sleutelfout heeft geen tweede poging nodig.
       if (poging === 0 && /api key|401|403/i.test(laatsteFout)) break;
     }
   }
 
-  console.warn('[bloeiwijzer] zorgprofiel mislukt:', laatsteFout);
+  console.warn('[bloeiwijzer] zorgprofiel mislukt:', laatsteFout || 'tijd op');
   return {
     profile: null,
-    note: 'Het onderhoudsvoorstel lukte niet. Vul de taken zelf in of probeer het later opnieuw.',
+    note: tijdOp
+      ? 'Het onderhoudsvoorstel duurde te lang. Probeer het opnieuw of vul de taken zelf in.'
+      : 'Het onderhoudsvoorstel lukte niet. Vul de taken zelf in of probeer het later opnieuw.',
   };
 }
 

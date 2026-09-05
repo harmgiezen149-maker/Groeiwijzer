@@ -10,7 +10,12 @@ const create = vi.fn();
 vi.mock('./client', () => ({
   aiEnabled: true,
   AI_MODEL: 'test-model',
-  anthropic: () => ({ messages: { create } }),
+  // De echte code streamt; het antwoord komt uit finalMessage().
+  anthropic: () => ({
+    messages: {
+      stream: (...args: unknown[]) => ({ finalMessage: () => create(...args) }),
+    },
+  }),
   textOf: (message: { content: { type: string; text: string }[] }) =>
     message.content
       .filter((b) => b.type === 'text')
@@ -118,5 +123,41 @@ describe('zorgprofiel opvragen', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(profile).toBeNull();
     expect(note).toBeTruthy();
+  });
+});
+
+describe('tijdsbudget', () => {
+  beforeEach(() => create.mockReset());
+
+  it('vraagt niets meer als het budget al op is', async () => {
+    const { profile, note } = await requestCareProfile({
+      name: 'Hortensia',
+      outdoor: true,
+      budget: { deadline: Date.now() - 1 },
+    });
+    expect(create).not.toHaveBeenCalled();
+    expect(profile).toBeNull();
+    expect(note).toContain('te lang');
+  });
+
+  it('geeft na een time-out een profiel-loos antwoord in plaats van te werpen', async () => {
+    create.mockImplementationOnce(async () => {
+      throw new Error('Request timed out.');
+    });
+    const { profile, note } = await requestCareProfile({ name: 'Hortensia', outdoor: true });
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(profile).toBeNull();
+    expect(note).toContain('te lang');
+  });
+
+  it('slaat de tweede poging over als er te weinig tijd over is', async () => {
+    create.mockResolvedValueOnce(antwoord('geen json'));
+    const { profile } = await requestCareProfile({
+      name: 'Hortensia',
+      outdoor: true,
+      budget: { deadline: Date.now() + 10_000 },
+    });
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(profile).toBeNull();
   });
 });

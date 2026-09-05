@@ -36,7 +36,7 @@ export async function identifyWithPlantNet(
     const res = await fetch(url, {
       method: 'POST',
       body: form,
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(12_000),
     });
     if (!res.ok) {
       return {

@@ -14,7 +14,11 @@ const input = z.object({
   locationId: z.string().trim().min(1),
 });
 
+/** Marge zodat de route zelf antwoordt in plaats van in de limiet te lopen. */
+const MARGE_MS = 8_000;
+
 export const POST = withGarden(async (ctx, req) => {
+  const start = Date.now();
   await assertWithinLimit(ctx.user.id, 'from-url');
   const { url, locationId } = parseOrThrow(input, await readJson(req));
   const location = await requireLocation(ctx.garden.id, locationId);
@@ -24,6 +28,7 @@ export const POST = withGarden(async (ctx, req) => {
     name: pagina.title,
     outdoor: location.outdoor,
     pageText: pagina.text,
+    budget: { deadline: start + (maxDuration * 1000 - MARGE_MS) },
   });
 
   return {
