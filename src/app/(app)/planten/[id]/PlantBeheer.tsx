@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/client';
 import type { PlantStatus } from '@/lib/types';
+import { FotoKiezer } from '@/components/FotoKiezer';
 
 export function PlantBeheer({
   plantId,
@@ -79,21 +80,8 @@ export function PlantBeheer({
         </div>
 
         <div>
-          <label className="bw-label" htmlFor="foto">
-            Foto toevoegen
-          </label>
-          <input
-            id="foto"
-            className="bw-input"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            capture="environment"
-            disabled={bezig}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void voegFotoToe(file);
-            }}
-          />
+          <p className="bw-label">Foto toevoegen</p>
+          <FotoKiezer disabled={bezig} onKies={(file) => void voegFotoToe(file)} />
         </div>
       </div>
 

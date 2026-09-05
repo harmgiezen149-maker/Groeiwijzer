@@ -3,7 +3,7 @@ import { db } from './redis';
 import { g } from './keys';
 import { getMeta, setMeta, NotFoundError } from './garden';
 import { listLivePlants, listPlants, requirePlant } from './plants';
-import { listTasks } from './tasks';
+import { alleenBijDroogte, isKalenderWater, listTasks, updateTask } from './tasks';
 import { mergeOccurrences, plannedOccurrences } from './schedule';
 import { rangeOverlapsMonth } from './dates';
 import { addLog } from './log';
@@ -17,9 +17,16 @@ export async function loadYear(
 }
 
 /**
+ * Hoger nummer betekent: de agenda van dit jaar opnieuw opbouwen, ook als hij
+ * al gedraaid heeft. Versie 2 haalde het kalendermatige water geven eruit.
+ */
+export const GENERATOR_VERSIE = 2;
+
+/**
  * Genereert de occurrences van een jaar (§7.1). Idempotent: bestaande id's
  * blijven staan, `gedaan` en `overgeslagen` worden nooit overschreven.
- * Ruimt daarnaast open occurrences op van taken of planten die weg zijn.
+ * Ruimt daarnaast open occurrences op van taken of planten die weg zijn, en
+ * van taken die niets meer plannen.
  */
 export async function generateOccurrences(
   gardenId: string,
@@ -31,7 +38,13 @@ export async function generateOccurrences(
   const planned: TaskOccurrence[] = [];
   const liveTaskIds = new Set<string>();
   for (const plant of plants) {
-    for (const task of await listTasks(gardenId, plant.id)) {
+    for (const taak of await listTasks(gardenId, plant.id)) {
+      let task = taak;
+      // Oudere profielen hebben water nog als kalendertaak; die schrijven we
+      // één keer om naar weer-gestuurd, zodat de plant zijn kennis houdt.
+      if (isKalenderWater(task)) {
+        task = await updateTask(gardenId, plant.id, task.id, alleenBijDroogte(task));
+      }
       liveTaskIds.add(`${plant.id}:${task.id}`);
       planned.push(...plannedOccurrences(task, year, generatedAt));
     }
@@ -40,9 +53,15 @@ export async function generateOccurrences(
   const existing = await loadYear(gardenId, year);
   const { toWrite, added } = mergeOccurrences(existing, planned);
 
-  // Opruimen: open occurrences waarvan de taak of de plant niet meer meetelt.
+  // Opruimen: open occurrences van een taak of plant die niet meer meetelt, en
+  // van een taak die deze dagen niet meer plant. Weertaken vallen erbuiten:
+  // die worden door de weerregels zelf gezet en opgeruimd.
+  const gepland = new Set(planned.map((occ) => occ.id));
   const stale = Object.values(existing).filter(
-    (occ) => occ.status === 'open' && !liveTaskIds.has(`${occ.plantId}:${occ.taskId}`),
+    (occ) =>
+      occ.status === 'open' &&
+      !occ.taskId.startsWith('weer-') &&
+      (!liveTaskIds.has(`${occ.plantId}:${occ.taskId}`) || !gepland.has(occ.id)),
   );
 
   if (Object.keys(toWrite).length) {
@@ -55,14 +74,17 @@ export async function generateOccurrences(
     await db().srem(g.openOccurrences(gardenId, year), ...ids);
   }
 
-  await setMeta(gardenId, { lastGeneratedYear: year });
+  await setMeta(gardenId, { lastGeneratedYear: year, generatorVersion: GENERATOR_VERSIE });
   return { added, removed: stale.length };
 }
 
 /** Draait de generator als dat voor dit jaar nog niet gebeurd is. */
 export async function ensureGenerated(gardenId: string, year: number): Promise<void> {
   const meta = await getMeta(gardenId);
-  if (Number(meta.lastGeneratedYear) === year) return;
+  const bij =
+    Number(meta.lastGeneratedYear) === year &&
+    Number(meta.generatorVersion ?? 0) >= GENERATOR_VERSIE;
+  if (bij) return;
   await generateOccurrences(gardenId, year);
 }
 

@@ -4,8 +4,8 @@ import { requireLocation } from '@/lib/locations';
 import { requestCareProfile } from '@/lib/ai/care-profile';
 import { assertWithinLimit } from '@/lib/ratelimit';
 import { parseOrThrow } from '@/lib/validation';
-import { haalFotoVerwijzing, isBlobUrl } from '@/lib/photo-ref';
-import { MAX_UPLOAD_BYTES, sniffImage } from '@/lib/upload';
+import { haalFotoVerwijzing } from '@/lib/photo-ref';
+import { MAX_UPLOAD_BYTES, readStoredImage, sniffImage } from '@/lib/upload';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -66,19 +66,16 @@ async function haalFoto(
   ref: string,
 ): Promise<{ base64: string; mediaType: 'image/jpeg' | 'image/png' | 'image/webp' } | null> {
   const url = await haalFotoVerwijzing(gardenId, ref);
-  if (!url || !isBlobUrl(url)) return null;
+  if (!url) return null;
+  const bytes = await readStoredImage(url);
+  if (!bytes || bytes.byteLength === 0 || bytes.byteLength > MAX_UPLOAD_BYTES) return null;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8_000) });
-    if (!res.ok) return null;
-    const bytes = new Uint8Array(await res.arrayBuffer());
-    if (bytes.byteLength === 0 || bytes.byteLength > MAX_UPLOAD_BYTES) return null;
     const { type } = sniffImage(bytes);
     return {
       base64: Buffer.from(bytes).toString('base64'),
       mediaType: type as 'image/jpeg' | 'image/png' | 'image/webp',
     };
-  } catch (error) {
-    console.warn('[bloeiwijzer] foto ophalen voor profiel mislukt', error);
+  } catch {
     return null;
   }
 }

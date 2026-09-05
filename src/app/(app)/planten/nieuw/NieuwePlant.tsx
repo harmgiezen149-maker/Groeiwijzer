@@ -6,6 +6,7 @@ import { api } from '@/lib/client';
 import { verkleinAfbeelding } from '@/components/OccurrenceList';
 import { TaakEditor, type TaakConcept } from '@/components/TaakEditor';
 import { PlantFoto } from '@/components/PlantFoto';
+import { FotoKiezer } from '@/components/FotoKiezer';
 import { beschrijfPlanningKort } from '@/lib/schedule-text';
 import { CATEGORY_LABEL } from '@/lib/ui';
 import { PLANT_CATEGORIES } from '@/lib/types';
@@ -379,17 +380,7 @@ export function NieuwePlant({
               Maak een foto van blad, bloem of de hele plant. Twee bronnen bepalen samen de soort;
               je bevestigt daarna zelf.
             </p>
-            <input
-              className="bw-input"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              capture="environment"
-              disabled={bezig}
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void herkenFoto(file);
-              }}
-            />
+            <FotoKiezer disabled={bezig} onKies={(file) => void herkenFoto(file)} />
             {bezig ? (
               <p className="text-[13.5px]" role="status">
                 {voortgang ?? 'Bezig met herkennen…'}
@@ -675,7 +666,10 @@ export function NieuwePlant({
           <p className="text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
             {actieveTaken.length} {actieveTaken.length === 1 ? 'taak' : 'taken'}:{' '}
             {actieveTaken
-              .map((taak) => `${taak.title.toLowerCase()} (${beschrijfPlanningKort(taak.schedule)})`)
+              .map(
+                (taak) =>
+                  `${taak.title.toLowerCase()} (${beschrijfPlanningKort(taak.schedule, taak.weatherRules)})`,
+              )
               .join(', ')}
           </p>
         ) : (

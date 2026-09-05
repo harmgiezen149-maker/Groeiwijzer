@@ -8,6 +8,7 @@ import { SKIP_REASONS, TASK_COLOR, TASK_LABEL, WEATHER_FLAG_LABEL } from '@/lib/
 import { formatRange } from '@/lib/dates';
 import { PlantFoto } from './PlantFoto';
 import { TaakIcoon } from './TaakIcoon';
+import { FotoKiezer } from './FotoKiezer';
 
 type Groepering = 'locatie' | 'geen';
 
@@ -411,18 +412,17 @@ function CompleteDialog({
   const [note, setNote] = useState('');
   const [bezig, setBezig] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
-  const bestand = useRef<HTMLInputElement>(null);
+  const [foto, setFoto] = useState<File | null>(null);
 
   async function verstuur() {
     setBezig(true);
     setFout(null);
     try {
       let photoUrl: string | undefined;
-      const file = bestand.current?.files?.[0];
-      if (file) photoUrl = await uploadFoto(file);
+      if (foto) photoUrl = await uploadFoto(foto);
       await onComplete({ note: note.trim() || undefined, photoUrl });
       setNote('');
-      if (bestand.current) bestand.current.value = '';
+      setFoto(null);
     } catch (error) {
       setFout(error instanceof Error ? error.message : 'Opslaan lukte niet');
     } finally {
@@ -434,17 +434,8 @@ function CompleteDialog({
     <Venster ref={ref} titel="Afvinken">
       <p className="text-[13px] text-[var(--ink-quiet)]">{titel}</p>
       <div>
-        <label className="bw-label" htmlFor={`foto-${titel}`}>
-          Foto (optioneel)
-        </label>
-        <input
-          id={`foto-${titel}`}
-          ref={bestand}
-          className="bw-input"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          capture="environment"
-        />
+        <p className="bw-label">Foto (optioneel)</p>
+        <FotoKiezer disabled={bezig} onKies={setFoto} gekozen={foto?.name} />
       </div>
       <div>
         <label className="bw-label" htmlFor={`notitie-${titel}`}>

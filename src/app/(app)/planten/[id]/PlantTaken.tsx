@@ -140,7 +140,7 @@ export function PlantTaken({
               <span className="min-w-0 flex-1 text-[13.5px]">
                 {taak.title}{' '}
                 <span className="text-[var(--ink-faint)]">
-                  · {beschrijfPlanningKort(taak.schedule)}
+                  · {beschrijfPlanningKort(taak.schedule, taak.weatherRules)}
                 </span>
               </span>
               <input

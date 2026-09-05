@@ -7,6 +7,33 @@ import type { CareTask } from './types';
 
 export const MAX_TASKS_PER_PLANT = 8;
 
+/**
+ * Water geven staat niet in de agenda. Een schema van "elke drie dagen"
+ * levert honderd regels per zomer op en dat overstemt de rest; het weer
+ * bepaalt beter wanneer er extra water nodig is dan de kalender (§7.2).
+ * De taak blijft wel op de plant staan, als weer-gestuurd.
+ */
+export function isKalenderWater(task: Pick<CareTask, 'type' | 'schedule'>): boolean {
+  return task.type === 'water' && task.schedule.kind !== 'weer-gestuurd';
+}
+
+/** Dezelfde taak, maar dan gestuurd door droogte in plaats van de kalender. */
+export function alleenBijDroogte<T extends Pick<CareTask, 'schedule' | 'weatherRules'>>(
+  task: T,
+): T {
+  return {
+    ...task,
+    schedule: {
+      kind: 'weer-gestuurd',
+      startMonth: task.schedule.startMonth,
+      endMonth: task.schedule.endMonth,
+    },
+    weatherRules: task.weatherRules.includes('droogte')
+      ? task.weatherRules
+      : [...task.weatherRules, 'droogte'],
+  };
+}
+
 export async function listTasks(gardenId: string, plantId: string): Promise<CareTask[]> {
   const map = await db().hgetall<CareTask>(g.plantTasks(gardenId, plantId));
   return Object.values(map).sort(

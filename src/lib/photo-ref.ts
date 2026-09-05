@@ -22,13 +22,3 @@ export async function haalFotoVerwijzing(gardenId: string, ref: string): Promise
   if (!/^[0-9a-f]{32}$/.test(ref)) return null;
   return db().get<string>(keyFor(gardenId, 'fotoref', ref));
 }
-
-/** Alleen adressen die de app zelf bij Vercel Blob heeft neergezet. */
-export function isBlobUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'https:' && parsed.hostname.endsWith('.blob.vercel-storage.com');
-  } catch {
-    return false;
-  }
-}

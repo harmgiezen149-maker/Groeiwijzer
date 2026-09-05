@@ -217,6 +217,8 @@ export interface PlantPhoto {
 
 export interface GardenMeta {
   lastGeneratedYear?: number;
+  /** Versie van de generator; bij een hogere versie draait hij opnieuw. */
+  generatorVersion?: number;
   lastWeatherSync?: string;
   lastMonthlyMail?: string;
 }

@@ -1,6 +1,7 @@
 import 'server-only';
 import { AI_MODEL, aiEnabled, anthropic, textOf } from './client';
 import { careProfileSchema, type CareProfile } from './schema';
+import { alleenBijDroogte } from '../tasks';
 import type { PlantCandidate } from '../types';
 
 /** Vaste systeeminstructie voor het zorgprofiel (OVERDRACHT §6.5). */
@@ -12,6 +13,7 @@ export function systemPrompt(outdoor: boolean): string {
     'Maanden zijn getallen van 1 tot en met 12. Maximaal 8 taken per plant.',
     'Het veld instructions bevat 2 tot 5 zinnen in het Nederlands, praktisch en concreet.',
     'Weet je iets niet, gebruik dan null. Nooit gokken.',
+    'Water geven hoort niet in de kalender: geef zo\'n taak kind "weer-gestuurd" met weatherRule "droogte", zodat hij alleen verschijnt als het droog is.',
     outdoor
       ? 'De plant staat buiten; weerafhankelijke taken zijn toegestaan.'
       : 'De plant staat BINNEN. Geef geen taken die op buitenweer slaan: geen winterbescherming, geen vorstbescherming, en geen weerregels die met vorst of hitte buiten te maken hebben.',
@@ -187,13 +189,21 @@ function buildUserMessage(input: ProfileInput, herhaling: boolean): UserBlock[] 
   return blocks;
 }
 
-/** Vangnet: binnen betekent binnen, ook als het model zich vergist. */
+/**
+ * Vangnet: binnen betekent binnen, ook als het model zich vergist, en water
+ * geven laat zich door het weer sturen in plaats van door de kalender.
+ */
 function normalise(profile: CareProfile, outdoor: boolean): CareProfile {
-  if (outdoor) return profile;
+  const tasks = profile.tasks.map((task) =>
+    task.type === 'water' && task.schedule.kind !== 'weer-gestuurd'
+      ? alleenBijDroogte(task)
+      : task,
+  );
+  if (outdoor) return { ...profile, tasks };
   return {
     ...profile,
     frostSensitive: false,
-    tasks: profile.tasks
+    tasks: tasks
       .filter((task) => task.type !== 'winterbescherming')
       .map((task) => ({ ...task, weatherRules: [] })),
   };

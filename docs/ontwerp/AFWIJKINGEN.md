@@ -97,3 +97,16 @@ Meegenomen tijdens dezelfde ronde, want de meetlat van §11 gold er al voor:
 de filterpillen op Agenda en Planten hadden een raakvlak van 34 px (het
 onzichtbare keuzeveld lag op de pil, niet erachter), en de kalenderdagen op de
 agenda 40 px. Beide staan nu op 44.
+
+## Water geven uit de agenda (september 2026)
+
+Het zorgprofiel gaf water geven een interval van een paar dagen. Over een
+seizoen zijn dat honderden regels, en die overstemden alles wat er verder te
+doen was. Water geven is nu weer-gestuurd: de taak blijft op de plant staan met
+het venster en de uitleg, maar hij verschijnt alleen als de droogteregel
+aanslaat. Die regel geldt voor buitenplanten die droogtegevoelig zijn of een
+waterbeurt in hun profiel hebben.
+
+Gevolg om te weten: kamerplanten krijgen zo geen enkele waterherinnering meer,
+want binnen geldt geen enkele weerregel (§4.1). Wie dat wel wil, kan met de
+hand een taak van een ander type aanmaken.

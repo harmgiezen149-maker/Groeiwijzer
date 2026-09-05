@@ -1,5 +1,5 @@
 import 'server-only';
-import { put } from '@vercel/blob';
+import { get, put } from '@vercel/blob';
 import { newId } from './ids';
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
@@ -54,10 +54,22 @@ export function sniffImage(bytes: Uint8Array): { type: string; ext: string } {
 }
 
 export interface StoredFile {
+  /** Waar de app de foto opvraagt: het CDN-adres, of de eigen route. */
   url: string;
+  pathname: string;
   contentType: string;
   size: number;
 }
+
+/** Pad waarop de app een besloten foto zelf uitserveert. */
+export const FOTO_ROUTE = '/api/foto/';
+
+/**
+ * Een Blob-opslag is openbaar of besloten; dat staat vast bij het aanmaken.
+ * Welke van de twee blijkt pas bij de eerste upload, dus die onthouden we
+ * voor de rest van het proces.
+ */
+let toegang: 'public' | 'private' | null = null;
 
 /**
  * Slaat een afbeelding op. Met BLOB_READ_WRITE_TOKEN gaat dat naar Vercel Blob;
@@ -83,12 +95,24 @@ export async function storeImage(
   }
 
   if (blobEnabled) {
-    const blob = await put(name, Buffer.from(bytes), {
-      access: 'public',
-      contentType: type,
-      addRandomSuffix: false,
-    });
-    return { url: blob.url, contentType: type, size: bytes.byteLength };
+    const opties = { contentType: type, addRandomSuffix: false } as const;
+    try {
+      const blob = await put(name, Buffer.from(bytes), { access: toegang ?? 'public', ...opties });
+      toegang ??= 'public';
+      return { url: blob.url, pathname: name, contentType: type, size: bytes.byteLength };
+    } catch (error) {
+      // Een besloten opslag weigert 'public'. Dan gaat de foto er besloten in
+      // en serveert de app hem zelf uit, achter de tuincontrole.
+      if (toegang !== null || !isBeslotenOpslag(error)) throw error;
+      await put(name, Buffer.from(bytes), { access: 'private', ...opties });
+      toegang = 'private';
+      return {
+        url: `${FOTO_ROUTE}${name}`,
+        pathname: name,
+        contentType: type,
+        size: bytes.byteLength,
+      };
+    }
   }
 
   const fs = await import('node:fs/promises');
@@ -96,7 +120,43 @@ export async function storeImage(
   const target = path.join(process.cwd(), 'public', 'uploads', name);
   await fs.mkdir(path.dirname(target), { recursive: true });
   await fs.writeFile(target, bytes);
-  return { url: `/uploads/${name}`, contentType: type, size: bytes.byteLength };
+  return { url: `/uploads/${name}`, pathname: name, contentType: type, size: bytes.byteLength };
+}
+
+function isBeslotenOpslag(error: unknown): boolean {
+  return /private (access|store)/i.test(error instanceof Error ? error.message : String(error));
+}
+
+/**
+ * Leest een foto die de app zelf heeft opgeslagen. Het adres zegt zelf hoe:
+ * de eigen route betekent besloten, een volledig adres betekent openbaar.
+ * Er wordt nooit een adres uit de browser opgehaald (§13).
+ */
+export async function readStoredImage(url: string): Promise<Uint8Array | null> {
+  try {
+    if (url.startsWith(FOTO_ROUTE)) {
+      const gevonden = await get(url.slice(FOTO_ROUTE.length), { access: 'private' });
+      if (!gevonden || gevonden.statusCode !== 200) return null;
+      return new Uint8Array(await new Response(gevonden.stream).arrayBuffer());
+    }
+    if (!isBlobUrl(url)) return null;
+    const res = await fetch(url, { signal: AbortSignal.timeout(8_000) });
+    if (!res.ok) return null;
+    return new Uint8Array(await res.arrayBuffer());
+  } catch (error) {
+    console.warn('[bloeiwijzer] foto lezen mislukt', error);
+    return null;
+  }
+}
+
+/** Alleen adressen die de app zelf bij Vercel Blob heeft neergezet. */
+export function isBlobUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && parsed.hostname.endsWith('.blob.vercel-storage.com');
+  } catch {
+    return false;
+  }
 }
 
 /**

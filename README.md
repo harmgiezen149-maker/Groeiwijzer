@@ -60,7 +60,7 @@ Daarna, per onderdeel:
 |---|---|
 | `ANTHROPIC_API_KEY` | Het onderhoudsvoorstel en de plantherkenning |
 | `PLANTNET_API_KEY` | De tweede bron bij herkenning op foto |
-| `BLOB_READ_WRITE_TOKEN` | Foto's naar Vercel Blob (anders naar de schijf, en die is vluchtig) |
+| `BLOB_READ_WRITE_TOKEN` | Foto's naar Vercel Blob. Een besloten opslag mag ook: dan serveert de app ze zelf uit via `/api/foto/...`, achter dezelfde tuincontrole |
 | `RESEND_API_KEY`, `AUTH_RESEND_KEY`, `RESEND_FROM` | Maandbericht, uitnodigingsmail, inloglink per e-mail |
 | `VAPID_PUBLIC_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Pushmeldingen (`npx web-push generate-vapid-keys`) |
 | `CRON_SECRET` | De geplande taken; zonder dit weigeren ze met 503 |
@@ -108,6 +108,10 @@ src/lib/       domeinlogica: types, Redis-sleutels, planning, weer, AI
 src/app/       routes (App Router); (app)/ is het ingelogde deel
 src/components/ herbruikbare interface-onderdelen
 ```
+
+Water geven staat niet in de agenda. Een schema van "elke drie dagen" levert
+honderden regels per zomer op en overstemt de rest; de taak blijft op de plant
+staan als weer-gestuurd en komt naar boven zodra de droogteregel aanslaat.
 
 Herkennen op foto is bewust twee aanroepen: `/api/plants/identify` doet
 PlantNet en bewaart de foto, `/api/plants/suggest-care` maakt daarna het

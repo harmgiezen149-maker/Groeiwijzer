@@ -102,7 +102,12 @@ export async function applyWeather(
   const droogte = rules.droogte;
   if (droogte) {
     for (const plant of plants) {
-      if (!plant.droughtSensitive || !isBuiten(plant)) continue;
+      if (!isBuiten(plant)) continue;
+      // Water geven staat niet meer in de kalender, dus dit is het moment
+      // waarop het naar boven komt: droogtegevoelig, of een plant met een
+      // waterbeurt in het zorgprofiel.
+      const heeftWater = (await listTasks(garden.id, plant.id)).some((t) => t.type === 'water');
+      if (!plant.droughtSensitive && !heeftWater) continue;
       const gemaakt = await zetWeerTaak(garden.id, plant, jaar, {
         taskId: WEER_TAAK.droogte,
         type: 'water',
