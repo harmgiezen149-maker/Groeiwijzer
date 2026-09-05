@@ -1,38 +1,72 @@
 import Link from 'next/link';
 
-/** Lege staten zijn instapmomenten, geen mededelingen (OVERDRACHT §10). */
+const INGANGEN = [
+  {
+    href: '/planten/nieuw?bron=foto',
+    kleur: 'var(--dahlia)',
+    titel: 'Foto maken',
+    uitleg: 'Herkenning plus zorgprofiel',
+    vorm: 'vierkant' as const,
+  },
+  {
+    href: '/planten/nieuw?bron=url',
+    kleur: 'var(--cornflower)',
+    titel: 'Link plakken',
+    uitleg: 'Vanaf een kwekerij- of infopagina',
+    vorm: 'rond' as const,
+  },
+  {
+    href: '/planten/nieuw?bron=handmatig',
+    kleur: 'var(--leaf)',
+    titel: 'Zelf invullen',
+    uitleg: 'Handmatig, met onderhoud-voorstel',
+    vorm: 'blok' as const,
+  },
+];
+
+/** Lege staten zijn instapmomenten, geen mededelingen. */
 export function LegeStaat() {
   return (
-    <div className="flex flex-col gap-4 py-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Voeg je eerste plant toe</h1>
-        <p className="mt-1 text-[var(--ink-soft)]">
-          Zodra er planten in staan, vult de agenda zich vanzelf met wat er per maand te doen is.
+        <h1 className="bw-titel">Je eerste plant</h1>
+        <p className="mt-1.5 text-[13.5px] text-[var(--ink-soft)]">
+          Zodra er planten in staan vult de agenda zich vanzelf met wat er per maand te doen is.
         </p>
       </div>
-      <div className="grid gap-2 sm:grid-cols-3">
-        <Link href="/planten/nieuw?bron=foto" className="bw-card flex flex-col gap-1 p-4">
-          <span aria-hidden className="text-2xl">📷</span>
-          <span className="font-semibold">Met een foto</span>
-          <span className="text-sm text-[var(--ink-soft)]">
-            Herkenning bepaalt de soort en het onderhoud.
+      <IngangKaarten />
+    </div>
+  );
+}
+
+export function IngangKaarten() {
+  return (
+    <div className="flex flex-col gap-3">
+      {INGANGEN.map((ingang) => (
+        <Link
+          key={ingang.href}
+          href={ingang.href}
+          className="bw-card flex items-center gap-3.5 p-[18px]"
+        >
+          <span
+            aria-hidden
+            className="grid size-11 shrink-0 place-items-center rounded-full"
+            style={{ background: `color-mix(in srgb, ${ingang.kleur} 10%, transparent)` }}
+          >
+            <i
+              className="block size-4"
+              style={{
+                border: `2px solid ${ingang.kleur}`,
+                borderRadius: ingang.vorm === 'rond' ? '50%' : ingang.vorm === 'vierkant' ? '4px' : '0',
+              }}
+            />
+          </span>
+          <span>
+            <span className="block text-[15px] font-semibold">{ingang.titel}</span>
+            <span className="block text-[12.5px] text-[var(--ink-faint)]">{ingang.uitleg}</span>
           </span>
         </Link>
-        <Link href="/planten/nieuw?bron=url" className="bw-card flex flex-col gap-1 p-4">
-          <span aria-hidden className="text-2xl">🔗</span>
-          <span className="font-semibold">Via een link</span>
-          <span className="text-sm text-[var(--ink-soft)]">
-            Plak de pagina van de kwekerij of tuincentrum.
-          </span>
-        </Link>
-        <Link href="/planten/nieuw?bron=handmatig" className="bw-card flex flex-col gap-1 p-4">
-          <span aria-hidden className="text-2xl">✍️</span>
-          <span className="font-semibold">Zelf invullen</span>
-          <span className="text-sm text-[var(--ink-soft)]">
-            Naam en locatie, de rest stellen we voor.
-          </span>
-        </Link>
-      </div>
+      ))}
     </div>
   );
 }

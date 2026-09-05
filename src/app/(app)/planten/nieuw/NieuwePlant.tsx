@@ -6,6 +6,7 @@ import { api } from '@/lib/client';
 import { verkleinAfbeelding } from '@/components/OccurrenceList';
 import { TaakEditor, type TaakConcept } from '@/components/TaakEditor';
 import { PlantFoto } from '@/components/PlantFoto';
+import { beschrijfPlanningKort } from '@/lib/schedule-text';
 import { CATEGORY_LABEL } from '@/lib/ui';
 import { PLANT_CATEGORIES } from '@/lib/types';
 import type { Location, PlantCandidate, PlantCategory } from '@/lib/types';
@@ -49,24 +50,52 @@ const LEEG: Concept = {
   droughtSensitive: false,
 };
 
+const INGANGEN: { bron: Bron; titel: string; uitleg: string; kleur: string; vorm: string }[] = [
+  {
+    bron: 'foto',
+    titel: 'Foto maken',
+    uitleg: 'Herkenning plus zorgprofiel',
+    kleur: 'var(--dahlia)',
+    vorm: '4px',
+  },
+  {
+    bron: 'url',
+    titel: 'Link plakken',
+    uitleg: 'Vanaf een kwekerij- of infopagina',
+    kleur: 'var(--cornflower)',
+    vorm: '50%',
+  },
+  {
+    bron: 'handmatig',
+    titel: 'Zelf invullen',
+    uitleg: 'Handmatig, met onderhoud-voorstel',
+    kleur: 'var(--leaf)',
+    vorm: '0',
+  },
+];
+
 export function NieuwePlant({
   locations,
   startBron,
 }: {
   locations: Location[];
-  startBron: Bron;
+  startBron: Bron | null;
 }) {
   const router = useRouter();
-  const [bron, setBron] = useState<Bron>(startBron);
+  const [bron, setBron] = useState<Bron | null>(startBron);
   const [locationId, setLocationId] = useState(locations[0]?.id ?? '');
-  const [stap, setStap] = useState<'invoer' | 'bevestigen'>('invoer');
+  const [stap, setStap] = useState<'kies' | 'invoer' | 'bevestigen'>(
+    startBron ? 'invoer' : 'kies',
+  );
   const [concept, setConcept] = useState<Concept>({ ...LEEG });
   const [taken, setTaken] = useState<TaakConcept[]>([]);
   const [kandidaten, setKandidaten] = useState<PlantCandidate[]>([]);
+  const [gekozenKandidaat, setGekozenKandidaat] = useState<string | null>(null);
   const [meldingen, setMeldingen] = useState<string[]>([]);
   const [fout, setFout] = useState<string | null>(null);
   const [bezig, setBezig] = useState(false);
   const [url, setUrl] = useState('');
+  const [alleTaken, setAlleTaken] = useState(false);
 
   const locatie = locations.find((l) => l.id === locationId);
   const outdoor = locatie?.outdoor ?? true;
@@ -83,9 +112,7 @@ export function NieuwePlant({
         droughtSensitive: profiel.droughtSensitive,
         ...extra,
       }));
-      setTaken(
-        profiel.tasks.map((taak) => ({ ...taak, source: 'ai' as const, enabled: true })),
-      );
+      setTaken(profiel.tasks.map((taak) => ({ ...taak, source: 'ai' as const, enabled: true })));
     } else {
       setConcept((huidig) => ({ ...huidig, ...extra }));
     }
@@ -111,6 +138,7 @@ export function NieuwePlant({
       };
       if (!res.ok) throw new Error(data.error ?? 'Herkennen lukte niet');
       setKandidaten(data.candidates ?? []);
+      setGekozenKandidaat(data.profile?.commonName ?? data.candidates?.[0]?.name ?? null);
       setMeldingen(data.notes ?? []);
       pasProfielToe(data.profile ?? null, { photoUrl: data.photoUrl });
     } catch (error) {
@@ -166,6 +194,7 @@ export function NieuwePlant({
         }));
         setTaken(data.profile.tasks.map((t) => ({ ...t, source: 'ai' as const, enabled: true })));
       }
+      setStap('bevestigen');
     } catch (error) {
       setFout(error instanceof Error ? error.message : 'Voorstellen lukte niet');
     } finally {
@@ -192,7 +221,7 @@ export function NieuwePlant({
           droughtSensitive: concept.droughtSensitive,
           photoUrl: concept.photoUrl,
           sourceUrl: concept.sourceUrl,
-          source: bron,
+          source: bron ?? 'handmatig',
           tasks: taken.filter((t) => t.enabled && t.title.trim()),
           identification: kandidaten.length
             ? { plantnet: kandidaten.map((c) => ({ name: c.name, score: c.score })) }
@@ -208,83 +237,120 @@ export function NieuwePlant({
 
   if (locations.length === 0) {
     return (
-      <p className="bw-card p-5">
-        Maak eerst een locatie aan bij <a href="/locaties">Locaties</a>.
+      <p className="bw-card p-5 text-[13.5px]">
+        Maak eerst een locatie aan bij{' '}
+        <a href="/locaties" className="underline">
+          Locaties
+        </a>
+        .
       </p>
     );
   }
 
-  return (
-    <div className="flex flex-col gap-4">
+  const berichten = (
+    <>
       {fout ? (
-        <p role="alert" className="bw-card border-[var(--zinnia)] p-3 text-sm">
+        <p role="alert" className="bw-banner bw-banner-urgent">
           {fout}
         </p>
       ) : null}
       {meldingen.map((melding) => (
-        <p key={melding} className="bw-card p-3 text-sm text-[var(--ink-soft)]">
+        <p key={melding} className="bw-banner bw-banner-info">
           {melding}
         </p>
       ))}
+    </>
+  );
 
-      <div>
-        <label className="bw-label" htmlFor="locatie">
-          Locatie
-        </label>
-        <select
-          id="locatie"
-          className="bw-select"
-          value={locationId}
-          onChange={(event) => setLocationId(event.target.value)}
-        >
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name} ({l.outdoor ? 'buiten' : 'binnen'})
-            </option>
-          ))}
-        </select>
-      </div>
+  const locatieKiezer = (
+    <div>
+      <label className="bw-label" htmlFor="locatie">
+        Locatie
+      </label>
+      <select
+        id="locatie"
+        className="bw-select"
+        value={locationId}
+        onChange={(event) => setLocationId(event.target.value)}
+      >
+        {locations.map((l) => (
+          <option key={l.id} value={l.id}>
+            {l.name} ({l.outdoor ? 'buiten' : 'binnen'})
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 
-      {stap === 'invoer' ? (
-        <>
-          <div className="flex gap-2" role="tablist" aria-label="Manier van toevoegen">
-            {(['foto', 'url', 'handmatig'] as Bron[]).map((optie) => (
-              <button
-                key={optie}
-                role="tab"
-                type="button"
-                aria-selected={bron === optie}
-                className={`bw-btn flex-1 text-sm ${bron === optie ? 'bw-btn-primary' : 'bw-btn-secondary'}`}
-                onClick={() => setBron(optie)}
-              >
-                {optie === 'foto' ? 'Foto' : optie === 'url' ? 'Link' : 'Zelf invullen'}
-              </button>
-            ))}
-          </div>
+  /* ------------------------------------------------------------- kiezen */
 
-          {bron === 'foto' ? (
-            <div className="bw-card flex flex-col gap-3 p-4">
-              <p className="text-sm text-[var(--ink-soft)]">
-                Maak een foto van blad, bloem of de hele plant. Twee bronnen bepalen samen de
-                soort; je bevestigt daarna zelf.
-              </p>
-              <input
-                className="bw-input"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                capture="environment"
-                disabled={bezig}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) void herkenFoto(file);
-                }}
+  if (stap === 'kies') {
+    return (
+      <div className="flex flex-col gap-4">
+        {berichten}
+        <p className="text-[13.5px] text-[var(--ink-soft)]">Kies hoe je wilt beginnen.</p>
+        {INGANGEN.map((ingang) => (
+          <button
+            key={ingang.bron}
+            type="button"
+            className="bw-card flex items-center gap-3.5 p-[18px] text-left"
+            onClick={() => {
+              setBron(ingang.bron);
+              setStap('invoer');
+            }}
+          >
+            <span
+              aria-hidden
+              className="grid size-11 shrink-0 place-items-center rounded-full"
+              style={{ background: `color-mix(in srgb, ${ingang.kleur} 10%, transparent)` }}
+            >
+              <i
+                className="block size-4"
+                style={{ border: `2px solid ${ingang.kleur}`, borderRadius: ingang.vorm }}
               />
-              {bezig ? <p className="text-sm">Bezig met herkennen…</p> : null}
-            </div>
-          ) : null}
+            </span>
+            <span>
+              <span className="block text-[15px] font-semibold">{ingang.titel}</span>
+              <span className="block text-[12.5px] text-[var(--ink-faint)]">{ingang.uitleg}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
-          {bron === 'url' ? (
-            <div className="bw-card flex flex-col gap-3 p-4">
+  /* ------------------------------------------------------------- invoer */
+
+  if (stap === 'invoer') {
+    return (
+      <div className="flex flex-col gap-4">
+        {berichten}
+        {locatieKiezer}
+
+        {bron === 'foto' ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-[13.5px] text-[var(--ink-soft)]">
+              Maak een foto van blad, bloem of de hele plant. Twee bronnen bepalen samen de soort;
+              je bevestigt daarna zelf.
+            </p>
+            <input
+              className="bw-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              disabled={bezig}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void herkenFoto(file);
+              }}
+            />
+            {bezig ? <p className="text-[13.5px]">Bezig met herkennen…</p> : null}
+          </div>
+        ) : null}
+
+        {bron === 'url' ? (
+          <div className="flex flex-col gap-3">
+            <div>
               <label className="bw-label" htmlFor="url">
                 Link naar de plantpagina
               </label>
@@ -296,255 +362,313 @@ export function NieuwePlant({
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
               />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="bw-btn bw-btn-primary flex-1"
-                  disabled={bezig || !url.trim()}
-                  onClick={() => void haalUrl()}
-                >
-                  {bezig ? 'Bezig…' : 'Ophalen'}
-                </button>
-                <button
-                  type="button"
-                  className="bw-btn bw-btn-secondary"
-                  onClick={() => {
-                    setBron('handmatig');
-                    setStap('bevestigen');
-                  }}
-                >
-                  Zelf invullen
-                </button>
-              </div>
             </div>
-          ) : null}
+            <button
+              type="button"
+              className="bw-btn bw-btn-primary h-[50px] w-full"
+              disabled={bezig || !url.trim()}
+              onClick={() => void haalUrl()}
+            >
+              {bezig ? 'Bezig…' : 'Ophalen'}
+            </button>
+          </div>
+        ) : null}
 
-          {bron === 'handmatig' ? (
-            <div className="bw-card flex flex-col gap-3 p-4">
-              <div>
-                <label className="bw-label" htmlFor="naam">
-                  Naam van de plant
-                </label>
-                <input
-                  id="naam"
-                  className="bw-input"
-                  value={concept.commonName}
-                  onChange={(event) =>
-                    setConcept({ ...concept, commonName: event.target.value })
-                  }
-                  placeholder="Hortensia"
-                />
-              </div>
-              <button
-                type="button"
-                className="bw-btn bw-btn-primary"
-                disabled={!concept.commonName.trim()}
-                onClick={() => setStap('bevestigen')}
-              >
-                Verder
-              </button>
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void opslaan();
-          }}
-        >
-          {concept.photoUrl ? (
-            <PlantFoto
-              url={concept.photoUrl}
-              alt=""
-              className="h-48 w-full rounded-[var(--radius)]"
-            />
-          ) : null}
-
-          {kandidaten.length ? (
-            <div className="bw-card p-4">
-              <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-[var(--ink-soft)]">
-                Gevonden kandidaten
-              </h2>
-              <ul className="flex flex-col gap-1.5 text-sm">
-                {kandidaten.map((kandidaat) => (
-                  <li key={kandidaat.name} className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="bw-btn bw-btn-secondary px-3 text-sm"
-                      onClick={() =>
-                        setConcept({
-                          ...concept,
-                          commonName: kandidaat.name,
-                          scientificName: kandidaat.scientificName ?? concept.scientificName,
-                        })
-                      }
-                    >
-                      Kies
-                    </button>
-                    <span className="min-w-0 flex-1 truncate">
-                      {kandidaat.name}
-                      {kandidaat.scientificName ? (
-                        <span className="text-[var(--ink-soft)]"> · {kandidaat.scientificName}</span>
-                      ) : null}
-                    </span>
-                    <span className="bw-chip shrink-0">{Math.round(kandidaat.score * 100)}%</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          <div className="bw-card flex flex-col gap-3 p-4">
+        {bron === 'handmatig' ? (
+          <div className="flex flex-col gap-3">
             <div>
-              <label className="bw-label" htmlFor="naam2">
+              <label className="bw-label" htmlFor="naam">
                 Naam
               </label>
               <input
-                id="naam2"
+                id="naam"
                 className="bw-input"
-                required
                 value={concept.commonName}
-                onChange={(e) => setConcept({ ...concept, commonName: e.target.value })}
+                onChange={(event) => setConcept({ ...concept, commonName: event.target.value })}
+                placeholder="Lavendel"
               />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="bw-label" htmlFor="wetenschappelijk">
-                  Wetenschappelijke naam
-                </label>
-                <input
-                  id="wetenschappelijk"
-                  className="bw-input"
-                  value={concept.scientificName}
-                  onChange={(e) => setConcept({ ...concept, scientificName: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="bw-label" htmlFor="cultivar">
-                  Cultivar
-                </label>
-                <input
-                  id="cultivar"
-                  className="bw-input"
-                  value={concept.cultivar}
-                  onChange={(e) => setConcept({ ...concept, cultivar: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="bw-label" htmlFor="categorie">
-                  Soort
-                </label>
-                <select
-                  id="categorie"
-                  className="bw-select"
-                  value={concept.category}
-                  onChange={(e) =>
-                    setConcept({ ...concept, category: e.target.value as PlantCategory })
-                  }
-                >
-                  {PLANT_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {CATEGORY_LABEL[c]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="bw-label" htmlFor="aantal">
-                  Aantal
-                </label>
-                <input
-                  id="aantal"
-                  className="bw-input"
-                  type="number"
-                  min={1}
-                  max={999}
-                  value={concept.quantity}
-                  onChange={(e) => setConcept({ ...concept, quantity: Number(e.target.value) })}
-                />
-              </div>
             </div>
             <div>
-              <label className="bw-label" htmlFor="winterhard">
-                Winterhardheid
+              <label className="bw-label" htmlFor="categorie1">
+                Categorie
               </label>
-              <input
-                id="winterhard"
-                className="bw-input"
-                value={concept.hardiness}
-                onChange={(e) => setConcept({ ...concept, hardiness: e.target.value })}
-                placeholder="winterhard tot ongeveer -15 °C"
-              />
-            </div>
-            <div className="flex flex-wrap gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="size-5"
-                  checked={concept.frostSensitive}
-                  onChange={(e) => setConcept({ ...concept, frostSensitive: e.target.checked })}
-                />
-                Vorstgevoelig
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="size-5"
-                  checked={concept.droughtSensitive}
-                  onChange={(e) => setConcept({ ...concept, droughtSensitive: e.target.checked })}
-                />
-                Droogtegevoelig
-              </label>
-            </div>
-            <div>
-              <label className="bw-label" htmlFor="notities">
-                Notities
-              </label>
-              <textarea
-                id="notities"
-                className="bw-textarea"
-                value={concept.notes}
-                onChange={(e) => setConcept({ ...concept, notes: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <section className="bw-card p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <h2 className="text-lg font-bold">Onderhoud</h2>
-              <button
-                type="button"
-                className="bw-btn bw-btn-secondary ml-auto px-3 text-sm"
-                disabled={bezig}
-                onClick={() => void stelOnderhoudVoor()}
+              <select
+                id="categorie1"
+                className="bw-select"
+                value={concept.category}
+                onChange={(event) =>
+                  setConcept({ ...concept, category: event.target.value as PlantCategory })
+                }
               >
-                {bezig ? 'Bezig…' : 'Onderhoud voorstellen'}
-              </button>
+                {PLANT_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_LABEL[c]}
+                  </option>
+                ))}
+              </select>
             </div>
-            <TaakEditor taken={taken} onChange={setTaken} outdoor={outdoor} />
-          </section>
-
-          <div className="flex gap-2">
+            <button
+              type="button"
+              className="bw-btn bw-btn-donker h-[50px] w-full"
+              disabled={bezig || !concept.commonName.trim()}
+              onClick={() => void stelOnderhoudVoor()}
+            >
+              {bezig ? 'Bezig…' : 'Onderhoud voorstellen'}
+            </button>
             <button
               type="button"
               className="bw-btn bw-btn-ghost"
-              onClick={() => setStap('invoer')}
+              disabled={!concept.commonName.trim()}
+              onClick={() => setStap('bevestigen')}
             >
-              Terug
-            </button>
-            <button
-              className="bw-btn bw-btn-primary flex-1"
-              disabled={bezig || !concept.commonName.trim()}
-            >
-              {bezig ? 'Bezig…' : 'Plant bewaren'}
+              Overslaan en zelf invullen
             </button>
           </div>
-        </form>
-      )}
-    </div>
+        ) : null}
+
+        <button type="button" className="bw-btn bw-btn-ghost" onClick={() => setStap('kies')}>
+          Terug
+        </button>
+      </div>
+    );
+  }
+
+  /* --------------------------------------------------------- bevestigen */
+
+  const actieveTaken = taken.filter((t) => t.enabled);
+
+  return (
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void opslaan();
+      }}
+    >
+      {berichten}
+
+      {concept.photoUrl ? (
+        <PlantFoto url={concept.photoUrl} alt="" vierkant className="-mx-5 h-40 w-[calc(100%+2.5rem)] object-cover" />
+      ) : null}
+
+      {concept.sourceUrl ? (
+        <h2 className="bw-sectie">Van {kortAdres(concept.sourceUrl)}</h2>
+      ) : null}
+
+      {kandidaten.length ? (
+        <section className="flex flex-col gap-2">
+          <h2 className="bw-sectie">Kies de juiste kandidaat</h2>
+          {kandidaten.map((kandidaat) => {
+            const actief = gekozenKandidaat === kandidaat.name;
+            return (
+              <button
+                key={kandidaat.name}
+                type="button"
+                className="rounded-[var(--radius)] p-3 text-left"
+                style={
+                  actief
+                    ? { border: '2px solid var(--dahlia)', background: 'var(--dahlia-wash)' }
+                    : { border: '1.5px solid var(--line-strong)', boxShadow: 'var(--shadow-inset)' }
+                }
+                onClick={() => {
+                  setGekozenKandidaat(kandidaat.name);
+                  setConcept({
+                    ...concept,
+                    commonName: kandidaat.name,
+                    scientificName: kandidaat.scientificName ?? concept.scientificName,
+                  });
+                }}
+              >
+                <span className="block text-[14.5px] font-semibold">{kandidaat.name}</span>
+                <span className="block text-[12px] text-[var(--ink-faint)]">
+                  {kandidaat.scientificName ? `${kandidaat.scientificName} · ` : ''}
+                  {Math.round(kandidaat.score * 100)}% zeker
+                </span>
+              </button>
+            );
+          })}
+        </section>
+      ) : null}
+
+      <section className="flex flex-col gap-3">
+        <div>
+          <label className="bw-label" htmlFor="naam2">
+            Naam
+          </label>
+          <input
+            id="naam2"
+            className="bw-input"
+            required
+            value={concept.commonName}
+            onChange={(e) => setConcept({ ...concept, commonName: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="bw-label" htmlFor="wetenschappelijk">
+              Wetenschappelijke naam
+            </label>
+            <input
+              id="wetenschappelijk"
+              className="bw-input"
+              value={concept.scientificName}
+              onChange={(e) => setConcept({ ...concept, scientificName: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="bw-label" htmlFor="cultivar">
+              Cultivar
+            </label>
+            <input
+              id="cultivar"
+              className="bw-input"
+              value={concept.cultivar}
+              onChange={(e) => setConcept({ ...concept, cultivar: e.target.value })}
+            />
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="bw-label" htmlFor="categorie2">
+              Soort
+            </label>
+            <select
+              id="categorie2"
+              className="bw-select"
+              value={concept.category}
+              onChange={(e) =>
+                setConcept({ ...concept, category: e.target.value as PlantCategory })
+              }
+            >
+              {PLANT_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {CATEGORY_LABEL[c]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="bw-label" htmlFor="aantal">
+              Aantal
+            </label>
+            <input
+              id="aantal"
+              className="bw-input"
+              type="number"
+              min={1}
+              max={999}
+              value={concept.quantity}
+              onChange={(e) => setConcept({ ...concept, quantity: Number(e.target.value) })}
+            />
+          </div>
+        </div>
+        {locatieKiezer}
+        <div>
+          <label className="bw-label" htmlFor="winterhard">
+            Winterhardheid
+          </label>
+          <input
+            id="winterhard"
+            className="bw-input"
+            value={concept.hardiness}
+            onChange={(e) => setConcept({ ...concept, hardiness: e.target.value })}
+            placeholder="winterhard tot ongeveer -15 °C"
+          />
+        </div>
+        <div className="flex flex-wrap gap-5 text-[13.5px]">
+          <label className="flex items-center gap-2.5">
+            <input
+              type="checkbox"
+              className="bw-toggle"
+              checked={concept.frostSensitive}
+              onChange={(e) => setConcept({ ...concept, frostSensitive: e.target.checked })}
+            />
+            Vorstgevoelig
+          </label>
+          <label className="flex items-center gap-2.5">
+            <input
+              type="checkbox"
+              className="bw-toggle"
+              checked={concept.droughtSensitive}
+              onChange={(e) => setConcept({ ...concept, droughtSensitive: e.target.checked })}
+            />
+            Droogtegevoelig
+          </label>
+        </div>
+        <div>
+          <label className="bw-label" htmlFor="notities">
+            Notities
+          </label>
+          <textarea
+            id="notities"
+            className="bw-textarea"
+            value={concept.notes}
+            onChange={(e) => setConcept({ ...concept, notes: e.target.value })}
+          />
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-2.5">
+        <div className="flex items-center gap-2">
+          <h2 className="bw-sectie">Voorgesteld zorgprofiel</h2>
+          <button
+            type="button"
+            className="bw-btn bw-btn-ghost ml-auto px-3 text-[13px]"
+            disabled={bezig}
+            onClick={() => void stelOnderhoudVoor()}
+          >
+            {bezig ? 'Bezig…' : 'Opnieuw voorstellen'}
+          </button>
+        </div>
+
+        {actieveTaken.length ? (
+          <p className="text-[13.5px] leading-relaxed text-[var(--ink-soft)]">
+            {actieveTaken.length} {actieveTaken.length === 1 ? 'taak' : 'taken'}:{' '}
+            {actieveTaken
+              .map((taak) => `${taak.title.toLowerCase()} (${beschrijfPlanningKort(taak.schedule)})`)
+              .join(', ')}
+          </p>
+        ) : (
+          <p className="text-[13px] text-[var(--ink-muted)]">Nog geen taken.</p>
+        )}
+
+        <button
+          type="button"
+          className="bw-btn bw-btn-secondary"
+          aria-expanded={alleTaken}
+          onClick={() => setAlleTaken((v) => !v)}
+        >
+          {alleTaken ? 'Taken dichtklappen' : 'Taken bekijken en bewerken'}
+        </button>
+        {alleTaken ? (
+          <TaakEditor taken={taken} onChange={setTaken} outdoor={outdoor} />
+        ) : null}
+      </section>
+
+      <div className="flex flex-col gap-2">
+        <button
+          className="bw-btn bw-btn-primary h-[50px] w-full"
+          disabled={bezig || !concept.commonName.trim()}
+        >
+          {bezig
+            ? 'Bezig…'
+            : concept.commonName.trim()
+              ? `Opslaan als ${concept.commonName.trim()}`
+              : 'Plant opslaan'}
+        </button>
+        <button type="button" className="bw-btn bw-btn-ghost" onClick={() => setStap('invoer')}>
+          Terug
+        </button>
+      </div>
+    </form>
   );
+}
+
+function kortAdres(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.hostname.replace(/^www\./, '')}${u.pathname}`.slice(0, 48);
+  } catch {
+    return url.slice(0, 48);
+  }
 }

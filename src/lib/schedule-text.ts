@@ -17,3 +17,20 @@ export function beschrijfPlanningTekst(schedule: Schedule): string {
       return `als het weer erom vraagt, ${venster}`;
   }
 }
+
+const KORT = [
+  'jan', 'feb', 'mrt', 'apr', 'mei', 'jun',
+  'jul', 'aug', 'sep', 'okt', 'nov', 'dec',
+] as const;
+
+/** Korte omschrijving voor in een lijstregel: "mrt–apr", "weer-gestuurd". */
+export function beschrijfPlanningKort(schedule: Schedule): string {
+  if (schedule.kind === 'weer-gestuurd') return 'weer-gestuurd';
+  const venster =
+    schedule.startMonth === schedule.endMonth
+      ? KORT[schedule.startMonth - 1]
+      : `${KORT[schedule.startMonth - 1]}–${KORT[schedule.endMonth - 1]}`;
+  if (schedule.kind === 'interval') return `${venster}, elke ${schedule.intervalDays} dagen`;
+  if (schedule.kind === 'meerjaarlijks') return `${venster}, om de ${schedule.everyYears} jaar`;
+  return schedule.timesPerWindow > 1 ? `${venster}, ${schedule.timesPerWindow}×` : venster;
+}

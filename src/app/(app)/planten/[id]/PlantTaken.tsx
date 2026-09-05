@@ -4,11 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/client';
 import { TaakEditor, type TaakConcept } from '@/components/TaakEditor';
+import { beschrijfPlanningKort } from '@/lib/schedule-text';
+import { TASK_COLOR } from '@/lib/ui';
 import type { CareTask } from '@/lib/types';
 
 /**
- * Bewerkt het zorgprofiel van één plant. Bij bewaren wordt het verschil met
- * de opgeslagen taken bepaald, zodat afgevinkte occurrences blijven staan.
+ * Het zorgprofiel van één plant. De schakelaar zet een taak direct aan of
+ * uit; voor de rest is er de volledige bewerkstand. Bij bewaren wordt het
+ * verschil met de opgeslagen taken bepaald, zodat afgevinkte occurrences
+ * blijven staan.
  */
 export function PlantTaken({
   plantId,
@@ -23,9 +27,28 @@ export function PlantTaken({
   const [concept, setConcept] = useState<(TaakConcept & { id?: string })[]>(
     opgeslagen.map((taak) => ({ ...taak })),
   );
+  const [aan, setAan] = useState<Record<string, boolean>>(
+    Object.fromEntries(opgeslagen.map((t) => [t.id, t.enabled])),
+  );
   const [bezig, setBezig] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
   const [bewerken, setBewerken] = useState(false);
+
+  async function schakel(taskId: string, enabled: boolean) {
+    const vorige = aan[taskId];
+    setAan((huidig) => ({ ...huidig, [taskId]: enabled }));
+    setFout(null);
+    try {
+      await api(`/api/tasks?plantId=${plantId}&taskId=${taskId}`, {
+        method: 'PATCH',
+        json: { enabled },
+      });
+      router.refresh();
+    } catch (error) {
+      setAan((huidig) => ({ ...huidig, [taskId]: vorige }));
+      setFout(error instanceof Error ? error.message : 'Opslaan lukte niet');
+    }
+  }
 
   async function bewaren() {
     setBezig(true);
@@ -66,62 +89,82 @@ export function PlantTaken({
     }
   }
 
-  if (!bewerken) {
+  if (bewerken) {
     return (
-      <div className="flex flex-col gap-2">
-        {opgeslagen.length === 0 ? (
-          <p className="bw-card p-4 text-sm text-[var(--ink-soft)]">
-            Nog geen onderhoud vastgelegd.
+      <div className="flex flex-col gap-3">
+        {fout ? (
+          <p role="alert" className="bw-banner bw-banner-urgent">
+            {fout}
           </p>
-        ) : (
-          <ul className="flex flex-col gap-1.5">
-            {opgeslagen.map((taak) => (
-              <li key={taak.id} className="bw-card p-3 text-sm">
-                <span className="font-semibold">{taak.title}</span>
-                <span className="block text-[var(--ink-soft)]">{taak.instructions}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <button
-          type="button"
-          className="bw-btn bw-btn-secondary"
-          onClick={() => {
-            setConcept(opgeslagen.map((taak) => ({ ...taak })));
-            setBewerken(true);
-          }}
-        >
-          Onderhoud bewerken
-        </button>
+        ) : null}
+        <TaakEditor taken={concept} onChange={setConcept} outdoor={outdoor} />
+        <div className="flex gap-2">
+          <button type="button" className="bw-btn bw-btn-ghost" onClick={() => setBewerken(false)}>
+            Terug
+          </button>
+          <button
+            type="button"
+            className="bw-btn bw-btn-primary flex-1"
+            disabled={bezig}
+            onClick={() => void bewaren()}
+          >
+            {bezig ? 'Bezig…' : 'Bewaren'}
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {fout ? (
-        <p role="alert" className="bw-card border-[var(--zinnia)] p-3 text-sm">
+        <p role="alert" className="bw-banner bw-banner-urgent">
           {fout}
         </p>
       ) : null}
-      <TaakEditor taken={concept} onChange={setConcept} outdoor={outdoor} />
-      <div className="flex gap-2">
-        <button
-          type="button"
-          className="bw-btn bw-btn-ghost"
-          onClick={() => setBewerken(false)}
-        >
-          Terug
-        </button>
-        <button
-          type="button"
-          className="bw-btn bw-btn-primary flex-1"
-          disabled={bezig}
-          onClick={() => void bewaren()}
-        >
-          {bezig ? 'Bezig…' : 'Bewaren'}
-        </button>
-      </div>
+
+      {opgeslagen.length === 0 ? (
+        <p className="text-[13px] text-[var(--ink-muted)]">Nog geen onderhoud vastgelegd.</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {opgeslagen.map((taak) => (
+            <li
+              key={taak.id}
+              className="bw-card-compact flex items-center gap-2.5 px-3 py-2.5"
+            >
+              <i
+                aria-hidden
+                className="bw-stip size-[9px]"
+                style={{ background: TASK_COLOR[taak.type] }}
+              />
+              <span className="min-w-0 flex-1 text-[13.5px]">
+                {taak.title}{' '}
+                <span className="text-[var(--ink-faint)]">
+                  · {beschrijfPlanningKort(taak.schedule)}
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                className="bw-toggle"
+                checked={aan[taak.id] ?? taak.enabled}
+                aria-label={`${taak.title} ${aan[taak.id] ?? taak.enabled ? 'uitzetten' : 'aanzetten'}`}
+                onChange={(event) => void schakel(taak.id, event.target.checked)}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <button
+        type="button"
+        className="bw-btn bw-btn-secondary"
+        onClick={() => {
+          setConcept(opgeslagen.map((taak) => ({ ...taak })));
+          setBewerken(true);
+        }}
+      >
+        Onderhoud bewerken
+      </button>
     </div>
   );
 }

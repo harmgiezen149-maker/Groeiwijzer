@@ -1,25 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/client';
+import { PushAanmelden } from '@/components/PushAanmelden';
 import { WEATHER_RULE_IDS } from '@/lib/types';
 import type { Garden, Membership, WeatherRuleId } from '@/lib/types';
 
-const WEER_UITLEG: Record<WeatherRuleId, string> = {
-  'geen-vorst': 'Snoeitaken krijgen een waarschuwing als er binnen 3 dagen vorst komt.',
-  'nachtvorst-alarm': 'Urgente taak plus pushmelding bij nachtvorst binnen 48 uur.',
-  droogte: 'Watertaak voor droogtegevoelige buitenplanten na een droge week.',
-  'geen-hitte': 'Bemesten en verpotten krijgen een waarschuwing boven 28 °C.',
-  groeiseizoen: 'Melding op het startscherm zodra het groeiseizoen begint.',
-};
-
 const WEER_NAAM: Record<WeatherRuleId, string> = {
   'geen-vorst': 'Niet snoeien bij vorst',
-  'nachtvorst-alarm': 'Nachtvorstalarm',
-  droogte: 'Droogte',
-  'geen-hitte': 'Hitte',
+  'nachtvorst-alarm': 'Nachtvorst-alarm',
+  droogte: 'Droogte-waarschuwing',
+  'geen-hitte': 'Hitte-waarschuwing',
   groeiseizoen: 'Start groeiseizoen',
 };
 
@@ -30,18 +23,34 @@ interface Lid {
   email: string;
 }
 
+/** Eén rij in een instellingenkaart: label links, bediening rechts. */
+function Rij({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-[13.5px]">
+      <span>{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function Kaart({ children }: { children: React.ReactNode }) {
+  return <div className="bw-card-compact flex flex-col gap-2.5 px-3.5 py-3">{children}</div>;
+}
+
 export function Instellingen({
   garden,
   membership,
   isEigenaar,
   currentUserId,
   members,
+  vapidPublicKey,
 }: {
   garden: Garden;
   membership: Membership;
   isEigenaar: boolean;
   currentUserId: string;
   members: Lid[];
+  vapidPublicKey: string | null;
 }) {
   const router = useRouter();
   const [naam, setNaam] = useState(garden.name);
@@ -55,6 +64,7 @@ export function Instellingen({
   const [melding, setMelding] = useState<string | null>(null);
   const [fout, setFout] = useState<string | null>(null);
   const [bezig, setBezig] = useState(false);
+  const [tuinOpen, setTuinOpen] = useState(false);
 
   async function doe<T>(actie: () => Promise<T>, gelukt?: string) {
     setBezig(true);
@@ -76,120 +86,100 @@ export function Instellingen({
   return (
     <div className="flex flex-col gap-5">
       {fout ? (
-        <p role="alert" className="bw-card border-[var(--zinnia)] p-3 text-sm">
+        <p role="alert" className="bw-banner bw-banner-urgent">
           {fout}
         </p>
       ) : null}
-      {melding ? <p className="bw-card p-3 text-sm">{melding}</p> : null}
+      {melding ? <p className="bw-banner bw-banner-info">{melding}</p> : null}
 
-      <section className="bw-card flex flex-col gap-2 p-4">
-        <h2 className="text-lg font-bold">Meer</h2>
-        <nav className="flex flex-wrap gap-2">
-          <Link href="/locaties" className="bw-btn bw-btn-secondary text-sm">
-            Locaties
-          </Link>
-          <Link href="/labels" className="bw-btn bw-btn-secondary text-sm">
-            QR-labels printen
-          </Link>
-          <Link href={`/jaar/${new Date().getFullYear()}`} className="bw-btn bw-btn-secondary text-sm">
-            Jaaroverzicht
-          </Link>
-          <Link href="/planten?archief=1" className="bw-btn bw-btn-secondary text-sm">
-            Archief
-          </Link>
-        </nav>
-      </section>
-
-      <section className="bw-card flex flex-col gap-3 p-4">
-        <h2 className="text-lg font-bold">De tuin</h2>
-        <div>
-          <label className="bw-label" htmlFor="tuinnaam">
-            Naam
-          </label>
-          <input
-            id="tuinnaam"
-            className="bw-input"
-            value={naam}
-            disabled={!isEigenaar}
-            onChange={(event) => setNaam(event.target.value)}
-          />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div>
-            <label className="bw-label" htmlFor="postcode">
-              Postcode
-            </label>
-            <input
-              id="postcode"
-              className="bw-input"
-              value={postcode}
-              disabled={!isEigenaar}
-              onChange={(event) => setPostcode(event.target.value)}
-            />
-          </div>
-          <div>
-            <label className="bw-label" htmlFor="lat">
-              Breedtegraad
-            </label>
-            <input
-              id="lat"
-              className="bw-input"
-              value={lat}
-              disabled={!isEigenaar}
-              onChange={(event) => setLat(event.target.value)}
-            />
-          </div>
-          <div>
-            <label className="bw-label" htmlFor="lon">
-              Lengtegraad
-            </label>
-            <input
-              id="lon"
-              className="bw-input"
-              value={lon}
-              disabled={!isEigenaar}
-              onChange={(event) => setLon(event.target.value)}
-            />
-          </div>
-        </div>
-        <p className="text-xs text-[var(--ink-faint)]">
-          De coördinaten bepalen welk weerbericht gebruikt wordt.
+      {/* --------------------------------------------------------- weer */}
+      <section>
+        <h2 className="bw-sectie mb-2">Weer</h2>
+        <Kaart>
+          <Rij label="Locatie voor weerdata">
+            <span className="text-[13px] text-[var(--ink-faint)]">
+              {garden.postcode || `${garden.lat.toFixed(2)}, ${garden.lon.toFixed(2)}`}
+            </span>
+          </Rij>
+          {WEATHER_RULE_IDS.map((regel) => {
+            const aan = !uit.includes(regel);
+            return (
+              <Rij key={regel} label={WEER_NAAM[regel]}>
+                <input
+                  type="checkbox"
+                  className="bw-toggle"
+                  checked={aan}
+                  disabled={!isEigenaar || bezig}
+                  aria-label={`${WEER_NAAM[regel]} ${aan ? 'uitzetten' : 'aanzetten'}`}
+                  onChange={() => {
+                    const next = aan ? [...uit, regel] : uit.filter((r) => r !== regel);
+                    setUit(next);
+                    void doe(() =>
+                      api('/api/garden', {
+                        method: 'PATCH',
+                        json: { disabledWeatherRules: next },
+                      }),
+                    );
+                  }}
+                />
+              </Rij>
+            );
+          })}
+        </Kaart>
+        <p className="mt-1.5 text-[12px] text-[var(--ink-muted)]">
+          Weerregels blokkeren nooit iets; ze markeren en melden. Ze gelden alleen buiten.
         </p>
-        {isEigenaar ? (
-          <button
-            type="button"
-            className="bw-btn bw-btn-primary self-start"
-            disabled={bezig}
-            onClick={() =>
-              doe(
-                () =>
-                  api('/api/garden', {
-                    method: 'PATCH',
-                    json: { name: naam, postcode, lat: Number(lat), lon: Number(lon) },
-                  }),
-                'De tuin is bijgewerkt.',
-              )
-            }
-          >
-            Bewaren
-          </button>
-        ) : null}
       </section>
 
-      <section className="bw-card flex flex-col gap-3 p-4">
-        <h2 className="text-lg font-bold">Leden</h2>
-        <ul className="flex flex-col gap-1.5">
+      {/* ---------------------------------------------------- meldingen */}
+      <section>
+        <h2 className="bw-sectie mb-2">Mijn meldingen</h2>
+        <Kaart>
+          <Rij label="Maandbericht per e-mail">
+            <input
+              type="checkbox"
+              className="bw-toggle"
+              checked={notify.email}
+              aria-label="Maandbericht per e-mail"
+              onChange={(event) => {
+                const next = { ...notify, email: event.target.checked };
+                setNotify(next);
+                void doe(() => api('/api/garden/notify', { method: 'PATCH', json: next }));
+              }}
+            />
+          </Rij>
+          <Rij label="Pushmeldingen bij vorst en spoed">
+            <input
+              type="checkbox"
+              className="bw-toggle"
+              checked={notify.push}
+              aria-label="Pushmeldingen bij vorst en spoed"
+              onChange={(event) => {
+                const next = { ...notify, push: event.target.checked };
+                setNotify(next);
+                void doe(() => api('/api/garden/notify', { method: 'PATCH', json: next }));
+              }}
+            />
+          </Rij>
+        </Kaart>
+        <div className="mt-2.5">
+          <PushAanmelden vapidPublicKey={vapidPublicKey} />
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------- leden */}
+      <section>
+        <h2 className="bw-sectie mb-2">Leden</h2>
+        <Kaart>
           {members.map((lid) => (
-            <li key={lid.userId} className="flex items-center gap-2 text-sm">
-              <span className="min-w-0 flex-1 truncate">
-                {lid.naam}
-                {lid.userId === currentUserId ? ' (jij)' : ''}
-                <span className="text-[var(--ink-soft)]"> · {lid.role}</span>
-              </span>
+            <Rij
+              key={lid.userId}
+              label={`${lid.naam}${lid.userId === currentUserId ? ' (jij)' : ''}`}
+            >
               {isEigenaar && lid.role !== 'eigenaar' ? (
                 <button
                   type="button"
-                  className="bw-btn bw-btn-ghost px-3 text-sm"
+                  className="bw-btn bw-btn-gevaar px-2 text-[13px]"
                   disabled={bezig}
                   onClick={() =>
                     doe(
@@ -198,19 +188,21 @@ export function Instellingen({
                     )
                   }
                 >
-                  Weg
+                  Verwijderen
                 </button>
-              ) : null}
-            </li>
+              ) : (
+                <span className="text-[13px] text-[var(--ink-faint)]">{lid.role}</span>
+              )}
+            </Rij>
           ))}
-        </ul>
+        </Kaart>
 
         <form
-          className="flex flex-col gap-2 border-t border-[var(--line)] pt-3"
+          className="mt-2.5 flex gap-2"
           onSubmit={(event) => {
             event.preventDefault();
             void doe(async () => {
-              const data = await api<{ link: string; mail: { sent: boolean; reason?: string } }>(
+              const data = await api<{ link: string; mail: { sent: boolean } }>(
                 '/api/garden/invite',
                 { method: 'POST', json: { email } },
               );
@@ -224,116 +216,170 @@ export function Instellingen({
             });
           }}
         >
-          <label className="bw-label" htmlFor="uitnodigen">
+          <label className="sr-only" htmlFor="uitnodigen">
             Iemand uitnodigen
           </label>
-          <div className="flex gap-2">
-            <input
-              id="uitnodigen"
-              className="bw-input"
-              type="email"
-              required
-              placeholder="naam@voorbeeld.nl"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-            <button className="bw-btn bw-btn-primary shrink-0 px-4" disabled={bezig}>
-              Sturen
-            </button>
-          </div>
-          {link ? (
-            <p className="break-all text-xs text-[var(--ink-soft)]">{link}</p>
-          ) : null}
+          <input
+            id="uitnodigen"
+            className="bw-input"
+            type="email"
+            required
+            placeholder="naam@voorbeeld.nl"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+          <button className="bw-btn bw-btn-primary shrink-0" disabled={bezig}>
+            Uitnodigen
+          </button>
         </form>
+        {link ? <p className="mt-1.5 break-all text-[12px] text-[var(--ink-faint)]">{link}</p> : null}
       </section>
 
-      <section className="bw-card flex flex-col gap-3 p-4">
-        <h2 className="text-lg font-bold">Mijn meldingen</h2>
-        {(['email', 'push'] as const).map((kanaal) => (
-          <label key={kanaal} className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              className="size-5"
-              checked={notify[kanaal]}
-              onChange={(event) => {
-                const next = { ...notify, [kanaal]: event.target.checked };
-                setNotify(next);
-                void doe(() => api('/api/garden/notify', { method: 'PATCH', json: next }));
-              }}
-            />
-            {kanaal === 'email' ? 'Maandbericht per e-mail' : 'Pushmeldingen bij vorst en spoed'}
-          </label>
-        ))}
-      </section>
-
-      <section className="bw-card flex flex-col gap-3 p-4">
-        <h2 className="text-lg font-bold">Weerregels</h2>
-        <p className="text-sm text-[var(--ink-soft)]">
-          Weerregels blokkeren nooit iets; ze markeren en melden. Ze gelden alleen buiten.
-        </p>
-        {WEATHER_RULE_IDS.map((regel) => {
-          const aan = !uit.includes(regel);
-          return (
-            <label key={regel} className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                className="mt-1 size-5"
-                checked={aan}
-                disabled={!isEigenaar || bezig}
-                onChange={() => {
-                  const next = aan ? [...uit, regel] : uit.filter((r) => r !== regel);
-                  setUit(next);
-                  void doe(() =>
-                    api('/api/garden', {
-                      method: 'PATCH',
-                      json: { disabledWeatherRules: next },
-                    }),
-                  );
-                }}
-              />
-              <span>
-                <span className="block font-semibold">{WEER_NAAM[regel]}</span>
-                <span className="block text-sm text-[var(--ink-soft)]">{WEER_UITLEG[regel]}</span>
-              </span>
-            </label>
-          );
-        })}
-      </section>
-
-      <section className="bw-card flex flex-col gap-3 p-4">
-        <h2 className="text-lg font-bold">Onderhoud van de app</h2>
+      {/* --------------------------------------------------------- tuin */}
+      <section>
+        <h2 className="bw-sectie mb-2">De tuin</h2>
         <button
           type="button"
-          className="bw-btn bw-btn-secondary self-start"
-          disabled={bezig}
-          onClick={() =>
-            doe(async () => {
-              const data = await api<{ added: number; removed: number }>(
-                '/api/occurrences/generate',
-                { method: 'POST', json: { year: new Date().getFullYear() } },
-              );
-              setMelding(
-                `Agenda bijgewerkt: ${data.added} taken toegevoegd, ${data.removed} opgeruimd.`,
-              );
-            })
-          }
+          className="bw-card-compact w-full px-3.5 py-3 text-left text-[13.5px]"
+          aria-expanded={tuinOpen}
+          onClick={() => setTuinOpen((v) => !v)}
         >
-          Agenda opnieuw opbouwen
+          {garden.name}
+          <span className="float-right text-[var(--ink-faint)]">{tuinOpen ? '−' : 'wijzig'}</span>
         </button>
-        <div className="flex flex-wrap gap-2">
-          <a className="bw-btn bw-btn-secondary" href="/api/export" download>
-            Alles als JSON
+
+        {tuinOpen ? (
+          <div className="mt-2.5 flex flex-col gap-3">
+            <div>
+              <label className="bw-label" htmlFor="tuinnaam">
+                Naam
+              </label>
+              <input
+                id="tuinnaam"
+                className="bw-input"
+                value={naam}
+                disabled={!isEigenaar}
+                onChange={(event) => setNaam(event.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="bw-label" htmlFor="postcode">
+                  Postcode
+                </label>
+                <input
+                  id="postcode"
+                  className="bw-input"
+                  value={postcode}
+                  disabled={!isEigenaar}
+                  onChange={(event) => setPostcode(event.target.value)}
+                />
+              </div>
+              <div>
+                <label className="bw-label" htmlFor="lat">
+                  Breedte
+                </label>
+                <input
+                  id="lat"
+                  className="bw-input"
+                  value={lat}
+                  disabled={!isEigenaar}
+                  onChange={(event) => setLat(event.target.value)}
+                />
+              </div>
+              <div>
+                <label className="bw-label" htmlFor="lon">
+                  Lengte
+                </label>
+                <input
+                  id="lon"
+                  className="bw-input"
+                  value={lon}
+                  disabled={!isEigenaar}
+                  onChange={(event) => setLon(event.target.value)}
+                />
+              </div>
+            </div>
+            {isEigenaar ? (
+              <button
+                type="button"
+                className="bw-btn bw-btn-primary"
+                disabled={bezig}
+                onClick={() =>
+                  doe(
+                    () =>
+                      api('/api/garden', {
+                        method: 'PATCH',
+                        json: { name: naam, postcode, lat: Number(lat), lon: Number(lon) },
+                      }),
+                    'De tuin is bijgewerkt.',
+                  )
+                }
+              >
+                Bewaren
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+
+      {/* ---------------------------------------------------- gegevens */}
+      <section>
+        <h2 className="bw-sectie mb-2">Gegevens</h2>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            className="bw-card-compact px-3.5 py-3 text-left text-[13.5px]"
+            disabled={bezig}
+            onClick={() =>
+              doe(async () => {
+                const data = await api<{ added: number; removed: number }>(
+                  '/api/occurrences/generate',
+                  { method: 'POST', json: { year: new Date().getFullYear() } },
+                );
+                setMelding(
+                  `Agenda bijgewerkt: ${data.added} taken toegevoegd, ${data.removed} opgeruimd.`,
+                );
+              })
+            }
+          >
+            Taken opnieuw genereren
+          </button>
+          <a
+            className="bw-card-compact px-3.5 py-3 text-left text-[13.5px]"
+            href="/api/export"
+            download
+          >
+            Exporteren als JSON
           </a>
-          {(['planten', 'taken', 'agenda', 'logboek'] as const).map((onderdeel) => (
-            <a
-              key={onderdeel}
-              className="bw-btn bw-btn-secondary text-sm"
-              href={`/api/export?onderdeel=${onderdeel}`}
-              download
-            >
-              {onderdeel} (CSV)
-            </a>
-          ))}
+          <div className="flex flex-wrap gap-2">
+            {(['planten', 'taken', 'agenda', 'logboek'] as const).map((onderdeel) => (
+              <a
+                key={onderdeel}
+                className="bw-pil"
+                href={`/api/export?onderdeel=${onderdeel}`}
+                download
+              >
+                {onderdeel} · CSV
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------- meer */}
+      <section>
+        <h2 className="bw-sectie mb-2">Meer</h2>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/labels" className="bw-pil">
+            QR-labels printen
+          </Link>
+          <Link href={`/jaar/${new Date().getFullYear()}`} className="bw-pil">
+            Jaaroverzicht
+          </Link>
+          <Link href="/planten?archief=1" className="bw-pil">
+            Archief
+          </Link>
         </div>
       </section>
     </div>

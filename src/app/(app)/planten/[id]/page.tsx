@@ -8,7 +8,7 @@ import { readLog } from '@/lib/log';
 import { agendaForYear } from '@/lib/occurrences';
 import { toRows } from '@/lib/agenda-view';
 import { CATEGORY_LABEL } from '@/lib/ui';
-import { formatDate } from '@/lib/dates';
+import { formatDate, todayInAmsterdam } from '@/lib/dates';
 import { PlantFoto } from '@/components/PlantFoto';
 import { OccurrenceList } from '@/components/OccurrenceList';
 import { PlantTaken } from './PlantTaken';
@@ -34,104 +34,125 @@ export default async function PlantPagina({ params }: { params: Promise<{ id: st
   ]);
 
   const locatie = locations.find((l) => l.id === plant.locationId);
-  const rijen = (await toRows(garden.id, agenda)).filter((r) => r.plantId === plant.id);
+  const vandaag = todayInAmsterdam();
+  const alleRijen = (await toRows(garden.id, agenda)).filter((r) => r.plantId === plant.id);
+  // Een taak die elke week terugkomt levert vijftig regels op; toon wat er nu
+  // speelt en verwijs voor de rest naar de agenda.
+  const rijen = alleRijen.filter((r) => r.windowEnd >= vandaag).slice(0, 8);
+  const rest = alleRijen.length - rijen.length;
+
+  const kenmerken = [
+    CATEGORY_LABEL[plant.category],
+    plant.hardiness,
+    `vorstgevoelig: ${plant.frostSensitive ? 'ja' : 'nee'}`,
+    plant.droughtSensitive ? 'droogtegevoelig' : null,
+    plant.quantity > 1 ? `${plant.quantity} stuks` : null,
+    locatie?.name,
+    locatie && !locatie.outdoor && !/binnen/i.test(locatie.name) ? 'binnen' : null,
+    plant.status !== 'levend' ? plant.status : null,
+  ].filter(Boolean) as string[];
 
   return (
-    <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-3">
-        <PlantFoto url={plant.photoUrl} alt="" className="h-52 w-full rounded-[var(--radius)]" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{plant.commonName}</h1>
-          <p className="text-sm text-[var(--ink-soft)]">
-            {[
-              plant.scientificName,
-              plant.cultivar ? `'${plant.cultivar}'` : null,
-              CATEGORY_LABEL[plant.category],
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-          <p className="mt-1 flex flex-wrap gap-1.5">
-            <span className="bw-chip">
-              {locatie?.name ?? 'Zonder locatie'} · {locatie?.outdoor ? 'buiten' : 'binnen'}
-            </span>
-            {plant.quantity > 1 ? <span className="bw-chip">{plant.quantity} stuks</span> : null}
-            {plant.frostSensitive ? <span className="bw-chip">Vorstgevoelig</span> : null}
-            {plant.droughtSensitive ? <span className="bw-chip">Droogtegevoelig</span> : null}
-            {plant.status !== 'levend' ? (
-              <span className="bw-chip" style={{ borderColor: 'var(--zinnia)' }}>
-                {plant.status}
+    <div className="-mx-5 flex flex-col">
+      <PlantFoto url={plant.photoUrl} alt="" vierkant className="h-[200px] w-full object-cover" />
+
+      <div className="flex flex-col gap-5 px-5 pt-4">
+        <header>
+          <h1 className="bw-titel-groot">{plant.commonName}</h1>
+          {plant.scientificName ? (
+            <p className="text-[13px] italic text-[var(--ink-faint)]">{plant.scientificName}</p>
+          ) : null}
+          <p className="mt-2 flex flex-wrap gap-1.5">
+            {kenmerken.map((kenmerk) => (
+              <span key={kenmerk} className="bw-chip">
+                {kenmerk}
               </span>
-            ) : null}
-          </p>
-        </div>
-        {plant.hardiness ? (
-          <p className="text-sm text-[var(--ink-soft)]">{plant.hardiness}</p>
-        ) : null}
-        {plant.notes ? <p className="text-sm">{plant.notes}</p> : null}
-        {plant.sourceUrl ? (
-          <p className="text-sm">
-            <a href={plant.sourceUrl} rel="noreferrer noopener" target="_blank">
-              Bron van de gegevens
-            </a>
-          </p>
-        ) : null}
-      </header>
-
-      <section>
-        <h2 className="mb-2 text-lg font-bold">Dit jaar</h2>
-        <OccurrenceList
-          rows={rijen}
-          groupBy="geen"
-          emptyText="Geen taken dit jaar voor deze plant."
-        />
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-lg font-bold">Zorgprofiel</h2>
-        <PlantTaken
-          plantId={plant.id}
-          taken={taken}
-          outdoor={locatie?.outdoor ?? true}
-        />
-      </section>
-
-      {photos.length ? (
-        <section>
-          <h2 className="mb-2 text-lg font-bold">Foto&apos;s</h2>
-          <ul className="grid grid-cols-3 gap-2">
-            {photos.map((foto) => (
-              <li key={foto.url} className="bw-card overflow-hidden">
-                <PlantFoto url={foto.url} alt={foto.caption ?? ''} className="aspect-square w-full" />
-                <span className="block p-1.5 text-[11px] text-[var(--ink-soft)]">
-                  {formatDate(foto.takenAt.slice(0, 10))}
-                </span>
-              </li>
             ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <section>
-        <h2 className="mb-2 text-lg font-bold">Logboek</h2>
-        <Logboek entries={log} />
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-lg font-bold">Beheer</h2>
-        <PlantBeheer
-          plantId={plant.id}
-          status={plant.status}
-          locationId={plant.locationId}
-          locations={locations.map((l) => ({ id: l.id, name: l.name }))}
-        />
-        {plant.labelCode ? (
-          <p className="mt-3 text-sm text-[var(--ink-soft)]">
-            Labelcode <strong>{plant.labelCode}</strong> ·{' '}
-            <Link href="/labels">printvel met QR-codes</Link>
           </p>
+          {plant.notes ? (
+            <p className="mt-2.5 text-[13.5px] text-[var(--ink-soft)]">{plant.notes}</p>
+          ) : null}
+          {plant.sourceUrl ? (
+            <p className="mt-1.5 text-[13px]">
+              <a
+                href={plant.sourceUrl}
+                rel="noreferrer noopener"
+                target="_blank"
+                className="text-[var(--cornflower-dark)] underline"
+              >
+                Bron van de gegevens
+              </a>
+            </p>
+          ) : null}
+        </header>
+
+        <section>
+          <h2 className="bw-sectie mb-2">Zorgprofiel</h2>
+          <PlantTaken plantId={plant.id} taken={taken} outdoor={locatie?.outdoor ?? true} />
+        </section>
+
+        <section>
+          <h2 className="bw-sectie mb-2">Wat er aankomt</h2>
+          <OccurrenceList
+            rows={rijen}
+            groupBy="geen"
+            zonderPlantnaam
+            emptyText="Geen taken meer dit jaar voor deze plant."
+          />
+          {rest > 0 ? (
+            <p className="mt-2 text-[12.5px] text-[var(--ink-muted)]">
+              {rest} eerdere {rest === 1 ? 'taak' : 'taken'} dit jaar ·{' '}
+              <Link href={`/jaar/${jaar}`} className="underline">
+                jaaroverzicht
+              </Link>
+            </p>
+          ) : null}
+        </section>
+
+        {photos.length ? (
+          <section>
+            <h2 className="bw-sectie mb-2">Foto&apos;s</h2>
+            <ul className="grid grid-cols-3 gap-2.5">
+              {photos.map((foto, index) => (
+                <li key={foto.url}>
+                  <PlantFoto
+                    url={foto.url}
+                    alt={foto.caption ?? ''}
+                    variant={((index % 3) + 1) as 1 | 2 | 3}
+                    className="aspect-square w-full"
+                  />
+                  <span className="mt-1 block text-[11px] text-[var(--ink-muted)]">
+                    {formatDate(foto.takenAt.slice(0, 10))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
-      </section>
+
+        <section>
+          <h2 className="bw-sectie mb-2">Logboek</h2>
+          <Logboek entries={log} />
+        </section>
+
+        <section>
+          <h2 className="bw-sectie mb-2">Beheer</h2>
+          <PlantBeheer
+            plantId={plant.id}
+            status={plant.status}
+            locationId={plant.locationId}
+            locations={locations.map((l) => ({ id: l.id, name: l.name }))}
+          />
+          {plant.labelCode ? (
+            <p className="mt-3 text-[12.5px] text-[var(--ink-faint)]">
+              Labelcode <strong>{plant.labelCode}</strong> ·{' '}
+              <Link href="/labels" className="underline">
+                printvel met QR-codes
+              </Link>
+            </p>
+          ) : null}
+        </section>
+      </div>
     </div>
   );
 }

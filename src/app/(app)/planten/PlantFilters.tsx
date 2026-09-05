@@ -18,14 +18,17 @@ export function PlantFilters({
     const next = new URLSearchParams(params.toString());
     if (waarde) next.set(sleutel, waarde);
     else next.delete(sleutel);
+    next.delete('label');
     router.replace(`/planten?${next.toString()}`);
   }
 
+  const locatie = params.get('locatie') ?? '';
+  const categorie = params.get('categorie') ?? '';
   const archief = params.get('archief') === '1';
   const alleenOpen = params.get('taken') === '1';
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -39,54 +42,38 @@ export function PlantFilters({
           id="zoek"
           className="bw-input"
           type="search"
-          placeholder="Zoek op naam"
+          placeholder="Zoek een plant"
           value={zoek}
           onChange={(event) => setZoek(event.target.value)}
           onBlur={() => zet('q', zoek.trim())}
         />
       </form>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        <select
-          className="bw-select w-auto shrink-0 py-1 text-sm"
-          aria-label="Filter op locatie"
-          value={params.get('locatie') ?? ''}
-          onChange={(event) => zet('locatie', event.target.value)}
-        >
-          <option value="">Alle locaties</option>
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="bw-select w-auto shrink-0 py-1 text-sm"
-          aria-label="Filter op categorie"
-          value={params.get('categorie') ?? ''}
-          onChange={(event) => zet('categorie', event.target.value)}
-        >
-          <option value="">Alle soorten</option>
-          {categories.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-
+      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+        {/* Een select in de vorm van een pil: één tik, geen extra scherm. */}
+        <PilSelect
+          label="Alle locaties"
+          value={locatie}
+          opties={locations.map((l) => ({ value: l.id, label: l.name }))}
+          onChange={(v) => zet('locatie', v)}
+        />
+        <PilSelect
+          label="Categorie"
+          value={categorie}
+          opties={categories}
+          onChange={(v) => zet('categorie', v)}
+        />
         <button
           type="button"
-          className={`bw-btn shrink-0 px-3 text-sm ${alleenOpen ? 'bw-btn-primary' : 'bw-btn-secondary'}`}
+          className="bw-pil"
           aria-pressed={alleenOpen}
           onClick={() => zet('taken', alleenOpen ? '' : '1')}
         >
           Open taken
         </button>
-
         <button
           type="button"
-          className={`bw-btn shrink-0 px-3 text-sm ${archief ? 'bw-btn-primary' : 'bw-btn-secondary'}`}
+          className="bw-pil"
           aria-pressed={archief}
           onClick={() => zet('archief', archief ? '' : '1')}
         >
@@ -94,5 +81,39 @@ export function PlantFilters({
         </button>
       </div>
     </div>
+  );
+}
+
+function PilSelect({
+  label,
+  value,
+  opties,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  opties: { value: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  const gekozen = opties.find((o) => o.value === value);
+  return (
+    <span className="relative shrink-0">
+      <span className="bw-pil" aria-hidden data-actief={Boolean(value)}>
+        {gekozen?.label ?? label}
+      </span>
+      <select
+        aria-label={label}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">{label}</option>
+        {opties.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }

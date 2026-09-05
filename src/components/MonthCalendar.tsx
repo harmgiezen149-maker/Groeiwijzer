@@ -1,99 +1,112 @@
-import { DAY_SHORT, MONTH_NAMES, daysInMonth, weekdayIndex, ymd } from '@/lib/dates';
-import { TASK_COLOR, TASK_LABEL } from '@/lib/ui';
+import Link from 'next/link';
+import { daysInMonth, weekdayIndex, ymd } from '@/lib/dates';
+import { TASK_COLOR } from '@/lib/ui';
 import type { AgendaRow } from '@/lib/dto';
 
+const LETTERS = ['M', 'D', 'W', 'D', 'V', 'Z', 'Z'];
+const KORT = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'];
+
 /**
- * Maandkalender met bolletjes per taaktype. Een taak beslaat een venster,
- * dus hij verschijnt op elke dag binnen dat venster in deze maand.
+ * Maandkalender met bolletjes per taaktype onder het dagnummer.
+ * Een taak beslaat een venster, dus hij verschijnt op elke dag binnen
+ * dat venster. Vandaag krijgt de donkere schijf uit het ontwerp.
  */
 export function MonthCalendar({
   year,
   month,
   rows,
   today,
+  selected,
+  hrefForDay,
 }: {
   year: number;
   month: number;
   rows: AgendaRow[];
   today?: string;
+  /** yyyy-mm-dd van de gekozen dag, als er een gekozen is. */
+  selected?: string;
+  hrefForDay?: (datum: string | null) => string;
 }) {
   const total = daysInMonth(year, month);
-  const first = ymd(year, month, 1);
-  const leading = weekdayIndex(first);
+  const leading = weekdayIndex(ymd(year, month, 1));
 
-  const perDag = new Map<number, Set<AgendaRow['taskType']>>();
-  for (const row of rows) {
-    for (let day = 1; day <= total; day++) {
-      const datum = ymd(year, month, day);
-      if (datum >= row.windowStart && datum <= row.windowEnd) {
-        const set = perDag.get(day) ?? new Set();
-        set.add(row.taskType);
-        perDag.set(day, set);
-      }
+  const perDag = new Map<number, AgendaRow['taskType'][]>();
+  for (let day = 1; day <= total; day++) {
+    const datum = ymd(year, month, day);
+    const types = new Set<AgendaRow['taskType']>();
+    for (const row of rows) {
+      if (datum >= row.windowStart && datum <= row.windowEnd) types.add(row.taskType);
     }
+    if (types.size) perDag.set(day, [...types]);
   }
 
-  const gebruikt = [...new Set(rows.map((r) => r.taskType))];
-
   return (
-    <div className="bw-card p-3">
-      <h3 className="mb-2 px-1 text-sm font-bold uppercase tracking-wide text-[var(--ink-soft)]">
-        {MONTH_NAMES[month - 1]} {year}
-      </h3>
-      <div className="grid grid-cols-7 gap-1 text-center">
-        {DAY_SHORT.map((d) => (
-          <div key={d} className="pb-1 text-[11px] font-semibold text-[var(--ink-faint)]">
-            {d}
+    <div>
+      <div className="mb-1 grid grid-cols-7 gap-1 text-center text-[10.5px] text-[var(--ink-muted)] sm:gap-2 sm:text-xs">
+        {LETTERS.map((letter, i) => (
+          <div key={i}>
+            <span className="sm:hidden">{letter}</span>
+            <span className="hidden sm:inline">{KORT[i]}</span>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {Array.from({ length: leading }, (_, i) => (
           <div key={`leeg-${i}`} />
         ))}
         {Array.from({ length: total }, (_, i) => {
           const day = i + 1;
-          const types = [...(perDag.get(day) ?? [])];
-          const isVandaag = today === ymd(year, month, day);
+          const datum = ymd(year, month, day);
+          const types = perDag.get(day) ?? [];
+          const isVandaag = today === datum;
+          const isGekozen = selected === datum;
+
+          const inhoud = (
+            <>
+              {day}
+              {types.length ? (
+                <span className="bw-dag-stippen" aria-hidden>
+                  {types.slice(0, 3).map((type) => (
+                    <i
+                      key={type}
+                      className="bw-dag-stip"
+                      style={{ background: TASK_COLOR[type] }}
+                    />
+                  ))}
+                </span>
+              ) : null}
+            </>
+          );
+
+          const klasse = `bw-dag ${isVandaag ? 'bw-dag-vandaag' : ''}`;
+          const stijl = isGekozen && !isVandaag
+            ? { boxShadow: 'inset 0 0 0 1.5px var(--dahlia)', color: 'var(--dahlia)', fontWeight: 700 }
+            : undefined;
+
+          if (!hrefForDay) {
+            return (
+              <div key={day} className={klasse} style={stijl}>
+                {inhoud}
+              </div>
+            );
+          }
+
           return (
-            <div
+            <Link
               key={day}
-              className="flex min-h-11 flex-col items-center justify-start rounded-[var(--radius-sm)] py-1"
-              style={{ background: isVandaag ? 'var(--paper-sunken)' : undefined }}
+              href={hrefForDay(isGekozen ? null : datum)}
+              scroll={false}
+              aria-label={`${day}${types.length ? `, ${types.length} soort werk` : ''}`}
+              aria-current={isGekozen ? 'date' : undefined}
+              className={`${klasse} block`}
+              style={stijl}
             >
-              <span
-                className="text-xs"
-                style={{ fontWeight: isVandaag ? 700 : 400 }}
-              >
-                {day}
-              </span>
-              <span className="mt-0.5 flex max-w-full flex-wrap justify-center gap-[2px]">
-                {types.slice(0, 4).map((type) => (
-                  <span
-                    key={type}
-                    className="block size-1.5 rounded-full"
-                    style={{ background: TASK_COLOR[type] }}
-                    title={TASK_LABEL[type]}
-                  />
-                ))}
-              </span>
-            </div>
+              {inhoud}
+            </Link>
           );
         })}
       </div>
-
-      {gebruikt.length ? (
-        <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1 border-t border-[var(--line)] pt-2 text-[11px] text-[var(--ink-soft)]">
-          {gebruikt.map((type) => (
-            <li key={type} className="flex items-center gap-1">
-              <span
-                aria-hidden
-                className="block size-2 rounded-full"
-                style={{ background: TASK_COLOR[type] }}
-              />
-              {TASK_LABEL[type]}
-            </li>
-          ))}
-        </ul>
-      ) : null}
     </div>
   );
 }

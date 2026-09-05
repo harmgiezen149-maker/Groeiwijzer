@@ -46,30 +46,30 @@ export function TaakEditor({
   return (
     <div className="flex flex-col gap-2">
       {taken.length === 0 ? (
-        <p className="text-sm text-[var(--ink-soft)]">
+        <p className="text-[13px] text-[var(--ink-muted)]">
           Nog geen taken. Voeg er zelf een toe of laat er een voorstellen.
         </p>
       ) : null}
 
       <ul className="flex flex-col gap-2">
         {taken.map((taak, index) => (
-          <li key={index} className="bw-card overflow-hidden">
+          <li key={index} className="bw-card-compact overflow-hidden">
             <div className="flex items-stretch">
               <span aria-hidden className="w-1.5 shrink-0" style={{ background: TASK_COLOR[taak.type] }} />
               <div className="min-w-0 flex-1 p-3">
                 <label className="flex items-start gap-2">
                   <input
                     type="checkbox"
-                    className="mt-1 size-5 shrink-0"
+                    className="bw-checkbox mt-1"
                     checked={taak.enabled}
                     onChange={(e) => wijzig(index, { enabled: e.target.checked })}
                     aria-label={`${taak.title || 'Taak'} meenemen`}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold">
+                    <span className="block truncate text-[14px] font-semibold">
                       {taak.title || TASK_LABEL[taak.type]}
                     </span>
-                    <span className="block text-sm text-[var(--ink-soft)]">
+                    <span className="block text-[12.5px] text-[var(--ink-faint)]">
                       {beschrijfPlanningTekst(taak.schedule)} · {IMPORTANCE_LABEL[taak.importance]}
                     </span>
                   </span>
@@ -86,7 +86,7 @@ export function TaakEditor({
               <div className="flex shrink-0 flex-col justify-center gap-1 p-2">
                 <button
                   type="button"
-                  className="bw-btn bw-btn-ghost px-3 text-sm"
+                  className="bw-btn bw-btn-ghost px-3 text-[13px]"
                   aria-expanded={open === index}
                   onClick={() => setOpen(open === index ? null : index)}
                 >
@@ -94,7 +94,7 @@ export function TaakEditor({
                 </button>
                 <button
                   type="button"
-                  className="bw-btn bw-btn-ghost px-3 text-sm"
+                  className="bw-btn bw-btn-ghost px-3 text-[13px]"
                   onClick={() => onChange(taken.filter((_, i) => i !== index))}
                 >
                   Weg
@@ -296,7 +296,7 @@ function TaakVelden({
                   key={regel}
                   type="button"
                   aria-pressed={aan}
-                  className={`bw-btn px-3 text-sm ${aan ? 'bw-btn-primary' : 'bw-btn-secondary'}`}
+                  className="bw-pil"
                   onClick={() =>
                     onChange({
                       weatherRules: aan
@@ -312,7 +312,7 @@ function TaakVelden({
           </div>
         </fieldset>
       ) : (
-        <p className="text-sm text-[var(--ink-soft)]">
+        <p className="text-[13px] text-[var(--ink-muted)]">
           Deze plant staat binnen; weerregels gelden hier niet.
         </p>
       )}

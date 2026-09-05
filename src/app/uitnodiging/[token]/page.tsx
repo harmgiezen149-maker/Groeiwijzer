@@ -33,9 +33,9 @@ export default async function UitnodigingPagina({
 
   if (result.ok) {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-5 py-10">
-        <h1 className="text-2xl font-bold tracking-tight">Je doet mee</h1>
-        <p className="text-[var(--ink-soft)]">
+      <main className="bw-bloemen mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-8 py-10">
+        <h1 className="bw-titel">Je doet mee</h1>
+        <p className="text-[14px] text-[var(--ink-soft)]">
           Je bent toegevoegd aan {garden?.name ?? 'de tuin'}. Je ziet dezelfde planten en agenda,
           en kunt taken afvinken.
         </p>
@@ -47,9 +47,9 @@ export default async function UitnodigingPagina({
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-5 py-10">
-      <h1 className="text-2xl font-bold tracking-tight">Uitnodiging werkt niet</h1>
-      <p className="text-[var(--ink-soft)]">{UITLEG[result.reason]}</p>
+    <main className="bw-bloemen mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-8 py-10">
+      <h1 className="bw-titel">Uitnodiging werkt niet</h1>
+      <p className="text-[14px] text-[var(--ink-soft)]">{UITLEG[result.reason]}</p>
       <Link href="/" className="bw-btn bw-btn-secondary">
         Naar je eigen tuin
       </Link>

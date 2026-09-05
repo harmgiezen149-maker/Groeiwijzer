@@ -53,12 +53,12 @@ export function PlantBeheer({
   return (
     <div className="flex flex-col gap-3">
       {fout ? (
-        <p role="alert" className="bw-card border-[var(--zinnia)] p-3 text-sm">
+        <p role="alert" className="bw-banner bw-banner-urgent">
           {fout}
         </p>
       ) : null}
 
-      <div className="bw-card flex flex-col gap-3 p-4">
+      <div className="bw-card-compact flex flex-col gap-3 p-3.5">
         <div>
           <label className="bw-label" htmlFor="verplaats">
             Locatie
@@ -100,13 +100,13 @@ export function PlantBeheer({
       {status === 'levend' ? (
         nieuweStatus ? (
           <form
-            className="bw-card flex flex-col gap-3 p-4"
+            className="bw-card-compact flex flex-col gap-3 p-3.5"
             onSubmit={(event) => {
               event.preventDefault();
               void patch({ status: nieuweStatus, statusReason: reden.trim() || undefined });
             }}
           >
-            <p className="text-sm">
+            <p className="text-[13.5px] text-[var(--ink-soft)]">
               De plant verdwijnt uit de agenda en de lijst, maar blijft met logboek in het
               archief staan.
             </p>
@@ -138,14 +138,14 @@ export function PlantBeheer({
           <div className="flex gap-2">
             <button
               type="button"
-              className="bw-btn bw-btn-secondary flex-1"
+              className="bw-btn bw-btn-secondary flex-1 text-[13.5px]"
               onClick={() => setNieuweStatus('dood')}
             >
               Plant is dood
             </button>
             <button
               type="button"
-              className="bw-btn bw-btn-secondary flex-1"
+              className="bw-btn bw-btn-secondary flex-1 text-[13.5px]"
               onClick={() => setNieuweStatus('verwijderd')}
             >
               Plant is weg

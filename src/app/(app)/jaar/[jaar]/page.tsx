@@ -36,39 +36,37 @@ export default async function JaarPagina({ params }: { params: Promise<{ jaar: s
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex items-center gap-2">
-        <Link href={`/jaar/${jaar - 1}`} className="bw-btn bw-btn-secondary px-3" aria-label="Vorig jaar">
+      <header className="flex items-center gap-1">
+        <h1 className="bw-titel-groot flex-1">{jaar}</h1>
+        <Link href={`/jaar/${jaar - 1}`} className="bw-btn bw-btn-ghost px-3" aria-label="Vorig jaar">
           ‹
         </Link>
-        <h1 className="flex-1 text-center text-2xl font-bold tracking-tight">{jaar}</h1>
-        <Link href={`/jaar/${jaar + 1}`} className="bw-btn bw-btn-secondary px-3" aria-label="Volgend jaar">
+        <Link href={`/jaar/${jaar + 1}`} className="bw-btn bw-btn-ghost px-3" aria-label="Volgend jaar">
           ›
         </Link>
       </header>
 
       <div className="grid grid-cols-3 gap-2 text-center">
-        <p className="bw-card p-3">
-          <span className="block text-2xl font-bold" style={{ color: 'var(--leaf)' }}>
+        <p className="bw-card-compact p-3">
+          <span className="bw-titel-klein block" style={{ color: 'var(--leaf)' }}>
             {afgerond.length}
           </span>
-          <span className="text-xs text-[var(--ink-soft)]">gedaan</span>
+          <span className="text-[11px] text-[var(--ink-faint)]">gedaan</span>
         </p>
-        <p className="bw-card p-3">
-          <span className="block text-2xl font-bold">{overgeslagen.length}</span>
-          <span className="text-xs text-[var(--ink-soft)]">overgeslagen</span>
+        <p className="bw-card-compact p-3">
+          <span className="bw-titel-klein block">{overgeslagen.length}</span>
+          <span className="text-[11px] text-[var(--ink-faint)]">overgeslagen</span>
         </p>
-        <p className="bw-card p-3">
-          <span className="block text-2xl font-bold">{rijen.length - afgerond.length - overgeslagen.length}</span>
-          <span className="text-xs text-[var(--ink-soft)]">nog open</span>
+        <p className="bw-card-compact p-3">
+          <span className="bw-titel-klein block">{rijen.length - afgerond.length - overgeslagen.length}</span>
+          <span className="text-[11px] text-[var(--ink-faint)]">nog open</span>
         </p>
       </div>
 
       {perLocatie.size ? (
-        <section className="bw-card p-4">
-          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-[var(--ink-soft)]">
-            Per locatie
-          </h2>
-          <ul className="flex flex-col gap-1 text-sm">
+        <section>
+          <h2 className="bw-sectie mb-2">Per locatie</h2>
+          <ul className="bw-card-compact flex flex-col gap-1.5 px-3.5 py-3 text-[13.5px]">
             {[...perLocatie.entries()]
               .sort((a, b) => b[1] - a[1])
               .map(([locatie, aantal]) => (
@@ -82,7 +80,7 @@ export default async function JaarPagina({ params }: { params: Promise<{ jaar: s
       ) : null}
 
       {perMaand.size === 0 ? (
-        <p className="bw-card p-5 text-[var(--ink-soft)]">
+        <p className="bw-card p-5 text-[13.5px] text-[var(--ink-quiet)]">
           In {jaar} is er nog niets afgevinkt.
         </p>
       ) : (
@@ -90,7 +88,7 @@ export default async function JaarPagina({ params }: { params: Promise<{ jaar: s
           .sort((a, b) => a[0] - b[0])
           .map(([maand, items]) => (
             <section key={maand}>
-              <h2 className="mb-2 text-lg font-bold">{MONTH_NAMES[maand - 1]}</h2>
+              <h2 className="bw-sectie mb-2">{MONTH_NAMES[maand - 1]}</h2>
               <ul className="flex flex-col gap-2">
                 {items.map((rij) => (
                   <li key={rij.id} className="bw-card flex items-stretch overflow-hidden">
@@ -100,16 +98,16 @@ export default async function JaarPagina({ params }: { params: Promise<{ jaar: s
                       style={{ background: TASK_COLOR[rij.taskType] }}
                     />
                     {rij.occurrencePhotoUrl ? (
-                      <PlantFoto url={rij.occurrencePhotoUrl} alt="" className="size-20 shrink-0" />
+                      <PlantFoto url={rij.occurrencePhotoUrl} alt="" vierkant className="size-20 shrink-0 object-cover" />
                     ) : null}
-                    <span className="min-w-0 flex-1 p-3 text-sm">
+                    <span className="min-w-0 flex-1 p-3 text-[13.5px]">
                       <Link href={`/planten/${rij.plantId}`} className="font-semibold">
                         {rij.plantName}
                       </Link>
-                      <span className="block text-[var(--ink-soft)]">
+                      <span className="block text-[var(--ink-quiet)]">
                         {rij.title} · {TASK_LABEL[rij.taskType]}
                       </span>
-                      <span className="block text-xs text-[var(--ink-faint)]">
+                      <span className="block text-[11.5px] text-[var(--ink-muted)]">
                         {rij.doneAt ? formatDate(rij.doneAt.slice(0, 10)) : ''}
                         {rij.doneByName ? ` · ${rij.doneByName}` : ''}
                         {rij.status === 'overgeslagen' ? ` · overgeslagen: ${rij.skipReason}` : ''}

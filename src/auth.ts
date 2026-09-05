@@ -13,7 +13,13 @@ export const devLoginEnabled =
 
 const providers: NextAuthConfig['providers'] = [];
 
+/* Bijhouden welke methodes er zijn terwijl we ze toevoegen. Het achteraf
+   uit de providerobjecten aflezen is onbetrouwbaar: een provider kan ook
+   een functie zijn, en dan is er geen `id` om naar te kijken. */
+export const availableProviders = { google: false, resend: false, dev: false };
+
 if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+  availableProviders.google = true;
   providers.push(
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -25,6 +31,7 @@ if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
 
 const resendKey = process.env.AUTH_RESEND_KEY ?? process.env.RESEND_API_KEY;
 if (resendKey && process.env.RESEND_FROM && usingUpstash) {
+  availableProviders.resend = true;
   providers.push(
     Resend({
       apiKey: resendKey,
@@ -35,6 +42,7 @@ if (resendKey && process.env.RESEND_FROM && usingUpstash) {
 }
 
 if (devLoginEnabled) {
+  availableProviders.dev = true;
   providers.push(
     Credentials({
       id: 'dev',
@@ -98,9 +106,3 @@ export const authConfig: NextAuthConfig = {
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-
-export const availableProviders = {
-  google: providers.some((p) => 'id' in p && p.id === 'google'),
-  resend: providers.some((p) => 'id' in p && p.id === 'resend'),
-  dev: providers.some((p) => 'id' in p && p.id === 'dev'),
-};

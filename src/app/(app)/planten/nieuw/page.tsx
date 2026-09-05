@@ -16,11 +16,11 @@ export default async function NieuwePlantPagina({
   const bron =
     params.bron === 'url' || params.bron === 'handmatig' || params.bron === 'foto'
       ? params.bron
-      : 'foto';
+      : null;
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold tracking-tight">Plant toevoegen</h1>
+      <h1 className="bw-titel-groot">Nieuwe plant</h1>
       <NieuwePlant locations={locations} startBron={bron} />
     </div>
   );

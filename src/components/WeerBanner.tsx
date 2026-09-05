@@ -1,19 +1,13 @@
 import type { RuleHit } from '@/lib/weather-rules';
 
-const KLEUR: Record<string, string> = {
-  'nachtvorst-alarm': 'var(--zinnia)',
-  'geen-vorst': 'var(--cornflower)',
-  droogte: 'var(--cornflower)',
-  'geen-hitte': 'var(--zinnia)',
-  groeiseizoen: 'var(--leaf)',
-};
+const URGENT = new Set(['nachtvorst-alarm']);
 
-const ICOON: Record<string, string> = {
-  'nachtvorst-alarm': '❄',
-  'geen-vorst': '❄',
-  droogte: '💧',
-  'geen-hitte': '🔥',
-  groeiseizoen: '🌱',
+const KOP: Record<string, string> = {
+  'nachtvorst-alarm': 'Nachtvorst binnen 48 uur.',
+  'geen-vorst': 'Vorst op komst.',
+  droogte: 'Het blijft droog.',
+  'geen-hitte': 'Het wordt heet.',
+  groeiseizoen: 'Het groeiseizoen begint.',
 };
 
 /** Weerbanner: alleen tonen als er echt iets aan de hand is. */
@@ -22,18 +16,21 @@ export function WeerBanner({ rules }: { rules: RuleHit[] }) {
 
   return (
     <ul className="flex flex-col gap-2">
-      {rules.map((regel) => (
-        <li
-          key={regel.id}
-          className="bw-card flex items-start gap-3 p-3 text-sm"
-          style={{ borderColor: KLEUR[regel.id] }}
-        >
-          <span aria-hidden className="text-lg leading-none">
-            {ICOON[regel.id]}
-          </span>
-          <span>{regel.text}</span>
-        </li>
-      ))}
+      {rules.map((regel) => {
+        const urgent = URGENT.has(regel.id);
+        return (
+          <li key={regel.id} className={`bw-banner ${urgent ? 'bw-banner-urgent' : 'bw-banner-info'}`}>
+            <i
+              aria-hidden
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ background: urgent ? 'var(--ink)' : 'var(--cornflower)' }}
+            />
+            <span>
+              <strong>{KOP[regel.id]}</strong> {regel.text}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

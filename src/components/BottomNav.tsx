@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+/** Vijf bestemmingen, zoals in het ontwerp: tekst, geen pictogrammen. */
 const ITEMS = [
-  { href: '/', label: 'Deze maand', icon: '🌱' },
-  { href: '/agenda', label: 'Agenda', icon: '📅' },
-  { href: '/planten', label: 'Planten', icon: '🪴' },
-  { href: '/planten/nieuw', label: 'Toevoegen', icon: '＋' },
+  { href: '/', label: 'vandaag' },
+  { href: '/planten', label: 'planten' },
+  { href: '/agenda', label: 'agenda' },
+  { href: '/locaties', label: 'locaties' },
+  { href: '/instellingen', label: 'instellingen' },
 ];
 
 export function BottomNav() {
@@ -15,25 +17,25 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--paper-raised)] bw-geen-print"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="bw-onderbalk bw-geen-print fixed inset-x-0 bottom-0 z-20"
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
       aria-label="Hoofdnavigatie"
     >
-      <ul className="mx-auto flex max-w-3xl">
+      <ul className="mx-auto flex max-w-[600px] justify-between px-3 sm:justify-center sm:gap-14">
         {ITEMS.map((item) => {
           const active =
             item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
           return (
-            <li key={item.href} className="flex-1">
+            <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className="flex min-h-[var(--tap)] flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-semibold"
-                style={{ color: active ? 'var(--dahlia)' : 'var(--ink-soft)' }}
+                className="flex min-h-[var(--tap)] items-center px-2 text-[11px] sm:text-xs"
+                style={{
+                  color: active ? 'var(--dahlia)' : 'var(--ink-muted)',
+                  fontWeight: active ? 700 : 500,
+                }}
               >
-                <span aria-hidden className="text-lg leading-none">
-                  {item.icon}
-                </span>
                 {item.label}
               </Link>
             </li>

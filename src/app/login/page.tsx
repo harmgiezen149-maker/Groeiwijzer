@@ -14,29 +14,33 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-5 py-10">
+    <main className="bw-bloemen flex min-h-dvh flex-col items-center justify-center gap-9 px-8">
       <header className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Bloeiwijzer</h1>
-        <p className="mt-2 text-[var(--ink-soft)]">
-          Jouw tuin, plant voor plant, maand voor maand.
+        <h1
+          className="bw-titel"
+          style={{ fontSize: '40px', color: 'var(--dahlia)' }}
+        >
+          Bloeiwijzer
+        </h1>
+        <p className="mt-2.5 text-[15px] text-[var(--ink-soft)]">
+          Bijhouden wat je tuin nodig heeft — en wanneer.
         </p>
       </header>
 
-      {params.check ? (
-        <p className="bw-card p-4 text-sm">
-          Kijk in je mail. De inloglink is verstuurd en is een uur geldig.
-        </p>
-      ) : null}
-      {params.error ? (
-        <p className="bw-card border-[var(--zinnia)] p-4 text-sm">
-          Inloggen lukte niet. Probeer het opnieuw.
-        </p>
-      ) : null}
+      <div className="w-full max-w-sm">
+        {params.check ? (
+          <p className="bw-card mb-4 p-4 text-[13.5px]">
+            Kijk in je mail. De inloglink is verstuurd en is een uur geldig.
+          </p>
+        ) : null}
+        {params.error ? (
+          <p className="bw-banner bw-banner-urgent mb-4">
+            Inloggen lukte niet. Probeer het opnieuw.
+          </p>
+        ) : null}
 
-      <LoginForm
-        providers={availableProviders}
-        callbackUrl={params.callbackUrl ?? '/'}
-      />
+        <LoginForm providers={availableProviders} callbackUrl={params.callbackUrl ?? '/'} />
+      </div>
     </main>
   );
 }

@@ -43,8 +43,8 @@ export default async function LabelsPagina({
   return (
     <div className="flex flex-col gap-4">
       <header className="bw-geen-print">
-        <h1 className="text-2xl font-bold tracking-tight">Labels</h1>
-        <p className="mt-1 text-sm text-[var(--ink-soft)]">
+        <h1 className="bw-titel-groot">Labels</h1>
+        <p className="mt-1 text-[13px] text-[var(--ink-faint)]">
           Scan een label in de tuin en je staat meteen op de juiste plantpagina. Print op stevig
           papier en lamineer het, of steek het in een plantensteker — los papier houdt het buiten
           niet lang.
@@ -56,13 +56,13 @@ export default async function LabelsPagina({
       </div>
 
       {labels.length === 0 ? (
-        <p className="bw-card p-5 text-[var(--ink-soft)]">Geen planten om te labelen.</p>
+        <p className="bw-card p-5 text-[13.5px] text-[var(--ink-quiet)]">Geen planten om te labelen.</p>
       ) : (
         <div className="bw-labelvel grid grid-cols-3 gap-3">
           {labels.map((label) => (
             <div
               key={label.id}
-              className="bw-label flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--line-strong)] p-2 text-center"
+              className="bw-label flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white p-2 text-center"
             >
               <span
                 className="block w-full max-w-[96px]"

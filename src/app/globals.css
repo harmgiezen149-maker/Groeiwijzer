@@ -2,61 +2,89 @@
 
 /* ------------------------------------------------------------------
    Ontwerptokens — Bloeiwijzer
-   Dit bestand is het enige punt waar kleur, ruimte en vorm vastliggen.
-   Componenten gebruiken uitsluitend variabelen, nooit losse kleurwaarden,
-   zodat het definitieve ontwerp uit Claude Design hier vervangen kan
-   worden zonder de rest van de app aan te raken (OVERDRACHT §11).
+   Overgenomen uit het ontwerp van Claude Design ("Bloemenrijke
+   app-ontwerp"), zie docs/ontwerp/bloeiwijzer-ontwerp.dc.html.
+   Dit bestand is het enige punt waar kleur, ruimte en vorm vastliggen;
+   componenten gebruiken uitsluitend variabelen.
    ------------------------------------------------------------------ */
 
 :root {
-  /* Basispalet — voorlopig */
-  --paper: #fffbf2;
-  --paper-raised: #ffffff;
-  --paper-sunken: #f6efe1;
-  --ink: #23372b;
-  --ink-soft: #5b6b60;
-  --ink-faint: #8b978f;
-  --line: #e3dac6;
-  --line-strong: #cbbfa4;
+  /* Vlakken */
+  --paper: #fffbf2;          /* achtergrond van de app */
+  --paper-raised: #ffffff;   /* kaarten */
+  --paper-sunken: #f4efe1;   /* rustige vulling */
 
-  --dahlia: #d6246e; /* primaire actie */
-  --dahlia-dark: #a81555;
-  --zinnia: #ff8a3d; /* urgentie */
-  --zinnia-dark: #b7480a;
-  --leaf: #2f8f5b; /* afgerond */
-  --leaf-dark: #1f6b41;
-  --cornflower: #4e7fd4; /* water en weer */
-  --cornflower-dark: #2f579c;
+  /* Tekst */
+  /* Het ontwerp gebruikt lichtere grijsgroenen (#8a9a8c, #9aa596). Die halen
+     op deze achtergrond geen AA-contrast, en §11 van de overdracht eist dat
+     wel. Deze tinten liggen in dezelfde familie maar komen alle vier boven
+     4,5:1 uit — zie de notitie in docs/ontwerp/AFWIJKINGEN.md. */
+  --ink: #23372b;        /* 12,3:1 */
+  --ink-soft: #4f5f52;   /*  6,6:1 */
+  --ink-quiet: #5b6b5d;  /*  5,5:1 */
+  --ink-faint: #657566;  /*  4,7:1 */
+  --ink-muted: #687868;  /*  4,5:1 */
 
-  /* Betekenis */
-  --color-urgent: var(--zinnia);
-  --color-done: var(--leaf);
-  --color-primary: var(--dahlia);
-  --color-info: var(--cornflower);
+  /* Lijnen */
+  --line: #eee3cb;
+  --line-strong: #e4ddc9;
 
-  /* Taaktypen — kleur is informatie, geen decoratie (§11).
-     Eén vaste kleur per type, overal identiek. */
-  --taak-snoeien: #c2185b;
-  --taak-bemesten: #8a6d1f;
-  --taak-verpotten: #a0522d;
-  --taak-water: #2f6fc4;
-  --taak-winterbescherming: #4a63b8;
-  --taak-ziektecontrole: #9c3d9c;
+  /* Accenten */
+  --dahlia: #d6246e;         /* primaire actie */
+  --dahlia-dark: #b41e5c;
+  --dahlia-wash: #d6246e14;  /* zachte vulling achter een keuze */
+  --zinnia: #ff8a3d;         /* urgentie */
+  --zinnia-dark: #a8511a;
+  --leaf: #2f8f5b;           /* afgerond — als vlak, niet achter witte tekst */
+  --leaf-dark: #246d45;      /* wit hierop haalt 6,3:1 */
+  --cornflower: #4e7fd4;     /* water en weer */
+  --cornflower-dark: #33589b;
+  --wijnrood: #a13a5c;       /* uitloggen, verwijderen */
+
+  /* Taaktypen — kleur is informatie, geen decoratie.
+     Deze kleuren staan altijd op een bolletje of een balkje,
+     nooit als tekstkleur: daar zou het contrast tekortschieten. */
+  --taak-snoeien: #d6246e;
+  --taak-bemesten: #ff8a3d;
+  --taak-water: #4e7fd4;
+  --taak-winterbescherming: #7fb8c4;
+  --taak-verpotten: #c17a4e;
+  --taak-ziektecontrole: #a13a5c;
+  --taak-oogsten: #2f8f5b;
   --taak-delen: #0f7c78;
-  --taak-oogsten: #b5551a;
-  --taak-planten: #2f8f5b;
-  --taak-overig: #6b7a70;
+  --taak-planten: #7a9e3c;
+  --taak-overig: #8a8371;
 
-  /* Ruimte en vorm */
-  --radius-sm: 8px;
-  --radius: 14px;
-  --radius-lg: 22px;
-  --tap: 44px; /* minimale raakhoogte, één hand, natte vingers */
-  --shadow-card: 0 1px 2px rgb(35 55 43 / 0.06), 0 4px 14px rgb(35 55 43 / 0.05);
-  --shadow-pop: 0 6px 24px rgb(35 55 43 / 0.16);
+  /* Vorm */
+  --radius-sm: 12px;   /* knoppen, invoervelden */
+  --radius: 14px;      /* compacte rijen */
+  --radius-md: 16px;   /* banners, locatiekaarten */
+  --radius-lg: 18px;   /* lijstkaarten */
+  --radius-xl: 20px;   /* panelen */
+  --pill: 999px;
+  /* Organische fotolijst: het handschrift van dit ontwerp. */
+  --blob: 45% 55% 50% 50% / 50% 45% 55% 50%;
+  --blob-2: 50% 50% 45% 55% / 55% 45% 50% 50%;
+  --blob-3: 45% 55% 55% 45% / 50% 50% 45% 55%;
+  --tap: 44px;         /* minimale raakhoogte: één hand, natte vingers */
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  /* Schaduw */
+  --shadow-card: 0 1px 2px rgb(35 55 43 / 0.07);
+  --shadow-soft: 0 1px 3px rgb(35 55 43 / 0.08);
+  --shadow-inset: inset 0 1px 3px rgb(35 55 43 / 0.06);
+  --shadow-blob: 0 4px 10px rgb(35 55 43 / 0.14);
+  --shadow-nav: 0 -4px 10px rgb(35 55 43 / 0.06);
+  --shadow-toggle: 0 2px 5px rgb(35 55 43 / 0.18);
+  --shadow-vandaag: 0 3px 8px rgb(35 55 43 / 0.3);
+
+  /* Typografie */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-karla), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Arial, sans-serif;
+  --wonk: "WONK" 1, "SOFT" 0;
+
+  /* Bloemmotief op de inlogschermen. */
+  --bloemen: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg fill='%2323372B' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='18' r='7'/%3E%3Ccircle cx='30' cy='42' r='7'/%3E%3Ccircle cx='19' cy='30' r='7'/%3E%3Ccircle cx='41' cy='30' r='7'/%3E%3Ccircle cx='30' cy='30' r='6'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 @theme inline {
@@ -65,19 +93,17 @@
   --color-paper-sunken: var(--paper-sunken);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
+  --color-ink-quiet: var(--ink-quiet);
   --color-ink-faint: var(--ink-faint);
+  --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-dahlia: var(--dahlia);
-  --color-dahlia-dark: var(--dahlia-dark);
   --color-zinnia: var(--zinnia);
-  --color-zinnia-dark: var(--zinnia-dark);
   --color-leaf: var(--leaf);
-  --color-leaf-dark: var(--leaf-dark);
   --color-cornflower: var(--cornflower);
-  --color-cornflower-dark: var(--cornflower-dark);
-  --radius-card: var(--radius);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
 }
 
 html {
@@ -87,12 +113,16 @@ html {
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-sans);
-  /* ruimte voor de vaste onderbalk op mobiel */
-  padding-bottom: env(safe-area-inset-bottom);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-/* Zichtbare toetsenbordfocus, overal (§11). */
+::selection {
+  background: #d6246e33;
+}
+
+/* Zichtbare toetsenbordfocus, overal. */
 :focus-visible {
   outline: 3px solid var(--cornflower);
   outline-offset: 2px;
@@ -110,12 +140,69 @@ body {
   }
 }
 
+/* ------------------------------------------------------------ typografie */
+
+.bw-titel {
+  font-family: var(--font-display);
+  font-variation-settings: var(--wonk);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.bw-titel-groot {
+  font-family: var(--font-display);
+  font-variation-settings: var(--wonk);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.bw-titel-klein {
+  font-family: var(--font-display);
+  font-variation-settings: var(--wonk);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+}
+@media (min-width: 768px) {
+  .bw-titel {
+    font-size: 34px;
+  }
+  .bw-titel-groot {
+    font-size: 30px;
+  }
+}
+
+/* Sectiekopje: klein, hoofdletters, rustig. */
+.bw-sectie {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.bw-bloemen {
+  background-color: var(--paper);
+  background-image: var(--bloemen);
+  background-size: 60px 60px;
+}
+
 /* --------------------------------------------------- componentprimitieven */
 
 .bw-card {
   background: var(--paper-raised);
-  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.bw-card-compact {
+  background: var(--paper-raised);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+.bw-paneel {
+  background: var(--paper-raised);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 }
 
@@ -125,13 +212,15 @@ body {
   justify-content: center;
   gap: 0.5rem;
   min-height: var(--tap);
-  padding: 0 1rem;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
+  padding: 0 1.1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
   font-weight: 600;
+  font-size: 15px;
   line-height: 1.1;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 .bw-btn:disabled {
   opacity: 0.5;
@@ -144,95 +233,316 @@ body {
 .bw-btn-primary:hover:not(:disabled) {
   background: var(--dahlia-dark);
 }
+.bw-btn-donker {
+  background: var(--ink);
+  color: var(--paper);
+}
+.bw-btn-donker:hover:not(:disabled) {
+  background: #16261c;
+}
 .bw-btn-secondary {
   background: var(--paper-raised);
   color: var(--ink);
-  border-color: var(--line-strong);
+  border: 1.5px solid var(--line-strong);
+  box-shadow: var(--shadow-soft);
 }
 .bw-btn-secondary:hover:not(:disabled) {
   background: var(--paper-sunken);
 }
 .bw-btn-ghost {
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--ink-quiet);
 }
 .bw-btn-ghost:hover:not(:disabled) {
   background: var(--paper-sunken);
 }
 .bw-btn-done {
-  background: var(--leaf);
+  background: var(--leaf-dark);
   color: #fff;
 }
 .bw-btn-done:hover:not(:disabled) {
-  background: var(--leaf-dark);
+  background: #1b5535;
+}
+/* Gestippelde toevoegknop, zoals bij Locaties. */
+.bw-btn-nieuw {
+  background: transparent;
+  border: 1.5px dashed var(--dahlia);
+  color: var(--dahlia);
+}
+.bw-btn-nieuw:hover:not(:disabled) {
+  background: var(--dahlia-wash);
+}
+.bw-btn-gevaar {
+  background: transparent;
+  color: var(--wijnrood);
+}
+.bw-btn-gevaar:hover:not(:disabled) {
+  background: #a13a5c14;
 }
 
 .bw-input,
 .bw-select,
 .bw-textarea {
   width: 100%;
-  min-height: var(--tap);
-  padding: 0.55rem 0.75rem;
+  min-height: 46px;
+  padding: 0.6rem 0.9rem;
   background: var(--paper-raised);
-  border: 1px solid var(--line-strong);
+  border: 1.5px solid var(--line-strong);
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-inset);
   color: var(--ink);
-  font-size: 16px; /* voorkomt inzoomen op iOS */
+  font-family: var(--font-body);
+  /* 16px voorkomt dat iOS inzoomt zodra je een veld aanraakt. */
+  font-size: 16px;
 }
 .bw-textarea {
   min-height: 5.5rem;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .bw-label {
   display: block;
-  font-size: 0.8125rem;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--ink-soft);
-  margin-bottom: 0.25rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.3rem;
 }
 
+/* Filterpil. Actief is donker, zoals in het ontwerp. */
+.bw-pil {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--pill);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-soft);
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bw-pil[aria-pressed='true'],
+.bw-pil[data-actief='true'],
+.bw-pil-actief {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* Kenmerkchip op de plantpagina: informatie, geen knop. */
 .bw-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--pill);
   border: 1px solid var(--line-strong);
   background: var(--paper-raised);
   color: var(--ink-soft);
+  font-size: 11.5px;
+  white-space: nowrap;
 }
 
-/* Het ene opvallende moment: de afvinkanimatie (§11). */
-@keyframes bw-vink {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.18) rotate(-4deg); }
-  100% { transform: scale(1); }
-}
-.bw-vink-animatie {
-  animation: bw-vink 420ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
-}
-@keyframes bw-weg {
-  to { opacity: 0; transform: translateX(8px); max-height: 0; margin: 0; padding: 0; }
-}
-.bw-weg {
-  animation: bw-weg 260ms ease forwards;
-  overflow: hidden;
+/* Bolletje in de taaktypekleur. */
+.bw-stip {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-@media print {
-  .bw-geen-print { display: none !important; }
-  body { background: #fff; }
+/* Organische fotolijst. */
+.bw-blob {
+  display: block;
+  border-radius: var(--blob);
+  box-shadow: var(--shadow-blob);
+  object-fit: cover;
+  background: repeating-linear-gradient(
+    135deg,
+    #ede6d3 0 8px,
+    #e3dac4 8px 16px
+  );
+}
+.bw-blob-2 { border-radius: var(--blob-2); }
+.bw-blob-3 { border-radius: var(--blob-3); }
+
+/* Afvinkknop: cirkel met dahliarand, 44 px raakvlak. */
+.bw-vink {
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+  border: 1.5px solid var(--dahlia);
+  background: transparent;
+  color: var(--dahlia);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.bw-vink:hover:not(:disabled) {
+  background: var(--dahlia-wash);
+}
+.bw-vink-af {
+  border-color: var(--leaf-dark);
+  background: var(--leaf-dark);
+  color: #fff;
 }
 
-/* Printvel met QR-labels (§9). */
+/* Schakelaar, 34 × 20. */
+.bw-toggle {
+  appearance: none;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--line-strong);
+  box-shadow: var(--shadow-toggle);
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+.bw-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 160ms ease;
+}
+.bw-toggle:checked {
+  background: var(--dahlia);
+}
+.bw-toggle:checked::after {
+  transform: translateX(14px);
+}
+.bw-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Selectievakje in de agenda. */
+.bw-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--dahlia);
+  flex-shrink: 0;
+}
+
+/* Urgente weerbanner: vol oranje, witte tekst. */
+.bw-banner {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+/* Vol oranje zoals in het ontwerp, maar met donkere tekst: wit haalt op
+   deze oranje maar 2,4:1. */
+.bw-banner-urgent {
+  background: var(--zinnia);
+  color: var(--ink);
+}
+.bw-banner-info {
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-card);
+}
+
+/* Onderbalk. */
+.bw-onderbalk {
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-nav);
+}
+
+/* Kalender. */
+.bw-dag {
+  position: relative;
+  display: grid;
+  place-items: center;
+  /* Vierkant, anders wordt de schijf van vandaag een ovaal. Boven een
+     bepaalde breedte blijft de cel even groot: een kalender met schijven
+     van tachtig pixels leest niet prettiger. */
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 40px;
+  margin-inline: auto;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 50%;
+}
+@media (min-width: 640px) {
+  .bw-dag {
+    font-size: 13.5px;
+    max-width: 44px;
+  }
+}
+.bw-dag-vandaag {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: var(--shadow-vandaag);
+}
+.bw-dag-stippen {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+}
+.bw-dag-stip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+/* Het ene opvallende moment: de afvinkanimatie. */
+@keyframes bw-bloei {
+  0% { transform: scale(1) rotate(0deg); }
+  40% { transform: scale(1.25) rotate(-8deg); }
+  70% { transform: scale(0.95) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.bw-bloei {
+  animation: bw-bloei 480ms cubic-bezier(0.22, 0.9, 0.3, 1.3);
+}
+@keyframes bw-wegschuiven {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(16px); }
+}
+.bw-wegschuiven {
+  animation: bw-wegschuiven 300ms ease forwards;
+}
+
+dialog {
+  border: none;
+  padding: 0;
+  color: var(--ink);
+}
+dialog::backdrop {
+  background: rgb(35 55 43 / 0.45);
+}
+
+/* ------------------------------------------------------------------ print */
+
 @page {
   size: A4;
   margin: 12mm;
 }
 
 @media print {
+  .bw-geen-print { display: none !important; }
+  body { background: #fff; }
   .bw-labelvel {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

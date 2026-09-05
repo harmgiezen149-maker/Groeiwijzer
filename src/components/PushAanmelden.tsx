@@ -98,7 +98,7 @@ export function PushAanmelden({ vapidPublicKey }: { vapidPublicKey: string | nul
 
   if (!vapidPublicKey) {
     return (
-      <p className="text-sm text-[var(--ink-soft)]">
+      <p className="text-[13px] text-[var(--ink-faint)]">
         Pushmeldingen zijn nog niet ingesteld op de server.
       </p>
     );
@@ -106,7 +106,7 @@ export function PushAanmelden({ vapidPublicKey }: { vapidPublicKey: string | nul
 
   if (isIOS && !standalone) {
     return (
-      <p className="text-sm text-[var(--ink-soft)]">
+      <p className="text-[13px] text-[var(--ink-faint)]">
         Op een iPhone werken meldingen alleen als je de app op je beginscherm zet. Tik in Safari
         op delen en kies &ldquo;Zet op beginscherm&rdquo;, open Bloeiwijzer daarna vanaf het
         beginscherm en zet de meldingen hier aan.
@@ -117,16 +117,16 @@ export function PushAanmelden({ vapidPublicKey }: { vapidPublicKey: string | nul
   return (
     <div className="flex flex-col gap-2">
       {fout ? (
-        <p role="alert" className="text-sm text-[var(--zinnia-dark)]">
+        <p role="alert" className="text-[13px] text-[var(--wijnrood)]">
           {fout}
         </p>
       ) : null}
       {status === 'kan-niet' ? (
-        <p className="text-sm text-[var(--ink-soft)]">
+        <p className="text-[13px] text-[var(--ink-faint)]">
           Deze browser kan geen pushmeldingen ontvangen.
         </p>
       ) : status === 'geweigerd' ? (
-        <p className="text-sm text-[var(--ink-soft)]">
+        <p className="text-[13px] text-[var(--ink-faint)]">
           Meldingen staan uit in je browserinstellingen. Zet ze daar weer aan voor deze site.
         </p>
       ) : status === 'aan' ? (

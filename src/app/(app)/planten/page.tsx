@@ -18,6 +18,7 @@ interface Zoekparameters {
   taken?: string;
   archief?: string;
   q?: string;
+  label?: string;
 }
 
 export default async function PlantenPagina({
@@ -63,53 +64,54 @@ export default async function PlantenPagina({
   const locatieNaam = new Map(locations.map((l) => [l.id, l.name]));
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {archief ? 'Archief' : 'Planten'}
-        </h1>
-        <Link href="/planten/nieuw" className="bw-btn bw-btn-primary ml-auto px-4">
-          Toevoegen
-        </Link>
-      </header>
+    <div className="flex flex-col gap-3">
+      <h1 className="bw-titel">{archief ? 'Archief' : 'Planten'}</h1>
+
+      {params.label ? (
+        <p className="bw-banner bw-banner-info">
+          {params.label === 'geentoegang'
+            ? 'Dat label hoort bij een tuin waar je geen lid van bent.'
+            : 'Dat label kennen we niet. Staat de plant misschien in het archief?'}
+        </p>
+      ) : null}
 
       <PlantFilters
         locations={locations.map((l) => ({ id: l.id, name: l.name }))}
         categories={PLANT_CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABEL[c] }))}
       />
 
-      <p className="text-sm text-[var(--ink-soft)]">
-        {planten.length} van {alles.length} planten
-      </p>
-
       {planten.length === 0 ? (
-        <p className="bw-card p-5 text-[var(--ink-soft)]">
+        <p className="bw-card p-5 text-[13.5px] text-[var(--ink-quiet)]">
           Niets gevonden met deze filters.
         </p>
       ) : (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {planten.map((plant) => (
+        <ul className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
+          {planten.map((plant, index) => (
             <li key={plant.id}>
-              <Link
-                href={`/planten/${plant.id}`}
-                className="bw-card block h-full overflow-hidden"
-              >
-                <PlantFoto url={plant.photoUrl} alt="" className="aspect-square w-full" />
-                <span className="block p-2.5">
-                  <span className="block truncate font-semibold">{plant.commonName}</span>
-                  <span className="block truncate text-xs text-[var(--ink-soft)]">
-                    {locatieNaam.get(plant.locationId) ?? 'Zonder locatie'}
-                    {plant.quantity > 1 ? ` · ${plant.quantity}×` : ''}
-                  </span>
-                  {openPerPlant.has(plant.id) ? (
-                    <span className="mt-1.5 inline-block bw-chip">Open taken</span>
-                  ) : null}
+              <Link href={`/planten/${plant.id}`} className="block">
+                <PlantFoto
+                  url={plant.photoUrl}
+                  alt=""
+                  variant={((index % 3) + 1) as 1 | 2 | 3}
+                  className="aspect-square w-full"
+                />
+                <span className="mt-2 block truncate text-[13.5px] font-semibold">
+                  {plant.commonName}
+                </span>
+                <span className="block truncate text-[12px] text-[var(--ink-faint)]">
+                  {locatieNaam.get(plant.locationId) ?? 'Zonder locatie'}
+                  {plant.quantity > 1 ? ` · ${plant.quantity}×` : ''}
+                  {openPerPlant.has(plant.id) ? ' · open taken' : ''}
                 </span>
               </Link>
             </li>
           ))}
         </ul>
       )}
+
+      <Link href="/planten/nieuw" className="bw-btn bw-btn-nieuw mt-1 w-full">
+        + Nieuwe plant
+      </Link>
     </div>
   );
 }

@@ -53,7 +53,7 @@ npm run lint       # eslint
 | 3 | PlantNet plus Claude op foto, URL-import | klaar |
 | 4 | Weer, weerregels, maandbericht, pushmeldingen | klaar |
 | 5 | Jaaroverzicht, export, QR-labels, PWA | klaar |
-| 6 | Ontwerp uit Claude Design doorvoeren | wacht op het ontwerp |
+| 6 | Ontwerp uit Claude Design doorvoeren | klaar |
 
 ## Opbouw
 
@@ -80,5 +80,11 @@ Twee regels die overal gelden:
 ### Ontwerp
 
 Kleur, ruimte en vorm staan uitsluitend in `src/app/globals.css`. Componenten
-gebruiken variabelen, nooit losse kleurwaarden, zodat het definitieve ontwerp
-in één bestand vervangen kan worden.
+gebruiken variabelen, nooit losse kleurwaarden.
+
+Het ontwerp komt uit Claude Design; de bron staat in
+`docs/ontwerp/bloeiwijzer-ontwerp.dc.html`. Typografie is Fraunces (koppen,
+met de WONK-as aan) en Karla (de rest), beide via `next/font` meegeleverd.
+Waar de bouw van het ontwerp afwijkt — vrijwel altijd om de
+toegankelijkheidseisen uit §11 te halen — staat dat in
+`docs/ontwerp/AFWIJKINGEN.md`.
