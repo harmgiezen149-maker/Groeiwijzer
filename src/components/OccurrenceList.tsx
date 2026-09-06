@@ -12,6 +12,15 @@ import { FotoKiezer } from './FotoKiezer';
 
 type Groepering = 'locatie' | 'geen';
 
+/** Elke locatie krijgt zijn eigen pil, in vaste volgorde. */
+const LOCATIE_KLEUR = [
+  { background: 'var(--tint-leaf)', color: 'var(--op-leaf)' },
+  { background: 'var(--tint-dahlia)', color: 'var(--op-dahlia)' },
+  { background: 'var(--tint-cornflower)', color: 'var(--op-cornflower)' },
+  { background: 'var(--tint-lila)', color: 'var(--op-lila)' },
+  { background: 'var(--tint-zinnia)', color: 'var(--op-zinnia)' },
+];
+
 export function OccurrenceList({
   rows: initialRows,
   groupBy = 'locatie',
@@ -130,7 +139,30 @@ export function OccurrenceList({
     return (
       <div className="flex flex-col gap-2.5">
         {ongedaan}
-        <p className="bw-card p-5 text-sm text-[var(--ink-quiet)]">{emptyText}</p>
+        <p
+          className="bw-taakkaart flex items-center gap-3.5 p-5"
+          style={{ background: 'var(--tint-leaf)', color: 'var(--op-leaf)' }}
+        >
+          <span
+            aria-hidden
+            className="grid size-11 shrink-0 place-items-center rounded-full"
+            style={{ background: 'var(--leaf-dark)', color: '#fff' }}
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m5 12.5 4.5 4.5L19 7.5" />
+            </svg>
+          </span>
+          <span className="bw-titel-klein">{emptyText}</span>
+        </p>
       </div>
     );
   }
@@ -144,9 +176,20 @@ export function OccurrenceList({
       ) : null}
       {ongedaan}
 
-      {groups.map((group) => (
+      {groups.map((group, index) => (
         <section key={group.key}>
-          {group.name ? <h3 className="bw-sectie mb-2.5">{group.name}</h3> : null}
+          {group.name ? (
+            <h3 className="mb-2.5">
+              <span className="bw-locpil" style={LOCATIE_KLEUR[index % LOCATIE_KLEUR.length]}>
+                <i
+                  aria-hidden
+                  className="block size-2 rounded-full"
+                  style={{ background: 'currentColor' }}
+                />
+                {group.name}
+              </span>
+            </h3>
+          ) : null}
           <ul className="flex flex-col gap-2.5">
             {group.rows.map((row) => (
               <OccurrenceRow
@@ -243,7 +286,7 @@ function OccurrenceRow({
   ) : null;
 
   return (
-    <li className={compact ? 'bw-card-compact overflow-hidden' : 'bw-card overflow-hidden'}>
+    <li className={compact ? 'bw-card-compact overflow-hidden' : 'bw-taakkaart overflow-hidden'}>
       {compact ? (
         /* Agenda: één regel per taak, met een selectievakje. */
         <div className="flex items-center gap-2.5 px-3 py-2.5">
@@ -277,21 +320,24 @@ function OccurrenceRow({
         </div>
       ) : (
         <div className="flex items-center gap-3 p-2.5">
-          {zonderPlantnaam || !row.photoUrl ? (
-            <span className="bw-taakblob" style={{ background: kleur }}>
-              <TaakIcoon type={row.taskType} />
-            </span>
-          ) : (
-            /* Met foto: die blijft leidend, met de taakkleur als klein
+          {row.photoUrl ? (
+            /* Met foto: die is het beeld, met de taakkleur als klein
                bloemetje in de hoek. */
             <span className="relative shrink-0">
-              <PlantFoto url={row.photoUrl} alt="" className="size-14" />
+              <PlantFoto url={row.photoUrl} alt="" vierkant className="bw-beeldtegel" />
               <span
                 className="bw-taakblob absolute -bottom-1 -right-1 size-6"
                 style={{ background: kleur, boxShadow: '0 0 0 2px var(--paper-raised)' }}
               >
                 <TaakIcoon type={row.taskType} size={13} />
               </span>
+            </span>
+          ) : (
+            <span
+              className="bw-beeldtegel"
+              style={{ background: `color-mix(in srgb, ${kleur} 20%, #fff)`, color: kleur }}
+            >
+              <TaakIcoon type={row.taskType} size={30} />
             </span>
           )}
 
@@ -301,11 +347,11 @@ function OccurrenceRow({
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="block truncate text-[14.5px] font-semibold">
+            <span className="bw-titel-klein block truncate">
               {zonderPlantnaam ? row.title : row.plantName}
             </span>
-            <span className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-[var(--ink-quiet)]">
-              <span className="truncate">
+            <span className="mt-0.5 block text-[13px] leading-[1.35] text-[var(--ink-soft)]">
+              <span className="line-clamp-2">
                 {zonderPlantnaam ? formatRange(row.windowStart, row.windowEnd) : row.title}
               </span>
             </span>
@@ -319,9 +365,19 @@ function OccurrenceRow({
             disabled={pending}
             onClick={() => start(() => void onAction(row.id, 'complete'))}
           >
-            <span aria-hidden className="text-lg leading-none">
-              ✓
-            </span>
+            <svg
+              aria-hidden
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m5 12.5 4.5 4.5L19 7.5" />
+            </svg>
           </button>
         </div>
       )}

@@ -138,3 +138,25 @@ Een taak met een lang venster (snoeien, 1× in maart–april) staat vanaf de eer
 dag van dat venster elke dag in beeld tot hij gedaan is, en heet daarna
 achterstallig. Dat is met opzet: werk dat blijft liggen hoort zichtbaar te
 blijven.
+
+## Richting Kwekerij (september 2026)
+
+Het ontwerp bleef te braaf. Van drie nieuwe voorstellen is "Kwekerij" gekozen
+en een slag feller doorgevoerd:
+
+- **Taakkaart met beeldtegel.** Links een vierkant van 62 px: de foto van de
+  plant, of een kleurvlak in de taaktypekleur met het pictogram erin. Rechts
+  een volle groene knop van 46 px in plaats van een dun cirkeltje — afvinken is
+  de belangrijkste handeling op het scherm en ziet er nu ook zo uit.
+- **Locatie als gekleurde pil** in plaats van een grijs kopje, met een vaste
+  kleur per locatie. Daarmee vervielen de losse locatietegels: dubbelop.
+- **Onderbalk met pictogrammen** en een zwevende cameraknop in het midden, de
+  kortste weg naar een nieuwe plant. Vier bestemmingen passen daarnaast, dus
+  Locaties is verhuisd naar Meer (bij Labels, Jaaroverzicht en Archief).
+- **Weekstrook** op het beginscherm in plaats van de maandkalender: die past
+  bij een agenda die over één dag gaat. De maand staat op /agenda.
+- **Vorm als systeem:** een plant is een blob (plantenlijst, plantpagina), een
+  taak is een afgeronde vierkant (takenlijst). De ene is een portret, de andere
+  een afvinkregel.
+- Is alles gedaan, dan staat er een groen vlak met een vinkje in plaats van een
+  grijs kaartje.

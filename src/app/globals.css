@@ -468,27 +468,100 @@ body::before {
   font-weight: 600;
 }
 
-/* Afvinkknop: cirkel met dahliarand, 44 px raakvlak. */
+/* Afvinken: vol groen, de opvallendste knop op het scherm. */
 .bw-vink {
-  width: var(--tap);
-  height: var(--tap);
-  border-radius: 50%;
-  border: 1.5px solid var(--dahlia);
-  background: transparent;
-  color: var(--dahlia);
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: none;
+  background: var(--leaf-dark);
+  color: #fff;
   display: grid;
   place-items: center;
   flex-shrink: 0;
   cursor: pointer;
-  transition: background-color 140ms ease, color 140ms ease;
+  box-shadow: 0 2px 6px rgb(36 109 69 / 0.28);
+  transition: transform 120ms ease, background-color 140ms ease;
 }
 .bw-vink:hover:not(:disabled) {
-  background: var(--dahlia-wash);
+  background: #1b5535;
+  transform: translateY(-1px);
+}
+.bw-vink:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .bw-vink-af {
-  border-color: var(--leaf-dark);
   background: var(--leaf-dark);
   color: #fff;
+  box-shadow: none;
+}
+
+/* Taakkaart: ruimer en ronder dan de gewone kaart. */
+.bw-taakkaart {
+  background: var(--paper-raised);
+  border-radius: 22px;
+  box-shadow: 0 2px 8px rgb(35 55 43 / 0.08);
+}
+
+/* Beeldtegel links in de taakkaart: foto, of een kleurvlak met pictogram. */
+.bw-beeldtegel {
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  object-fit: cover;
+}
+
+/* Locatiekop als gekleurde pil in plaats van een grijs kopje. */
+.bw-locpil {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 13px 5px 10px;
+  border-radius: var(--pill);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Dag in de weekstrook. */
+.bw-weekdag {
+  display: block;
+  padding: 9px 0 8px;
+  border-radius: 16px;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  color: inherit;
+  text-decoration: none;
+}
+.bw-weekdag-nu {
+  background: var(--dahlia);
+  color: #fff;
+  box-shadow: 0 3px 10px rgb(214 36 110 / 0.3);
+}
+
+/* Zwevende cameraknop midden in de onderbalk. */
+.bw-fab {
+  position: absolute;
+  left: 50%;
+  top: -26px;
+  transform: translateX(-50%);
+  width: 62px;
+  height: 62px;
+  border: 5px solid var(--paper);
+  border-radius: 50%;
+  background: var(--dahlia);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px rgb(214 36 110 / 0.34);
+}
+.bw-fab:hover {
+  background: var(--dahlia-dark);
 }
 
 /* Schakelaar, 34 × 20. */

@@ -371,6 +371,9 @@ export function Instellingen({
       <section>
         <h2 className="bw-sectie mb-2">Meer</h2>
         <div className="bw-pillen">
+          <Link href="/locaties" className="bw-pil">
+            Locaties
+          </Link>
           <Link href="/labels" className="bw-pil">
             QR-labels printen
           </Link>

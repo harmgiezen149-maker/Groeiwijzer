@@ -199,8 +199,7 @@ await schermschot('overgeslagen');
 for (const [naam, label] of [
   ['planten', 'planten'],
   ['agenda', 'agenda'],
-  ['locaties', 'locaties'],
-  ['instellingen', 'instellingen'],
+  ['instellingen', 'meer'],
 ]) {
   await page.getByRole('link', { name: label, exact: true }).click();
   await page.waitForLoadState('networkidle');
@@ -208,6 +207,13 @@ for (const [naam, label] of [
   await controleer(naam);
   await schermschot(naam);
 }
+
+// 7b. locaties, tegenwoordig bereikbaar via Meer
+await page.getByRole('link', { name: 'Locaties', exact: true }).click();
+await page.waitForLoadState('networkidle');
+await page.waitForTimeout(400);
+await controleer('locaties');
+await schermschot('locaties');
 
 // 8. een dag kiezen in de agenda
 await page.getByRole('link', { name: 'agenda', exact: true }).click();

@@ -2,14 +2,13 @@ import { requireContext } from '@/lib/session';
 import { agendaForDay, agendaForMonth, ensureGenerated } from '@/lib/occurrences';
 import { toRows } from '@/lib/agenda-view';
 import { listPlants } from '@/lib/plants';
-import { MONTH_NAMES, formatDate, parseYmd, todayInAmsterdam } from '@/lib/dates';
+import { addDays, formatDate, parseYmd, todayInAmsterdam } from '@/lib/dates';
 import { weatherFor } from '@/lib/weather';
 import { applyWeather } from '@/lib/weather-apply';
 import { OccurrenceList } from '@/components/OccurrenceList';
-import { MonthCalendar } from '@/components/MonthCalendar';
+import { WeekStrook } from '@/components/WeekStrook';
 import { WeerBanner } from '@/components/WeerBanner';
 import { LegeStaat } from '@/components/LegeStaat';
-import { LocatieTegels } from '@/components/LocatieTegels';
 import { Binnenkort } from '@/components/Binnenkort';
 
 export const dynamic = 'force-dynamic';
@@ -25,9 +24,18 @@ export default async function StartPagina() {
   const weer = await weatherFor(garden);
   await applyWeather(garden, weer);
 
-  const [dag, dezeMaand, planten] = await Promise.all([
+  // De weekstrook loopt zeven dagen vooruit en kan de maandgrens over.
+  const eindeStrook = parseYmd(addDays(today, 6));
+  const maanden = [{ jaar: year, maand: month }];
+  if (eindeStrook.month !== month) {
+    maanden.push({ jaar: eindeStrook.year, maand: eindeStrook.month });
+  }
+
+  const [dag, weekItems, planten] = await Promise.all([
     agendaForDay(garden.id, today),
-    agendaForMonth(garden.id, year, month).then((items) => toRows(garden.id, items, today)),
+    Promise.all(maanden.map((m) => agendaForMonth(garden.id, m.jaar, m.maand))).then((sets) =>
+      toRows(garden.id, sets.flat(), today),
+    ),
     listPlants(garden.id),
   ]);
 
@@ -46,22 +54,33 @@ export default async function StartPagina() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="bw-titel">Vandaag</h1>
-        <p className="mt-1 text-[13.5px] text-[var(--ink-faint)]">{formatDate(today)}</p>
+      <header className="flex items-end gap-3">
+        <div className="flex-1">
+          <p className="bw-sectie mb-1">{formatDate(today)}</p>
+          <h1 className="bw-titel">Vandaag</h1>
+        </div>
+        <p className="text-right">
+          <span
+            className="bw-titel-groot block leading-none"
+            style={{ color: vandaag.length ? 'var(--dahlia)' : 'var(--leaf-dark)' }}
+          >
+            {vandaag.length}
+          </span>
+          <span className="text-[11.5px] text-[var(--ink-faint)]">
+            {vandaag.length === 1 ? 'te doen' : 'te doen'}
+          </span>
+        </p>
       </header>
 
       <WeerBanner rules={meldingen} />
-
-      <LocatieTegels rows={vandaag} />
 
       <OccurrenceList rows={vandaag} emptyText="Niets te doen vandaag. Mooi." />
 
       <Binnenkort rows={binnenkort} />
 
       <section>
-        <h2 className="bw-sectie mb-2.5">{MONTH_NAMES[month - 1]}</h2>
-        <MonthCalendar year={year} month={month} rows={dezeMaand} today={today} />
+        <h2 className="bw-sectie mb-2.5">Deze week</h2>
+        <WeekStrook today={today} rows={weekItems} />
       </section>
     </div>
   );
