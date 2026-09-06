@@ -3,7 +3,8 @@ import { withGarden, readJson } from '@/lib/api';
 import { requireLocation } from '@/lib/locations';
 import { requestCareProfile } from '@/lib/ai/care-profile';
 import { assertWithinLimit } from '@/lib/ratelimit';
-import { fetchPageText } from '@/lib/url-import';
+import { fetchPageImage, fetchPageText } from '@/lib/url-import';
+import { sniffImage, tryStoreImage } from '@/lib/upload';
 import { parseOrThrow } from '@/lib/validation';
 
 export const runtime = 'nodejs';
@@ -24,17 +25,38 @@ export const POST = withGarden(async (ctx, req) => {
   const location = await requireLocation(ctx.garden.id, locationId);
 
   const pagina = await fetchPageText(url);
-  const profiel = await requestCareProfile({
-    name: pagina.title,
-    outdoor: location.outdoor,
-    pageText: pagina.text,
-    budget: { deadline: start + (maxDuration * 1000 - MARGE_MS) },
-  });
+
+  // De foto van de pagina en het zorgprofiel tegelijk: de foto is een extra,
+  // dus als die wegvalt gaat de import gewoon door.
+  const [profiel, foto] = await Promise.all([
+    requestCareProfile({
+      name: pagina.title,
+      outdoor: location.outdoor,
+      pageText: pagina.text,
+      budget: { deadline: start + (maxDuration * 1000 - MARGE_MS) },
+    }),
+    pagina.imageUrl ? bewaarPaginafoto(ctx.garden.id, pagina.imageUrl) : null,
+  ]);
 
   return {
     sourceUrl: url,
     pageTitle: pagina.title,
+    photoUrl: foto ?? undefined,
     profile: profiel.profile,
     notes: [profiel.note].filter(Boolean),
   };
 });
+
+/** Haalt de foto op, controleert dat het echt een afbeelding is, en bewaart hem. */
+async function bewaarPaginafoto(gardenId: string, imageUrl: string): Promise<string | null> {
+  const bytes = await fetchPageImage(imageUrl);
+  if (!bytes) return null;
+  try {
+    // Op de magic bytes, niet op wat de server zegt (§13).
+    sniffImage(bytes);
+  } catch {
+    return null;
+  }
+  const bewaard = await tryStoreImage(bytes, `tuin/${gardenId}`);
+  return bewaard.stored?.url ?? null;
+}

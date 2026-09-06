@@ -4,6 +4,7 @@ import { isIP } from 'node:net';
 
 const TIMEOUT_MS = 8000;
 const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_AFBEELDING_BYTES = 5 * 1024 * 1024;
 const MAX_REDIRECTS = 3;
 
 /** Blokkeert adressen in privé-ranges, om SSRF te voorkomen (§13). */
@@ -41,8 +42,15 @@ async function assertPublicHost(hostname: string): Promise<void> {
   }
 }
 
-/** Haalt een publieke HTML-pagina op en levert de kale tekst. */
-export async function fetchPageText(rawUrl: string): Promise<{ text: string; title?: string }> {
+/**
+ * Haalt een adres op met alle controles van §13: alleen http en https, geen
+ * privé-adressen, hooguit drie doorverwijzingen en een tijdslimiet. Geeft de
+ * uiteindelijke response terug, samen met het adres waar hij vandaan komt.
+ */
+async function veiligeFetch(
+  rawUrl: string,
+  accept: string,
+): Promise<{ res: Response; url: URL }> {
   let url: URL;
   try {
     url = new URL(rawUrl);
@@ -58,7 +66,7 @@ export async function fetchPageText(rawUrl: string): Promise<{ text: string; tit
     await assertPublicHost(huidig.hostname);
     const res = await fetch(huidig, {
       redirect: 'manual',
-      headers: { accept: 'text/html', 'user-agent': 'Bloeiwijzer/1.0' },
+      headers: { accept, 'user-agent': 'Bloeiwijzer/1.0' },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
 
@@ -71,15 +79,83 @@ export async function fetchPageText(rawUrl: string): Promise<{ text: string; tit
     if (!res.ok) {
       throw Object.assign(new Error(`De pagina gaf een fout (${res.status}).`), { status: 400 });
     }
-    const type = res.headers.get('content-type') ?? '';
-    if (!type.includes('text/html')) {
-      throw Object.assign(new Error('Dit is geen webpagina met tekst.'), { status: 400 });
-    }
-    const html = await readLimited(res, MAX_BYTES);
-    return { text: stripHtml(html), title: titleOf(html) };
+    return { res, url: huidig };
   }
 
   throw Object.assign(new Error('Te veel doorverwijzingen.'), { status: 400 });
+}
+
+export interface PaginaInhoud {
+  text: string;
+  title?: string;
+  /** Het adres van de foto op de pagina, als die er is. */
+  imageUrl?: string;
+}
+
+/** Haalt een publieke HTML-pagina op en levert de kale tekst en de foto. */
+export async function fetchPageText(rawUrl: string): Promise<PaginaInhoud> {
+  const { res, url } = await veiligeFetch(rawUrl, 'text/html');
+  const type = res.headers.get('content-type') ?? '';
+  if (!type.includes('text/html')) {
+    throw Object.assign(new Error('Dit is geen webpagina met tekst.'), { status: 400 });
+  }
+  const html = await readLimited(res, MAX_BYTES);
+  return { text: stripHtml(html), title: titleOf(html), imageUrl: imageOf(html, url) };
+}
+
+/**
+ * Haalt de foto van een productpagina op. Werpt niet: lukt het niet, dan gaat
+ * de import gewoon door zonder foto.
+ */
+export async function fetchPageImage(rawUrl: string): Promise<Uint8Array | null> {
+  try {
+    const { res } = await veiligeFetch(rawUrl, 'image/*');
+    const type = res.headers.get('content-type') ?? '';
+    if (!type.startsWith('image/')) return null;
+    const bytes = await readLimitedBytes(res, MAX_AFBEELDING_BYTES);
+    return bytes && bytes.byteLength > 0 ? bytes : null;
+  } catch (error) {
+    console.warn('[bloeiwijzer] foto van de pagina ophalen mislukt', error);
+    return null;
+  }
+}
+
+/**
+ * Het adres van de foto op de pagina. Webwinkels zetten die in og:image; is
+ * die er niet, dan de eerste afbeelding die geen logo of pictogram lijkt.
+ */
+export function imageOf(html: string, base: URL | string): string | undefined {
+  const meta =
+    html.match(
+      /<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image(?::src)?)["'][^>]*>/i,
+    )?.[0];
+  const kandidaat =
+    meta?.match(/content=["']([^"']+)["']/i)?.[1] ??
+    html.match(/<link[^>]+rel=["']image_src["'][^>]*href=["']([^"']+)["']/i)?.[1] ??
+    eersteAfbeelding(html);
+  if (!kandidaat) return undefined;
+  try {
+    const adres = new URL(kandidaat.trim(), base);
+    return adres.protocol === 'http:' || adres.protocol === 'https:' ? adres.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const GEEN_FOTO = /(logo|icon|sprite|avatar|placeholder|pixel|badge|banner)/i;
+
+function eersteAfbeelding(html: string): string | undefined {
+  for (const treffer of html.matchAll(/<img[^>]+>/gi)) {
+    const tag = treffer[0];
+    const src = tag.match(/\ssrc=["']([^"']+)["']/i)?.[1];
+    if (!src || src.startsWith('data:')) continue;
+    if (GEEN_FOTO.test(src) || GEEN_FOTO.test(tag.match(/alt=["']([^"']*)["']/i)?.[1] ?? '')) {
+      continue;
+    }
+    if (/\.svg(\?|$)/i.test(src)) continue;
+    return src;
+  }
+  return undefined;
 }
 
 async function readLimited(res: Response, max: number): Promise<string> {
@@ -98,6 +174,25 @@ async function readLimited(res: Response, max: number): Promise<string> {
     delen.push(value);
   }
   return new TextDecoder().decode(Buffer.concat(delen.map((d) => Buffer.from(d))));
+}
+
+async function readLimitedBytes(res: Response, max: number): Promise<Uint8Array | null> {
+  const reader = res.body?.getReader();
+  if (!reader) return null;
+  const delen: Uint8Array[] = [];
+  let totaal = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totaal += value.byteLength;
+    // Groter dan de limiet: helemaal niet gebruiken, geen half bestand.
+    if (totaal > max) {
+      await reader.cancel();
+      return null;
+    }
+    delen.push(value);
+  }
+  return new Uint8Array(Buffer.concat(delen.map((d) => Buffer.from(d))));
 }
 
 export function titleOf(html: string): string | undefined {

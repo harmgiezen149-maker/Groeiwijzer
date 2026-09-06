@@ -63,6 +63,11 @@ export async function createPlant(gardenId: string, input: NewPlant): Promise<Pl
   await db().hset(g.plants(gardenId), plant.id, plant);
   await db().sadd(g.locationPlants(gardenId, plant.locationId), plant.id);
   await db().set(g.label(gardenId, plant.labelCode!), plant.id);
+  // De foto waarmee de plant binnenkwam hoort ook in het album, anders is hij
+  // niet te wisselen of weg te halen.
+  if (plant.photoUrl) {
+    await addPhoto(gardenId, plant.id, { url: plant.photoUrl, takenAt: now });
+  }
   return plant;
 }
 

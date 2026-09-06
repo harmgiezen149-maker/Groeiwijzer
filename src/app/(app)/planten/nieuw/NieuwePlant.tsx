@@ -200,12 +200,14 @@ export function NieuwePlant({
     setFout(null);
     setMeldingen([]);
     try {
-      const data = await api<{ profile: Profiel | null; notes?: string[]; sourceUrl: string }>(
-        '/api/plants/from-url',
-        { method: 'POST', json: { url, locationId } },
-      );
+      const data = await api<{
+        profile: Profiel | null;
+        notes?: string[];
+        sourceUrl: string;
+        photoUrl?: string;
+      }>('/api/plants/from-url', { method: 'POST', json: { url, locationId } });
       setMeldingen(data.notes ?? []);
-      pasProfielToe(data.profile, { sourceUrl: data.sourceUrl });
+      pasProfielToe(data.profile, { sourceUrl: data.sourceUrl, photoUrl: data.photoUrl });
     } catch (error) {
       setFout(error instanceof Error ? error.message : 'Ophalen lukte niet');
     } finally {

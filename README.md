@@ -109,6 +109,11 @@ src/app/       routes (App Router); (app)/ is het ingelogde deel
 src/components/ herbruikbare interface-onderdelen
 ```
 
+Bij een import via een link pakt de app ook de foto van die pagina mee
+(og:image, anders de eerste afbeelding die geen logo is). Dat adres gaat door
+dezelfde controle als de pagina zelf: alleen http en https, geen privé-adressen,
+en het type wordt op de magic bytes gecontroleerd, niet op wat de server zegt.
+
 Foto's van een plant staan bij elkaar op de plantpagina. De nieuwste foto
 wordt de hoofdfoto — die zie je boven aan de pagina en in de takenlijst — en
 een oudere is met één tik weer als hoofdfoto te kiezen. Verwijderen gaat in
