@@ -443,6 +443,12 @@ body::before {
   height: 30px;
   border-radius: var(--blob-2);
 }
+/* Hoekje op een foto: klein genoeg om de plant te laten zien. */
+.bw-taakblob-hoek {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--blob-3);
+}
 .bw-taakblob:nth-of-type(2n) { border-radius: var(--blob-2); }
 .bw-taakblob:nth-of-type(3n) { border-radius: var(--blob-3); }
 

@@ -8,11 +8,12 @@ import { readLog } from '@/lib/log';
 import { agendaForYear } from '@/lib/occurrences';
 import { toRows } from '@/lib/agenda-view';
 import { CATEGORY_LABEL } from '@/lib/ui';
-import { formatDate, todayInAmsterdam } from '@/lib/dates';
+import { todayInAmsterdam } from '@/lib/dates';
 import { PlantFoto } from '@/components/PlantFoto';
 import { OccurrenceList } from '@/components/OccurrenceList';
 import { PlantTaken } from './PlantTaken';
 import { PlantBeheer } from './PlantBeheer';
+import { PlantFotos } from './PlantFotos';
 import { Logboek } from './Logboek';
 
 export const dynamic = 'force-dynamic';
@@ -122,26 +123,10 @@ export default async function PlantPagina({ params }: { params: Promise<{ id: st
           ) : null}
         </section>
 
-        {photos.length ? (
-          <section>
-            <h2 className="bw-sectie mb-2">Foto&apos;s</h2>
-            <ul className="grid grid-cols-3 gap-2.5">
-              {photos.map((foto, index) => (
-                <li key={foto.url}>
-                  <PlantFoto
-                    url={foto.url}
-                    alt={foto.caption ?? ''}
-                    variant={((index % 3) + 1) as 1 | 2 | 3}
-                    className="aspect-square w-full"
-                  />
-                  <span className="mt-1 block text-[11px] text-[var(--ink-muted)]">
-                    {formatDate(foto.takenAt.slice(0, 10))}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+        <section>
+          <h2 className="bw-sectie mb-2">Foto&apos;s</h2>
+          <PlantFotos plantId={plant.id} photos={photos} hoofdfoto={plant.photoUrl} />
+        </section>
 
         <section>
           <h2 className="bw-sectie mb-2">Logboek</h2>

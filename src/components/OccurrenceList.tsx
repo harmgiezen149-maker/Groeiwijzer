@@ -38,6 +38,14 @@ export function OccurrenceList({
 }) {
   const router = useRouter();
   const [rows, setRows] = useState(initialRows);
+  /* De lijst werkt optimistisch, maar de server heeft het laatste woord:
+     komt er nieuwe serverdata binnen, dan volgt de lijst die. Zonder dit
+     kan een late verversing de lijst uit de pas laten lopen. */
+  const [gezien, setGezien] = useState(initialRows);
+  if (initialRows !== gezien) {
+    setGezien(initialRows);
+    setRows(initialRows);
+  }
   const [fout, setFout] = useState<string | null>(null);
   /** Wat er net is afgevinkt, om een misklik terug te kunnen draaien. */
   const [laatst, setLaatst] = useState<{ row: AgendaRow; actie: 'complete' | 'skip' } | null>(null);
@@ -326,10 +334,10 @@ function OccurrenceRow({
             <span className="relative shrink-0">
               <PlantFoto url={row.photoUrl} alt="" vierkant className="bw-beeldtegel" />
               <span
-                className="bw-taakblob absolute -bottom-1 -right-1 size-6"
+                className="bw-taakblob bw-taakblob-hoek absolute -bottom-0.5 -right-0.5"
                 style={{ background: kleur, boxShadow: '0 0 0 2px var(--paper-raised)' }}
               >
-                <TaakIcoon type={row.taskType} size={13} />
+                <TaakIcoon type={row.taskType} size={12} />
               </span>
             </span>
           ) : (

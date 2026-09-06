@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/client';
 import type { PlantStatus } from '@/lib/types';
-import { FotoKiezer } from '@/components/FotoKiezer';
 
 export function PlantBeheer({
   plantId,
@@ -38,19 +37,6 @@ export function PlantBeheer({
     }
   }
 
-  async function voegFotoToe(file: File) {
-    setBezig(true);
-    setFout(null);
-    try {
-      await uploadFotoNaarPlant(plantId, file);
-      router.refresh();
-    } catch (error) {
-      setFout(error instanceof Error ? error.message : 'Foto toevoegen lukte niet');
-    } finally {
-      setBezig(false);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-3">
       {fout ? (
@@ -77,11 +63,6 @@ export function PlantBeheer({
               </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <p className="bw-label">Foto toevoegen</p>
-          <FotoKiezer disabled={bezig} onKies={(file) => void voegFotoToe(file)} />
         </div>
       </div>
 
@@ -154,14 +135,3 @@ export function PlantBeheer({
   );
 }
 
-async function uploadFotoNaarPlant(plantId: string, file: File): Promise<void> {
-  const { verkleinAfbeelding } = await import('@/components/OccurrenceList');
-  const verkleind = await verkleinAfbeelding(file);
-  const form = new FormData();
-  form.append('file', verkleind, 'plant.jpg');
-  const res = await fetch(`/api/plants/${plantId}/photos`, { method: 'POST', body: form });
-  if (!res.ok) {
-    const data = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(data.error ?? 'Foto toevoegen lukte niet');
-  }
-}

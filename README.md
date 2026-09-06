@@ -109,6 +109,11 @@ src/app/       routes (App Router); (app)/ is het ingelogde deel
 src/components/ herbruikbare interface-onderdelen
 ```
 
+Foto's van een plant staan bij elkaar op de plantpagina. De nieuwste foto
+wordt de hoofdfoto — die zie je boven aan de pagina en in de takenlijst — en
+een oudere is met één tik weer als hoofdfoto te kiezen. Verwijderen gaat in
+twee tikken.
+
 De agenda gaat over één dag. Van een terugkerende taak staat hooguit één beurt
 in beeld: de laatste waarvan het venster is begonnen. Wat daarvoor lag en nooit
 gedaan is, krijgt de status `verlopen` en verdwijnt uit beeld — anders staat

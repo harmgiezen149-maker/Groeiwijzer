@@ -1,4 +1,6 @@
 import 'server-only';
+import { mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { Redis } from '@upstash/redis';
 
 /**
@@ -120,39 +122,47 @@ class MemoryStore implements Store {
   private data = new Map<string, MemValue>();
   private file: string | null = null;
   private loaded = false;
-  private saveTimer: NodeJS.Timeout | null = null;
+  /** Tijdstempel van het bestand zoals wij het laatst lazen of schreven. */
+  private stempel = 0;
 
   constructor(file: string | null) {
     this.file = file;
   }
 
+  /**
+   * Bij `next dev` bedienen meerdere processen dezelfde app. Ze delen alleen
+   * dit bestand, dus voor elke lees kijken we of een ander proces iets heeft
+   * geschreven. Zonder die controle ziet het ene proces de plant niet die het
+   * andere net heeft opgeslagen.
+   */
   private async load() {
-    if (this.loaded) return;
-    this.loaded = true;
-    if (!this.file) return;
+    if (!this.file) {
+      this.loaded = true;
+      return;
+    }
     try {
       const fs = await import('node:fs/promises');
+      const { mtimeMs } = await fs.stat(this.file);
+      if (this.loaded && mtimeMs <= this.stempel) return;
       const raw = await fs.readFile(this.file, 'utf8');
       this.data = new Map(Object.entries(JSON.parse(raw) as Record<string, MemValue>));
+      this.stempel = mtimeMs;
     } catch {
       /* nog geen bestand */
     }
+    this.loaded = true;
   }
 
   private save() {
     if (!this.file) return;
-    if (this.saveTimer) clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(async () => {
-      try {
-        const fs = await import('node:fs/promises');
-        const path = await import('node:path');
-        await fs.mkdir(path.dirname(this.file!), { recursive: true });
-        await fs.writeFile(this.file!, JSON.stringify(Object.fromEntries(this.data)), 'utf8');
-      } catch {
-        /* dev-only, mag stilletjes falen */
-      }
-    }, 50);
-    this.saveTimer.unref?.();
+    // Meteen wegschrijven: een ander proces moet dit direct kunnen lezen.
+    try {
+      mkdirSync(dirname(this.file), { recursive: true });
+      writeFileSync(this.file, JSON.stringify(Object.fromEntries(this.data)), 'utf8');
+      this.stempel = statSync(this.file).mtimeMs;
+    } catch {
+      /* dev-only, mag stilletjes falen */
+    }
   }
 
   private async entry(key: string): Promise<MemValue | undefined> {

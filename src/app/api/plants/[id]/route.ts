@@ -1,5 +1,5 @@
 import { withGardenParams, readJson } from '@/lib/api';
-import { deletePlant, requirePlant, updatePlant } from '@/lib/plants';
+import { deletePlant, listPhotos, requirePlant, updatePlant } from '@/lib/plants';
 import { listTasks } from '@/lib/tasks';
 import { dropOpenOccurrencesForPlant, generateOccurrences } from '@/lib/occurrences';
 import { addLog } from '@/lib/log';
@@ -16,6 +16,14 @@ export const PATCH = withGardenParams<{ id: string }, unknown>(async (ctx, req, 
   const patch = parseOrThrow(plantPatch, await readJson(req));
   const current = await requirePlant(ctx.garden.id, params.id);
   const statusWijzigt = patch.status && patch.status !== current.status;
+
+  // Een hoofdfoto moet een foto van deze plant zijn, geen willekeurig adres.
+  if (patch.photoUrl !== undefined && patch.photoUrl !== current.photoUrl) {
+    const eigen = await listPhotos(ctx.garden.id, params.id);
+    if (!eigen.some((foto) => foto.url === patch.photoUrl)) {
+      throw Object.assign(new Error('Die foto hoort niet bij deze plant.'), { status: 400 });
+    }
+  }
 
   const plant = await updatePlant(ctx.garden.id, params.id, {
     ...patch,
