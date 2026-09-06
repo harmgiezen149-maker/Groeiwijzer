@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { acceptInvite, getGarden, getInvite } from '@/lib/garden';
+import { acceptInvite, getGarden, getInvite, getUserByEmail } from '@/lib/garden';
 import { currentUser } from '@/lib/session';
+import { availableProviders } from '@/auth';
+import { Aanmelden } from './Aanmelden';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Uitnodiging — Bloeiwijzer' };
@@ -21,15 +23,31 @@ export default async function UitnodigingPagina({
 }) {
   const { token } = await params;
   const user = await currentUser();
+  const invite = await getInvite(token);
+  const garden = invite ? await getGarden(invite.gardenId) : null;
 
-  // Zonder sessie eerst inloggen, daarna komt de gebruiker hier terug.
+  // Nog geen account? Dan hoeft er geen mail aan te pas te komen: op vertoon
+  // van deze uitnodiging kiest de genodigde hier zelf een wachtwoord.
   if (!user) {
+    const bruikbaar =
+      invite && !invite.acceptedAt && new Date(invite.expiresAt).getTime() > Date.now();
+    if (bruikbaar && !(await getUserByEmail(invite.email))) {
+      return (
+        <main className="bw-bloemen mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-5 px-8 py-10">
+          <h1 className="bw-titel">Meedoen</h1>
+          <Aanmelden
+            token={token}
+            email={invite.email}
+            tuin={garden?.name ?? 'deze tuin'}
+            metGoogle={availableProviders.google}
+          />
+        </main>
+      );
+    }
     redirect(`/login?callbackUrl=${encodeURIComponent(`/uitnodiging/${token}`)}`);
   }
 
-  const invite = await getInvite(token);
-  const garden = invite ? await getGarden(invite.gardenId) : null;
-  const result = await acceptInvite(token, user);
+  const result = await acceptInvite(token, user!);
 
   if (result.ok) {
     return (

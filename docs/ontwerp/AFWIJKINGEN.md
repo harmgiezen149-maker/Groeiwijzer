@@ -160,3 +160,35 @@ en een slag feller doorgevoerd:
   een afvinkregel.
 - Is alles gedaan, dan staat er een groen vlak met een vinkje in plaats van een
   grijs kaartje.
+
+## Inloggen met een eigen wachtwoord (september 2026)
+
+De overdracht noemt Google en een inloglink per e-mail (§3). In de praktijk
+liep dat vast: Resend mag zonder geverifieerd domein alleen naar het adres van
+de accounthouder mailen, dus een uitnodiging en een inloglink naar de partner
+kwamen niet aan.
+
+Daarom een derde manier: een zelfgekozen wachtwoord.
+
+- **Aanmelden kan alleen met een geldige uitnodiging.** Er is geen open
+  registratie; de uitnodiging is het bewijs dat de tuineigenaar dit adres
+  binnen wil hebben. De eigenaar deelt de link zelf, bijvoorbeeld via een
+  berichtje.
+- **Bestaat het adres al, dan gebeurt er niets.** Die persoon logt in zoals
+  altijd en neemt de uitnodiging daarna aan. Anders zou wie de link in handen
+  krijgt een bestaand account kunnen overnemen.
+- **Hashen met scrypt** uit Node zelf (N=16384, r=8, p=1), met een eigen zout
+  per wachtwoord en een vergelijking op vaste tijd. De hash staat onder een
+  eigen sleutel, los van het profiel, zodat hij nooit kan meeliften met
+  gebruikersgegevens die naar de browser gaan.
+- **Minstens tien tekens**, en niet je eigen e-mailadres of iets uit een klein
+  lijstje voor de hand liggende woorden. Lengte doet meer dan hoofdletters en
+  leestekens.
+- **Raden wordt afgeremd** met dezelfde limiet als de AI-endpoints: twintig
+  pogingen per uur per e-mailadres, zestig per dag.
+- Wie al binnen is kan onder Instellingen een wachtwoord zetten of wijzigen;
+  wijzigen vraagt eerst om het huidige.
+
+Wat er niet is: een wachtwoord vergeten-mail. Die zou over dezelfde mail lopen
+die nu juist niet werkt. Kwijt betekent: de eigenaar nodigt opnieuw uit, of
+inloggen met Google.

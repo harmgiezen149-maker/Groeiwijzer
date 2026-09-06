@@ -66,6 +66,15 @@ export async function upsertUser(input: {
   return user;
 }
 
+/** Bewaart de wachtwoordhash van een gebruiker, los van het profiel. */
+export async function setPasswordHash(userId: string, hash: string): Promise<void> {
+  await db().set(userKey.secret(userId), hash);
+}
+
+export async function getPasswordHash(userId: string): Promise<string | null> {
+  return db().get<string>(userKey.secret(userId));
+}
+
 /** Zorgt dat de gebruiker minstens één tuin heeft; geeft de tuinen terug. */
 export async function ensureGardenForUser(user: User): Promise<Garden[]> {
   const gardens = await listGardensForUser(user.id);

@@ -4,7 +4,9 @@ import Resend from 'next-auth/providers/resend';
 import Credentials from 'next-auth/providers/credentials';
 import { UpstashRedisAdapter } from '@auth/upstash-redis-adapter';
 import { Redis } from '@upstash/redis';
-import { ensureGardenForUser, getUser, upsertUser } from '@/lib/garden';
+import { ensureGardenForUser, getPasswordHash, getUser, getUserByEmail, upsertUser } from '@/lib/garden';
+import { verifyPassword } from '@/lib/password';
+import { assertWithinLimit } from '@/lib/ratelimit';
 import { upstashConfig, usingUpstash } from '@/lib/redis';
 
 /** Inloggen zonder externe sleutels: alleen buiten productie, voor lokale bouw. */
@@ -16,7 +18,7 @@ const providers: NextAuthConfig['providers'] = [];
 /* Bijhouden welke methodes er zijn terwijl we ze toevoegen. Het achteraf
    uit de providerobjecten aflezen is onbetrouwbaar: een provider kan ook
    een functie zijn, en dan is er geen `id` om naar te kijken. */
-export const availableProviders = { google: false, resend: false, dev: false };
+export const availableProviders = { google: false, resend: false, wachtwoord: true, dev: false };
 
 if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
   availableProviders.google = true;
@@ -40,6 +42,38 @@ if (resendKey && process.env.RESEND_FROM && usingUpstash) {
     }),
   );
 }
+
+/**
+ * Inloggen met een zelfgekozen wachtwoord. Aanmelden kan alleen via een
+ * uitnodiging (§3), dus dit is geen open registratie: hier wordt alleen
+ * gecontroleerd wie er al een wachtwoord heeft gezet.
+ */
+providers.push(
+  Credentials({
+    id: 'wachtwoord',
+    name: 'E-mail en wachtwoord',
+    credentials: {
+      email: { label: 'E-mail', type: 'email' },
+      password: { label: 'Wachtwoord', type: 'password' },
+    },
+    authorize: async (credentials) => {
+      const email = String(credentials?.email ?? '')
+        .trim()
+        .toLowerCase();
+      const wachtwoord = String(credentials?.password ?? '');
+      if (!email || !wachtwoord) return null;
+      // Raden afremmen: een reeks pogingen op hetzelfde adres loopt vast.
+      await assertWithinLimit(`login:${email}`, 'wachtwoord');
+
+      const user = await getUserByEmail(email);
+      if (!user) return null;
+      const hash = await getPasswordHash(user.id);
+      if (!hash) return null;
+      if (!(await verifyPassword(wachtwoord, hash))) return null;
+      return { id: user.id, email: user.email, name: user.name ?? user.email };
+    },
+  }),
+);
 
 if (devLoginEnabled) {
   availableProviders.dev = true;
@@ -118,9 +152,11 @@ export function configuratieProblemen(): string[] {
         'gegevens blijven niet bewaard.',
     );
   }
-  if (providers.length === 0) {
+  if (!availableProviders.google && !availableProviders.resend && !availableProviders.dev) {
     problemen.push(
-      'Er is geen inlogmethode: zet AUTH_GOOGLE_ID en AUTH_GOOGLE_SECRET, of AUTH_RESEND_KEY en RESEND_FROM.',
+      'Er is nog geen manier om het eerste account te maken: zet AUTH_GOOGLE_ID en ' +
+        'AUTH_GOOGLE_SECRET, of AUTH_RESEND_KEY en RESEND_FROM. Daarna kan iedereen die je ' +
+        'uitnodigt een eigen wachtwoord kiezen.',
     );
   } else if (!availableProviders.resend && (resendKey || process.env.RESEND_FROM)) {
     const mist = [

@@ -123,7 +123,7 @@ await page.goto(`${B}/login`, { waitUntil: 'networkidle' });
 await controleer('login');
 await schermschot('login');
 await page.fill('#email', adres);
-await page.locator('form button').click();
+await page.getByRole('button', { name: /Ontwikkelmodus/ }).click();
 await page.waitForURL(`${B}/`, { timeout: 45000 });
 await page.waitForLoadState('networkidle');
 

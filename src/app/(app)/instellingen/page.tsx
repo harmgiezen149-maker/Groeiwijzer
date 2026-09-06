@@ -3,6 +3,8 @@ import { listMembers } from '@/lib/garden';
 import { Instellingen } from './Instellingen';
 import { signOutAction } from '@/app/actions';
 import { voorzieningen } from '@/lib/voorzieningen';
+import { getPasswordHash } from '@/lib/garden';
+import { Wachtwoord } from './Wachtwoord';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Instellingen — Bloeiwijzer' };
@@ -11,6 +13,7 @@ export default async function InstellingenPagina() {
   const { garden, user, membership } = await requireContext();
   const members = await listMembers(garden.id);
   const diensten = voorzieningen();
+  const heeftWachtwoord = Boolean(await getPasswordHash(user.id));
 
   return (
     <div className="flex flex-col gap-5">
@@ -58,7 +61,10 @@ export default async function InstellingenPagina() {
 
       <section>
         <h2 className="bw-sectie mb-2">Account</h2>
-        <p className="mb-2 text-[13px] text-[var(--ink-faint)]">Ingelogd als {user.email}.</p>
+        <p className="mb-2.5 text-[13px] text-[var(--ink-faint)]">Ingelogd als {user.email}.</p>
+        <div className="mb-3">
+          <Wachtwoord ingesteld={heeftWachtwoord} />
+        </div>
         <form action={signOutAction}>
           <button className="bw-btn bw-btn-gevaar px-0">Uitloggen</button>
         </form>

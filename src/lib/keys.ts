@@ -13,6 +13,9 @@ export const userKey = {
   profile: (userId: string) => `user:${safe(userId, 'userId')}`,
   byEmail: (email: string) => `user:byEmail:${email.trim().toLowerCase()}`,
   gardens: (userId: string) => `user:${safe(userId, 'userId')}:gardens`,
+  /* Apart van het profiel: zo kan een wachtwoordhash nooit meeliften met
+     gebruikersgegevens die naar de browser gaan. */
+  secret: (userId: string) => `user:${safe(userId, 'userId')}:secret`,
   push: (userId: string) => `push:${safe(userId, 'userId')}`,
 };
 

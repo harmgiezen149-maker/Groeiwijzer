@@ -59,6 +59,7 @@ Daarna, per onderdeel:
 | Variabele | Zet aan |
 |---|---|
 | `ANTHROPIC_API_KEY` | Het onderhoudsvoorstel en de plantherkenning |
+| — | Inloggen met een eigen wachtwoord werkt altijd; aanmelden kan alleen via een uitnodiging |
 | `PLANTNET_API_KEY` | De tweede bron bij herkenning op foto |
 | `BLOB_READ_WRITE_TOKEN` | Foto's naar Vercel Blob. Een besloten opslag mag ook: dan serveert de app ze zelf uit via `/api/foto/...`, achter dezelfde tuincontrole |
 | `RESEND_API_KEY`, `AUTH_RESEND_KEY`, `RESEND_FROM` | Maandbericht, uitnodigingsmail, inloglink per e-mail |
