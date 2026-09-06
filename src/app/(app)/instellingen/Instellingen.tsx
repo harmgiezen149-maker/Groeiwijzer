@@ -232,7 +232,23 @@ export function Instellingen({
             Uitnodigen
           </button>
         </form>
-        {link ? <p className="mt-1.5 break-all text-[12px] text-[var(--ink-faint)]">{link}</p> : null}
+        {link ? (
+          <div className="bw-card-compact mt-2 flex flex-col gap-2 p-3">
+            <p className="break-all text-[12px] text-[var(--ink-faint)]">{link}</p>
+            <button
+              type="button"
+              className="bw-btn bw-btn-secondary self-start text-[13px]"
+              onClick={() => {
+                void navigator.clipboard
+                  ?.writeText(link)
+                  .then(() => setMelding('De link staat op het klembord.'))
+                  .catch(() => setMelding('Kopiëren lukte niet; selecteer de link zelf.'));
+              }}
+            >
+              Link kopiëren
+            </button>
+          </div>
+        ) : null}
       </section>
 
       {/* --------------------------------------------------------- tuin */}

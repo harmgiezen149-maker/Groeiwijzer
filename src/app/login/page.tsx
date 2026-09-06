@@ -4,6 +4,23 @@ import { LoginForm } from './LoginForm';
 
 export const metadata = { title: 'Inloggen — Bloeiwijzer' };
 
+/**
+ * Auth.js geeft alleen een code terug; hier staat wat die betekent en wat je
+ * eraan kunt doen. "Probeer het opnieuw" helpt niemand verder.
+ */
+const FOUTEN: Record<string, string> = {
+  EmailSignin:
+    'De inloglink kon niet verstuurd worden. Probeer het met Google, of vraag degene die je uitnodigde om je toegang te geven.',
+  Verification: 'Deze inloglink is verlopen of al gebruikt. Vraag een nieuwe aan.',
+  AccessDenied: 'Je hebt geen toegang gekregen tot deze tuin.',
+  Configuration:
+    'De inlog is nog niet volledig ingesteld. Laat de eigenaar van de app even kijken.',
+  OAuthAccountNotLinked:
+    'Dit e-mailadres is eerder op een andere manier gebruikt. Log in zoals de vorige keer.',
+  OAuthSignin: 'Google gaf geen antwoord. Probeer het opnieuw.',
+  OAuthCallback: 'Google gaf geen antwoord. Probeer het opnieuw.',
+};
+
 export default async function LoginPage({
   searchParams,
 }: {
@@ -35,7 +52,7 @@ export default async function LoginPage({
         ) : null}
         {params.error ? (
           <p className="bw-banner bw-banner-urgent mb-4">
-            Inloggen lukte niet. Probeer het opnieuw.
+            {FOUTEN[params.error] ?? 'Inloggen lukte niet. Probeer het opnieuw.'}
           </p>
         ) : null}
 
