@@ -109,6 +109,12 @@ src/app/       routes (App Router); (app)/ is het ingelogde deel
 src/components/ herbruikbare interface-onderdelen
 ```
 
+De agenda gaat over één dag. Van een terugkerende taak staat hooguit één beurt
+in beeld: de laatste waarvan het venster is begonnen. Wat daarvoor lag en nooit
+gedaan is, krijgt de status `verlopen` en verdwijnt uit beeld — anders staat
+dezelfde plant vijftien keer onder elkaar. Onder Vandaag staat ingeklapt wat er
+de komende zeven dagen begint.
+
 Water geven loopt anders dan de rest. Buiten stuurt het weer: een schema van
 "elke drie dagen" levert honderden regels per zomer op, dus de taak staat als
 weer-gestuurd op de plant en komt naar boven zodra de droogteregel aanslaat.

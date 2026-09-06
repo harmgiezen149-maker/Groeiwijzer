@@ -35,11 +35,19 @@ export default async function PlantPagina({ params }: { params: Promise<{ id: st
 
   const locatie = locations.find((l) => l.id === plant.locationId);
   const vandaag = todayInAmsterdam();
-  const alleRijen = (await toRows(garden.id, agenda)).filter((r) => r.plantId === plant.id);
-  // Een taak die elke week terugkomt levert vijftig regels op; toon wat er nu
-  // speelt en verwijs voor de rest naar de agenda.
-  const rijen = alleRijen.filter((r) => r.windowEnd >= vandaag).slice(0, 8);
-  const rest = alleRijen.length - rijen.length;
+  const alleRijen = (await toRows(garden.id, agenda, vandaag)).filter(
+    (r) => r.plantId === plant.id,
+  );
+  // Per taak één regel: de eerstvolgende die nog niet voorbij is. Een taak die
+  // elke week terugkomt hoort hier niet vijftig keer te staan.
+  const komend = new Map<string, (typeof alleRijen)[number]>();
+  for (const rij of alleRijen) {
+    if (rij.status !== 'open' || rij.windowEnd < vandaag) continue;
+    const eerder = komend.get(rij.taskId);
+    if (!eerder || rij.windowStart < eerder.windowStart) komend.set(rij.taskId, rij);
+  }
+  const rijen = [...komend.values()].sort((a, b) => a.windowStart.localeCompare(b.windowStart));
+  const rest = alleRijen.filter((r) => r.status === 'gedaan').length;
 
   const kenmerken = [
     CATEGORY_LABEL[plant.category],
@@ -106,7 +114,7 @@ export default async function PlantPagina({ params }: { params: Promise<{ id: st
           />
           {rest > 0 ? (
             <p className="mt-2 text-[12.5px] text-[var(--ink-muted)]">
-              {rest} eerdere {rest === 1 ? 'taak' : 'taken'} dit jaar ·{' '}
+              {rest} {rest === 1 ? 'beurt' : 'beurten'} gedaan dit jaar ·{' '}
               <Link href={`/jaar/${jaar}`} className="underline">
                 jaaroverzicht
               </Link>

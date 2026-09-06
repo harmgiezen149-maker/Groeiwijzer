@@ -16,6 +16,8 @@ export interface AgendaRow {
   importance: Importance;
   windowStart: string;
   windowEnd: string;
+  /** Venster is voorbij en de taak staat nog open. */
+  achterstallig?: boolean;
   status: OccurrenceStatus;
   weatherFlag?: WeatherFlag;
   note?: string;

@@ -6,7 +6,7 @@ import { listLivePlants, listPlants, requirePlant } from './plants';
 import { listLocations } from './locations';
 import { listTasks, updateTask, waterPlanning } from './tasks';
 import { mergeOccurrences, plannedOccurrences } from './schedule';
-import { rangeOverlapsMonth } from './dates';
+import { addDays, rangeOverlapsMonth } from './dates';
 import { addLog } from './log';
 import type { CareTask, Plant, TaskOccurrence } from './types';
 
@@ -103,6 +103,86 @@ export interface AgendaItem {
   plant: Plant;
 }
 
+export interface DagAgenda {
+  /** Wat vandaag mag: per taak de beurt die nu aan de beurt is. */
+  vandaag: AgendaItem[];
+  /** Wat er de komende dagen aankomt: per taak de eerstvolgende beurt. */
+  binnenkort: AgendaItem[];
+}
+
+/** Hoe ver "binnenkort" vooruitkijkt. */
+export const BINNENKORT_DAGEN = 7;
+
+/**
+ * De agenda van één dag (§7.1, herzien). Van een terugkerende taak staat
+ * hooguit één beurt in beeld: de laatste waarvan het venster is begonnen.
+ * Beurten die daarvóór liggen en nooit gedaan zijn, krijgen de status
+ * `verlopen` — je kunt gisteren niet meer water geven, en een stapel gemiste
+ * beurten helpt niemand.
+ */
+export async function agendaForDay(
+  gardenId: string,
+  day: string,
+  opts: { vooruitDagen?: number } = {},
+): Promise<DagAgenda> {
+  const jaar = Number(day.slice(0, 4));
+  const jaren = await Promise.all([
+    loadYear(gardenId, jaar - 1),
+    loadYear(gardenId, jaar),
+    loadYear(gardenId, jaar + 1),
+  ]);
+  const open = jaren.flatMap((set) => Object.values(set)).filter((occ) => occ.status === 'open');
+
+  const grens = addDays(day, opts.vooruitDagen ?? BINNENKORT_DAGEN);
+  const groepen = new Map<string, TaskOccurrence[]>();
+  for (const occ of open) {
+    const sleutel = `${occ.plantId}:${occ.taskId}`;
+    const groep = groepen.get(sleutel);
+    if (groep) groep.push(occ);
+    else groepen.set(sleutel, [occ]);
+  }
+
+  const nu: TaskOccurrence[] = [];
+  const straks: TaskOccurrence[] = [];
+  const verlopen: TaskOccurrence[] = [];
+
+  for (const beurten of groepen.values()) {
+    const oplopend = [...beurten].sort((a, b) => a.windowStart.localeCompare(b.windowStart));
+    const begonnen = oplopend.filter((occ) => occ.windowStart <= day);
+    if (begonnen.length) {
+      nu.push(begonnen[begonnen.length - 1]);
+      verlopen.push(...begonnen.slice(0, -1));
+      continue;
+    }
+    const eerstvolgende = oplopend[0];
+    if (eerstvolgende && eerstvolgende.windowStart <= grens) straks.push(eerstvolgende);
+  }
+
+  if (verlopen.length) await markeerVerlopen(gardenId, verlopen);
+
+  const [vandaag, binnenkort] = await Promise.all([
+    hydrate(gardenId, nu, {}),
+    hydrate(gardenId, straks, {}),
+  ]);
+  return { vandaag, binnenkort };
+}
+
+async function markeerVerlopen(gardenId: string, occurrences: TaskOccurrence[]): Promise<void> {
+  const perJaar = new Map<number, TaskOccurrence[]>();
+  for (const occ of occurrences) {
+    const groep = perJaar.get(occ.year);
+    if (groep) groep.push(occ);
+    else perJaar.set(occ.year, [occ]);
+  }
+  for (const [jaar, groep] of perJaar) {
+    await db().hsetMany(
+      g.occurrences(gardenId, jaar),
+      Object.fromEntries(groep.map((occ) => [occ.id, { ...occ, status: 'verlopen' as const }])),
+    );
+    await db().srem(g.openOccurrences(gardenId, jaar), ...groep.map((occ) => occ.id));
+  }
+}
+
 /**
  * Occurrences die een maand raken. Vensters over de jaargrens staan onder het
  * jaar waarin ze beginnen, dus het vorige jaar wordt altijd meegelezen.
@@ -148,6 +228,8 @@ async function hydrate(
 
   const items: AgendaItem[] = [];
   for (const occ of occurrences) {
+    // Verlopen beurten zijn geen gebeurtenis: ze staan nergens in beeld.
+    if (occ.status === 'verlopen') continue;
     if (!opts.includeDone && occ.status !== 'open') continue;
     const plant = plants.get(occ.plantId);
     if (!plant) continue;

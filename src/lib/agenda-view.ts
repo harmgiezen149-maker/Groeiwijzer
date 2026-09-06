@@ -4,7 +4,12 @@ import { listLocations } from './locations';
 import type { AgendaItem } from './occurrences';
 import type { AgendaRow } from './dto';
 
-export async function toRows(gardenId: string, items: AgendaItem[]): Promise<AgendaRow[]> {
+export async function toRows(
+  gardenId: string,
+  items: AgendaItem[],
+  /** Met een dag erbij weet de regel of hij achterstallig is. */
+  today?: string,
+): Promise<AgendaRow[]> {
   const locations = new Map((await listLocations(gardenId)).map((l) => [l.id, l]));
   const names = new Map<string, string>();
   for (const item of items) {
@@ -32,6 +37,7 @@ export async function toRows(gardenId: string, items: AgendaItem[]): Promise<Age
       importance: task.importance,
       windowStart: occurrence.windowStart,
       windowEnd: occurrence.windowEnd,
+      achterstallig: today ? occurrence.windowEnd < today : undefined,
       status: occurrence.status,
       weatherFlag: occurrence.weatherFlag,
       note: occurrence.note,

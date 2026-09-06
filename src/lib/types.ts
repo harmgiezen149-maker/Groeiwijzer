@@ -163,7 +163,12 @@ export interface CareTask {
   enabled: boolean;
 }
 
-export type OccurrenceStatus = 'open' | 'gedaan' | 'overgeslagen';
+/**
+ * `verlopen`: het venster is voorbij en er is al een nieuwe beurt begonnen.
+ * Zo blijft er van een terugkerende taak altijd één regel over in plaats van
+ * een stapel gemiste beurten.
+ */
+export type OccurrenceStatus = 'open' | 'gedaan' | 'overgeslagen' | 'verlopen';
 export type WeatherFlag = 'gunstig' | 'ongunstig' | 'urgent';
 
 export interface TaskOccurrence {

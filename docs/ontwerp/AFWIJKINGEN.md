@@ -111,3 +111,30 @@ Binnen geldt geen enkele weerregel (§4.1), dus daar doet de kalender het:
 kamerplanten krijgen één waterherinnering per week, het jaar rond. Wat iemand
 zelf heeft ingesteld blijft staan — alleen taken uit een AI-profiel worden
 omgeschreven.
+
+## De agenda gaat over één dag (september 2026)
+
+Het beginscherm toonde elke beurt die de maand ergens raakte. Bij een taak van
+elke twee dagen zijn dat vijftien regels per maand voor één plant, en dan staat
+dezelfde varen vijftien keer onder elkaar.
+
+Nu:
+
+- **Vandaag** toont per taak hooguit één beurt: de laatste waarvan het venster
+  is begonnen. Daaronder staat **Binnenkort** ingeklapt, met wat er de komende
+  zeven dagen begint.
+- Beurten die daarvóór lagen en nooit gedaan zijn, krijgen de status
+  `verlopen`. Je kunt gisteren niet meer water geven, en een stapel gemiste
+  beurten helpt niemand. Ze staan nergens in beeld en tellen nergens mee — ze
+  blijven alleen in de opslag staan zodat de generator ze niet opnieuw aanmaakt.
+- Het rooster blijft vast liggen. Vink je een dag later af, dan schuift het
+  ritme niet mee; de volgende beurt staat waar hij stond.
+- Afvinken haalt de regel meteen uit de lijst. Bovenaan blijft één regel staan
+  om het terug te draaien.
+- De agenda-pagina heeft altijd een dag geselecteerd: vandaag, of de eerste van
+  de maand waar je naartoe bladert.
+
+Een taak met een lang venster (snoeien, 1× in maart–april) staat vanaf de eerste
+dag van dat venster elke dag in beeld tot hij gedaan is, en heet daarna
+achterstallig. Dat is met opzet: werk dat blijft liggen hoort zichtbaar te
+blijven.

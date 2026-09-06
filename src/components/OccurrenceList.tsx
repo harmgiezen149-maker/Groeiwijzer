@@ -30,6 +30,8 @@ export function OccurrenceList({
   const router = useRouter();
   const [rows, setRows] = useState(initialRows);
   const [fout, setFout] = useState<string | null>(null);
+  /** Wat er net is afgevinkt, om een misklik terug te kunnen draaien. */
+  const [laatst, setLaatst] = useState<{ row: AgendaRow; actie: 'complete' | 'skip' } | null>(null);
 
   const groups = useMemo(() => {
     if (groupBy === 'geen') return [{ key: '', name: '', rows }];
@@ -48,18 +50,18 @@ export function OccurrenceList({
 
   async function call(id: string, actie: 'complete' | 'skip' | 'reopen', body?: unknown) {
     const vorige = rows;
-    // Optimistisch: de rij verandert meteen, bij een fout draaien we terug.
-    setRows((huidig) =>
-      huidig.map((row) =>
-        row.id === id
-          ? {
-              ...row,
-              status:
-                actie === 'complete' ? 'gedaan' : actie === 'skip' ? 'overgeslagen' : 'open',
-            }
-          : row,
-      ),
-    );
+    const rij = rows.find((row) => row.id === id);
+    // Afgevinkt is weg: de regel verdwijnt meteen uit de lijst en blijft
+    // alleen bovenaan staan om terug te draaien. Bij een fout keert hij terug.
+    if (actie === 'reopen') {
+      setRows((huidig) =>
+        huidig.map((row) => (row.id === id ? { ...row, status: 'open' } : row)),
+      );
+      setLaatst(null);
+    } else {
+      setRows((huidig) => huidig.filter((row) => row.id !== id));
+      if (rij) setLaatst({ row: rij, actie });
+    }
     setFout(null);
     try {
       const res = await fetch(`/api/occurrences/${encodeURIComponent(id)}/${actie}`, {
@@ -78,12 +80,59 @@ export function OccurrenceList({
       router.refresh();
     } catch (error) {
       setRows(vorige);
+      setLaatst(null);
       setFout(error instanceof Error ? error.message : 'Opslaan lukte niet');
     }
   }
 
+  /** Zet de laatste actie terug en laat de regel weer in de lijst zien. */
+  async function draaiTerug() {
+    if (!laatst) return;
+    const terug = laatst;
+    setLaatst(null);
+    setRows((huidig) =>
+      [...huidig, { ...terug.row, status: 'open' as const }].sort((a, b) =>
+        a.windowStart.localeCompare(b.windowStart),
+      ),
+    );
+    try {
+      const res = await fetch(`/api/occurrences/${encodeURIComponent(terug.row.id)}/reopen`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+      });
+      if (!res.ok) throw new Error('Terugdraaien lukte niet');
+      router.refresh();
+    } catch (error) {
+      setRows((huidig) => huidig.filter((row) => row.id !== terug.row.id));
+      setLaatst(terug);
+      setFout(error instanceof Error ? error.message : 'Terugdraaien lukte niet');
+    }
+  }
+
+  const ongedaan = laatst ? (
+    <p className="bw-card flex items-center gap-3 px-4 py-2.5 text-[13px]">
+      <span className="min-w-0 flex-1 truncate text-[var(--ink-quiet)]">
+        {laatst.actie === 'complete' ? 'Gedaan' : 'Overgeslagen'}: {laatst.row.title.toLowerCase()}
+        {zonderPlantnaam ? '' : ` bij ${laatst.row.plantName}`}
+      </span>
+      <button
+        type="button"
+        className="bw-btn bw-btn-ghost shrink-0 px-2 text-[13px]"
+        onClick={() => void draaiTerug()}
+      >
+        Ongedaan
+      </button>
+    </p>
+  ) : null;
+
   if (rows.length === 0) {
-    return <p className="bw-card p-5 text-sm text-[var(--ink-quiet)]">{emptyText}</p>;
+    return (
+      <div className="flex flex-col gap-2.5">
+        {ongedaan}
+        <p className="bw-card p-5 text-sm text-[var(--ink-quiet)]">{emptyText}</p>
+      </div>
+    );
   }
 
   return (
@@ -93,6 +142,7 @@ export function OccurrenceList({
           {fout}
         </p>
       ) : null}
+      {ongedaan}
 
       {groups.map((group) => (
         <section key={group.key}>
@@ -177,14 +227,18 @@ function OccurrenceRow({
     );
   }
 
-  const vlag = row.weatherFlag ? (
-    <span
-      className="text-[11.5px] font-semibold"
-      style={{
-        color: row.weatherFlag === 'urgent' ? 'var(--zinnia-dark)' : 'var(--cornflower-dark)',
-      }}
-    >
-      {WEATHER_FLAG_LABEL[row.weatherFlag]}
+  const merk = row.weatherFlag
+    ? {
+        tekst: WEATHER_FLAG_LABEL[row.weatherFlag],
+        kleur: row.weatherFlag === 'urgent' ? 'var(--zinnia-dark)' : 'var(--cornflower-dark)',
+      }
+    : row.achterstallig
+      ? { tekst: 'Blijven liggen', kleur: 'var(--zinnia-dark)' }
+      : null;
+
+  const vlag = merk ? (
+    <span className="text-[11.5px] font-semibold" style={{ color: merk.kleur }}>
+      {merk.tekst}
     </span>
   ) : null;
 
