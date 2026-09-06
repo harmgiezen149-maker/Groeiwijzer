@@ -237,3 +237,58 @@ Verder is `w-[calc(100%+2.5rem)]` vervangen door `.bw-randloos`. Die
 Tailwind-klasse leverde ongeldige CSS op (calc heeft spaties om de `+` nodig),
 waardoor de brede foto's boven aan het scherm stilletjes niet tot de rand
 liepen.
+
+## Kleur en lettertype ververst naar de mintrichting (6 september 2026)
+
+De canvas in Claude Design is na "Richting Kwekerij" nog één keer bijgesteld:
+op verzoek is de look aangepast aan een aangeleverde referentieafbeelding.
+Die laatste versie staat gearchiveerd in
+`docs/ontwerp/kleurrichtingen/RichtingD-mint.dc.html` en vervangt de kleur- en
+lettertypekeuzes uit `bloeiwijzer-ontwerp.dc.html` (dat bestand beschrijft nog
+vorm en schermindeling correct, alleen niet meer de kleur). Dit is een
+kleurenrestyle, geen herbouw: alle logica, tests, PWA, pushmeldingen,
+uitnodigingen en cron-taken blijven ongewijzigd.
+
+**Palet.** Vlak mintgroen (`--paper` #eaf6dc, `--paper-sunken` #f6fbef) met
+felle lime, paars, roze en geel als accent, in plaats van het warme
+crème/dahlia-palet. Dahlia, zinnia, leaf, cornflower, wijnrood en lila
+behielden hun rol maar kregen nieuwe hexwaarden; `--yellow` en `--lime` zijn
+nieuw. De taaktypekleuren wijken nu ook onderling meer af: bemesten kreeg voor
+het eerst een eigen kleur (geel) los van verpotten (oranje) — de aangeleverde
+legenda onderscheidt die twee expliciet, de vorige versie deelde er nog één.
+
+**Contrast opnieuw doorgerekend**, dezelfde methode als bij Richting A:
+
+| Token | Was | Nu | Contrast |
+|---|---|---|---|
+| `--ink-soft` | #4f5f52 (6,6:1) | #3d4f42 | 8,3:1 |
+| `--ink-quiet` | #5b6b5d (5,5:1) | #55665a | 5,8:1 |
+| `--ink-faint` | #657566 (4,7:1) | #647566 | 4,7:1 |
+| `--ink-muted` | #687868 (4,5:1) | #66766a | 4,6:1 |
+
+Het nieuwe roze (`--dahlia` #e91e8c) haalt zelf maar 4,2:1 op wit — net onder
+de 4,5:1 voor gewone tekst, al ruim boven de 3:1 voor grote/vette tekst en
+niet-tekstuele UI. Waar het als klein tekstlabel dient (`.bw-btn-primary`,
+`.bw-btn-nieuw`, `.bw-weekdag-nu`, `.bw-nav-actief`) is dat nu `--dahlia-dark`
+(#c4126f, 5,7:1). Waar het puur decoratief is — de cameraknop, de schakelaar,
+het vinkje bij een checkbox — bleef het volle `--dahlia` staan, zoals de
+bestaande `-dark`-varianten dat al voor de andere kleuren deden.
+
+Geel (#ffc629) en limoen (#a8e51a) halen 1,5–1,6:1 op wit: die staan
+uitsluitend als vlak met donkere inkt erop (9,5:1 en 9,9:1), nooit als
+tekstkleur — dezelfde regel als voor de taakbolletjes.
+
+**Lettertype.** Bricolage Grotesque → Baloo 2 (koppen), Karla → Nunito
+(lopende tekst), in `src/app/layout.tsx`. De CSS-variabelen heten voor het
+gemak nog `--font-bricolage` en `--font-karla`; hernoemen zou elk bestand dat
+ze aanroept raken zonder functioneel voordeel.
+
+**Achtergrond.** De aquarel-bloesemfoto (`bloesem.webp`) paste bij het vorige,
+zachtere palet, niet bij "plat en fel" uit de nieuwe opdracht. Ervoor in de
+plaats: twee zachte kleurgloeden (limoen en roze) die wegvloeien in het
+mintgroen, puur in CSS. De losse foto's blijven ongebruikt in `public/`
+staan.
+
+**App-icoon.** Zelfde bloemvorm, herkleurd van dahlia/zinnia naar het nieuwe
+roze/oranje op de nieuwe mintgroene ondergrond (`public/icon-*.png`,
+`src/app/icon.png`, `src/app/apple-icon.png`).

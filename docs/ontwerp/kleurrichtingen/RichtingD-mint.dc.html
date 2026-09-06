@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+body{margin:0;background:#EAF6DC;}
+::selection{background:#E91E8C33;}
+a{color:#6B2FB0;} a:hover{color:#E91E8C;}
+</style>
+<script type="text/babel" src="./ios-frame.jsx"></script>
+<script type="text/babel" src="./browser-window.jsx"></script>
+</helmet>
+
+<div style="font-family:'Nunito',sans-serif;color:#1A2B1F;padding:56px 40px 120px;max-width:2400px;margin:0 auto;">
+
+  <div style="margin-bottom:56px;max-width:820px;">
+    <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;color:#E91E8C;text-transform:uppercase;margin-bottom:10px;">Ontwerpoverdracht</div>
+    <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:48px;line-height:1.05;margin:0 0 16px;">{{ appName }} — schermontwerp</h1>
+    <p style="font-size:17px;line-height:1.6;color:#3d4f42;margin:0;">Vrolijke, felkleurige tuinonderhoud-app: lime, paars, roze en geel op een frisse mintgroene basis, met platte speelse iconografie en een verhoogde camera-knop voor "plant toevoegen".</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;margin-bottom:64px;padding:20px 24px;background:#fff;border-radius:20px;box-shadow:0 6px 18px rgba(26,43,31,0.1);">
+    <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:#6b7a6e;">Taaktypes</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#E91E8C;display:inline-block;"></i>snoeien</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#FFC629;display:inline-block;"></i>bemesten</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#3E8EF7;display:inline-block;"></i>water</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#6B2FB0;display:inline-block;"></i>winterbescherming</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#FF8A00;display:inline-block;"></i>verpotten</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#B0165C;display:inline-block;"></i>ziektecontrole</span>
+    <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;"><i style="width:12px;height:12px;border-radius:50%;background:#1FA971;display:inline-block;"></i>oogsten</span>
+  </div>
+
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:26px;margin:0 0 24px;">Mobiel</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;margin-bottom:80px;">
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">01 · /login</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="{{ appName }}" hint-size="402,874">
+        <div style="width:100%;height:100%;background:linear-gradient(180deg,#EAF6DC 0%,#fff 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;box-sizing:border-box;gap:32px;">
+          <div style="width:120px;height:120px;border-radius:50%;background:#A8E51A;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(107,47,176,0.2);">
+            <div style="width:56px;height:56px;border-radius:8px 8px 8px 30px;background:#6B2FB0;"></div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:38px;color:#1FA971;">{{ appName }}</div>
+            <div style="font-size:15px;color:#4f5f52;margin-top:8px;font-weight:600;">Bijhouden wat je tuin nodig heeft — en wanneer.</div>
+          </div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:12px;">
+            <button style="width:100%;height:52px;border:none;border-radius:16px;background:#1A2B1F;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;box-shadow:0 6px 14px rgba(26,43,31,0.25);">Doorgaan met Google</button>
+            <div style="display:flex;align-items:center;gap:10px;color:#a9ab9c;font-size:13px;font-weight:700;"><i style="flex:1;height:2px;background:#dcefc9;"></i>of<i style="flex:1;height:2px;background:#dcefc9;"></i></div>
+            <input placeholder="jouw@email.nl" style="width:100%;height:52px;border-radius:16px;border:2px solid #dcefc9;background:#fff;padding:0 16px;font-family:'Nunito',sans-serif;font-size:15px;box-sizing:border-box;color:#1A2B1F;font-weight:600;"/>
+            <button style="width:100%;height:52px;border:none;border-radius:16px;background:#E91E8C;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;box-shadow:0 6px 14px rgba(233,30,140,0.3);">Stuur inloglink</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">02 · / (startscherm)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Vandaag" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="padding:10px 20px 14px;">
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:27px;">Deze maand 🌿</div>
+          </div>
+          <sc-if value="{{ showUrgentBanner }}" hint-placeholder-val="{{ true }}">
+          <div style="margin:0 20px 18px;padding:14px 16px;border-radius:18px;background:#FF8A00;color:#fff;display:flex;gap:12px;align-items:center;box-shadow:0 6px 14px rgba(255,138,0,0.35);">
+            <i style="width:11px;height:11px;border-radius:50%;background:#fff;flex-shrink:0;"></i>
+            <div style="font-size:13.5px;line-height:1.4;font-weight:600;"><strong>Nachtvorst binnen 48 uur.</strong> Haal kwetsbare planten binnen of dek ze af.</div>
+          </div>
+          </sc-if>
+          <div style="margin:0 20px 20px;padding:16px;border-radius:20px;background:#A8E51A;display:flex;align-items:center;gap:14px;box-shadow:0 8px 18px rgba(168,229,26,0.4);">
+            <div style="flex:1;">
+              <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;">Scan je plant</div>
+              <div style="font-size:12.5px;color:#33461f;font-weight:600;">Herken en volg je planten meteen op</div>
+            </div>
+            <div style="width:52px;height:52px;border-radius:16px;background:#6B2FB0;flex-shrink:0;box-shadow:0 4px 10px rgba(107,47,176,0.4);"></div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:0 20px;display:flex;flex-direction:column;gap:22px;">
+            <div>
+              <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:10px;">Achtertuin border noord</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;gap:12px;align-items:center;background:#fff;border-radius:20px;padding:10px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+                  <div style="width:56px;height:56px;flex-shrink:0;border-radius:16px;background:#1FA971;box-shadow:0 4px 8px rgba(31,169,113,0.3);"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:14.5px;font-weight:700;">Hortensia 'Endless Summer'</div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6b7a6e;font-weight:600;"><i style="width:8px;height:8px;border-radius:50%;background:#E91E8C;display:inline-block;"></i>Snoeien</div>
+                  </div>
+                  <button style="width:38px;height:38px;border-radius:50%;border:none;background:#F1E6FA;flex-shrink:0;"></button>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;background:#fff;border-radius:20px;padding:10px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+                  <div style="width:56px;height:56px;flex-shrink:0;border-radius:16px;background:#FFC629;box-shadow:0 4px 8px rgba(255,198,41,0.3);"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:14.5px;font-weight:700;">Rozenstruik 'Bonica'</div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6b7a6e;font-weight:600;"><i style="width:8px;height:8px;border-radius:50%;background:#FFC629;display:inline-block;"></i>Bemesten</div>
+                  </div>
+                  <button style="width:38px;height:38px;border-radius:50%;border:none;background:#F1E6FA;flex-shrink:0;"></button>
+                </div>
+              </div>
+            </div>
+            <div style="padding-bottom:8px;">
+              <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:6px;">Later dit jaar</div>
+              <div style="font-size:13px;color:#a9ab9c;font-weight:600;">6 taken tussen mei en september</div>
+            </div>
+          </div>
+          <div style="position:relative;display:flex;justify-content:space-around;align-items:center;padding:12px 0 20px;border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 20px rgba(26,43,31,0.12);">
+            <div style="font-size:11px;color:#1FA971;font-weight:800;text-align:center;">Huis</div>
+            <div style="font-size:11px;color:#9aa596;font-weight:700;text-align:center;">Planten</div>
+            <div style="width:52px;height:52px;border-radius:50%;background:#FFC629;position:relative;top:-22px;box-shadow:0 8px 16px rgba(255,198,41,0.5);"></div>
+            <div style="font-size:11px;color:#9aa596;font-weight:700;text-align:center;">Agenda</div>
+            <div style="font-size:11px;color:#9aa596;font-weight:700;text-align:center;">Profiel</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">03 · /planten</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Planten" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;">
+          <div style="padding:10px 20px 12px;">
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:27px;margin-bottom:12px;">Planten</div>
+            <input placeholder="Zoek een plant" style="width:100%;height:44px;border-radius:14px;border:2px solid #dcefc9;padding:0 14px;font-family:'Nunito',sans-serif;font-size:14px;box-sizing:border-box;background:#fff;font-weight:600;"/>
+            <div style="display:flex;gap:8px;margin-top:10px;overflow:hidden;">
+              <span style="background:#1A2B1F;color:#fff;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:20px;">Alle locaties</span>
+              <span style="background:#fff;border:2px solid #dcefc9;color:#3d4f42;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:20px;">Categorie</span>
+              <span style="background:#fff;border:2px solid #dcefc9;color:#3d4f42;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:20px;">Open taken</span>
+            </div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:6px 20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start;">
+            <div><div style="width:100%;aspect-ratio:1;border-radius:22px;background:#1FA971;box-shadow:0 6px 14px rgba(31,169,113,0.3);"></div><div style="font-size:13.5px;font-weight:700;margin-top:8px;">Hortensia</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Achtertuin</div></div>
+            <div><div style="width:100%;aspect-ratio:1;border-radius:22px;background:#E91E8C;box-shadow:0 6px 14px rgba(233,30,140,0.3);"></div><div style="font-size:13.5px;font-weight:700;margin-top:8px;">Vlinderstruik</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Achtertuin</div></div>
+            <div><div style="width:100%;aspect-ratio:1;border-radius:22px;background:#6B2FB0;box-shadow:0 6px 14px rgba(107,47,176,0.3);"></div><div style="font-size:13.5px;font-weight:700;margin-top:8px;">Clematis</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Voortuin</div></div>
+            <div><div style="width:100%;aspect-ratio:1;border-radius:22px;background:#A8E51A;box-shadow:0 6px 14px rgba(168,229,26,0.3);"></div><div style="font-size:13.5px;font-weight:700;margin-top:8px;">Buxushaag</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Voortuin</div></div>
+            <div><div style="width:100%;aspect-ratio:1;border-radius:22px;background:#FFC629;box-shadow:0 6px 14px rgba(255,198,41,0.3);"></div><div style="font-size:13.5px;font-weight:700;margin-top:8px;">Lavendel</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Terraspotten</div></div>
+            <div><div style="width:100%;aspect-ratio:1;border-radius:22px;background:#FF8A00;box-shadow:0 6px 14px rgba(255,138,0,0.3);"></div><div style="font-size:13.5px;font-weight:700;margin-top:8px;">Framboos</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Moestuinbak</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-around;align-items:center;padding:12px 0 20px;border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 20px rgba(26,43,31,0.12);">
+            <div style="font-size:11px;color:#9aa596;font-weight:700;">Huis</div><div style="font-size:11px;color:#1FA971;font-weight:800;">Planten</div>
+            <div style="width:52px;height:52px;border-radius:50%;background:#FFC629;position:relative;top:-22px;box-shadow:0 8px 16px rgba(255,198,41,0.5);"></div>
+            <div style="font-size:11px;color:#9aa596;font-weight:700;">Agenda</div><div style="font-size:11px;color:#9aa596;font-weight:700;">Profiel</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">04 · /planten/[id]</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Hortensia" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="height:200px;flex-shrink:0;background:#1FA971;display:flex;align-items:center;justify-content:center;font-family:'Nunito',monospace;font-size:11px;color:#fff;font-weight:700;">foto: hortensia</div>
+          <div style="flex:1;overflow:hidden;padding:16px 20px;display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:23px;">Hortensia 'Endless Summer'</div>
+              <div style="font-size:13px;color:#8a9a8c;font-style:italic;font-weight:600;">Hydrangea macrophylla</div>
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                <span style="background:#F1E6FA;color:#6B2FB0;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px;">struik</span>
+                <span style="background:#FFF3D6;color:#B27C00;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px;">winterhard tot -15°C</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:8px;">Zorgprofiel</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 4px 10px rgba(26,43,31,0.06);">
+                  <i style="width:9px;height:9px;border-radius:50%;background:#E91E8C;flex-shrink:0;"></i>
+                  <div style="flex:1;font-size:13.5px;font-weight:600;">Uitgebloeide bloemen wegknippen <span style="color:#8a9a8c;">· mrt–apr</span></div>
+                  <div style="width:36px;height:20px;border-radius:10px;background:#1FA971;position:relative;flex-shrink:0;"><div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;"></div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 4px 10px rgba(26,43,31,0.06);">
+                  <i style="width:9px;height:9px;border-radius:50%;background:#3E8EF7;flex-shrink:0;"></i>
+                  <div style="flex:1;font-size:13.5px;font-weight:600;">Water geven bij droogte <span style="color:#8a9a8c;">· weer-gestuurd</span></div>
+                  <div style="width:36px;height:20px;border-radius:10px;background:#1FA971;position:relative;flex-shrink:0;"><div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;align-items:center;padding:12px 0 20px;border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 20px rgba(26,43,31,0.12);">
+            <div style="font-size:11px;color:#9aa596;font-weight:700;">Huis</div><div style="font-size:11px;color:#1FA971;font-weight:800;">Planten</div>
+            <div style="width:52px;height:52px;border-radius:50%;background:#FFC629;position:relative;top:-22px;box-shadow:0 8px 16px rgba(255,198,41,0.5);"></div>
+            <div style="font-size:11px;color:#9aa596;font-weight:700;">Agenda</div><div style="font-size:11px;color:#9aa596;font-weight:700;">Profiel</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">05a · /planten/nieuw</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Plant toevoegen" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;padding:16px 20px;box-sizing:border-box;gap:14px;">
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:23px;">Nieuwe plant</div>
+          <div style="font-size:13.5px;color:#5c6b5f;font-weight:600;">Kies hoe je wilt beginnen.</div>
+          <button style="display:flex;align-items:center;gap:14px;background:#A8E51A;border:none;border-radius:20px;padding:18px;text-align:left;box-shadow:0 8px 16px rgba(168,229,26,0.35);">
+            <div style="width:48px;height:48px;border-radius:14px;background:#6B2FB0;flex-shrink:0;"></div>
+            <div><div style="font-weight:700;font-size:15px;">Foto maken</div><div style="font-size:12.5px;color:#33461f;font-weight:600;">Herkenning + zorgprofiel</div></div>
+          </button>
+          <button style="display:flex;align-items:center;gap:14px;background:#fff;border:none;border-radius:20px;padding:18px;text-align:left;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+            <div style="width:48px;height:48px;border-radius:14px;background:#3E8EF7;flex-shrink:0;"></div>
+            <div><div style="font-weight:700;font-size:15px;">Link plakken</div><div style="font-size:12.5px;color:#8a9a8c;font-weight:600;">Vanaf een kwekerij- of infopagina</div></div>
+          </button>
+          <button style="display:flex;align-items:center;gap:14px;background:#fff;border:none;border-radius:20px;padding:18px;text-align:left;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+            <div style="width:48px;height:48px;border-radius:14px;background:#1FA971;flex-shrink:0;"></div>
+            <div><div style="font-weight:700;font-size:15px;">Zelf invullen</div><div style="font-size:12.5px;color:#8a9a8c;font-weight:600;">Handmatig, met onderhoud-voorstel</div></div>
+          </button>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">05b · bevestiging (foto)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Bevestigen" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="height:160px;flex-shrink:0;background:#6B2FB0;display:flex;align-items:center;justify-content:center;font-family:'Nunito',monospace;font-size:11px;color:#fff;font-weight:700;">foto: onbekende struik</div>
+          <div style="flex:1;overflow:hidden;padding:16px 20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;">Kies de juiste kandidaat</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="border:2.5px solid #E91E8C;border-radius:18px;padding:12px;background:#FCE8F3;"><div style="font-weight:700;font-size:14.5px;">Vlinderstruik</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Buddleja davidii · 92% zeker</div></div>
+              <div style="border:2px solid #e4e9dd;border-radius:18px;padding:12px;"><div style="font-weight:700;font-size:14.5px;">Sering</div><div style="font-size:12px;color:#8a9a8c;font-weight:600;">Syringa vulgaris · 41% zeker</div></div>
+            </div>
+            <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-top:4px;">Voorgesteld zorgprofiel</div>
+            <div style="font-size:13.5px;color:#3d4f42;line-height:1.5;font-weight:600;">3 taken: terugsnoeien (feb–mrt), bemesten (apr), controle op meeldauw (jun–aug)</div>
+          </div>
+          <div style="padding:14px 20px 22px;">
+            <button style="width:100%;height:52px;border:none;border-radius:16px;background:#E91E8C;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;box-shadow:0 8px 16px rgba(233,30,140,0.3);">Opslaan als Vlinderstruik</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">05c · bevestiging (link)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Bevestigen" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;padding:16px 20px;box-sizing:border-box;gap:14px;overflow:hidden;">
+          <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;">Van kwekerij.nl/clematis-nelly</div>
+          <div style="background:#fff;border-radius:18px;padding:14px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+            <div style="font-weight:700;font-size:15px;">Clematis 'Nelly Moser'</div>
+            <div style="font-size:12px;color:#8a9a8c;margin-bottom:8px;font-weight:600;">klimplant · gevonden op de pagina</div>
+            <div style="font-size:13px;color:#3d4f42;line-height:1.5;font-weight:600;">Snoeigroep 2: licht snoeien in februari, na de eerste bloei terugsnoeien.</div>
+          </div>
+          <label style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;">Locatie</label>
+          <select style="height:48px;border-radius:14px;border:2px solid #dcefc9;padding:0 14px;font-family:'Nunito',sans-serif;font-size:14.5px;background:#fff;font-weight:600;"><option>Voortuin</option></select>
+          <div style="flex:1;"></div>
+          <button style="width:100%;height:52px;border:none;border-radius:16px;background:#E91E8C;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;box-shadow:0 8px 16px rgba(233,30,140,0.3);">Plant opslaan</button>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">05d · handmatig invullen</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Handmatig" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;padding:16px 20px;box-sizing:border-box;gap:12px;overflow:hidden;">
+          <label style="font-size:12px;color:#6b8a5f;font-weight:700;">Naam</label>
+          <input value="Lavendel" style="height:48px;border-radius:14px;border:2px solid #dcefc9;padding:0 14px;font-family:'Nunito',sans-serif;font-size:14.5px;background:#fff;font-weight:600;"/>
+          <label style="font-size:12px;color:#6b8a5f;font-weight:700;">Categorie</label>
+          <select style="height:48px;border-radius:14px;border:2px solid #dcefc9;padding:0 14px;font-family:'Nunito',sans-serif;font-size:14.5px;background:#fff;font-weight:600;"><option>vaste plant</option></select>
+          <label style="font-size:12px;color:#6b8a5f;font-weight:700;">Locatie</label>
+          <select style="height:48px;border-radius:14px;border:2px solid #dcefc9;padding:0 14px;font-family:'Nunito',sans-serif;font-size:14.5px;background:#fff;font-weight:600;"><option>Terraspotten</option></select>
+          <div style="flex:1;"></div>
+          <button style="width:100%;height:52px;border:none;border-radius:16px;background:#1A2B1F;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;box-shadow:0 8px 16px rgba(26,43,31,0.25);">Onderhoud voorstellen</button>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">06 · /agenda</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Agenda" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="padding:10px 20px 8px;">
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;">Maart 2027</div>
+          </div>
+          <div style="padding:0 20px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:10.5px;color:#9aa596;font-weight:700;text-align:center;margin-bottom:4px;">
+            <div>M</div><div>D</div><div>W</div><div>D</div><div>V</div><div>Z</div><div>Z</div>
+          </div>
+          <div style="padding:0 20px 12px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-weight:700;">
+            <div></div><div></div><div style="text-align:center;font-size:12px;padding:4px 0;">1</div><div style="text-align:center;font-size:12px;padding:4px 0;">2</div><div style="text-align:center;font-size:12px;padding:4px 0;position:relative;">3<i style="width:5px;height:5px;border-radius:50%;background:#E91E8C;position:absolute;bottom:0;left:50%;transform:translateX(-50%);"></i></div><div style="text-align:center;font-size:12px;padding:4px 0;">4</div><div style="text-align:center;font-size:12px;padding:4px 0;">5</div>
+            <div style="text-align:center;font-size:12px;padding:4px 0;">6</div><div style="text-align:center;font-size:12px;padding:4px 0;">7</div><div style="text-align:center;font-size:12px;padding:4px 0;background:#1FA971;color:#fff;border-radius:50%;">8</div><div style="text-align:center;font-size:12px;padding:4px 0;position:relative;">9<i style="width:5px;height:5px;border-radius:50%;background:#3E8EF7;position:absolute;bottom:0;left:50%;transform:translateX(-50%);"></i></div><div style="text-align:center;font-size:12px;padding:4px 0;">10</div><div style="text-align:center;font-size:12px;padding:4px 0;">11</div><div style="text-align:center;font-size:12px;padding:4px 0;position:relative;">12<i style="width:5px;height:5px;border-radius:50%;background:#FFC629;position:absolute;bottom:0;left:50%;transform:translateX(-50%);"></i></div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:8px 20px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;">8 maart</div>
+            <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 4px 10px rgba(26,43,31,0.06);">
+              <input type="checkbox" style="width:18px;height:18px;accent-color:#1FA971;"/>
+              <div style="flex:1;font-size:13.5px;font-weight:600;">Hortensia — snoeien</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 4px 10px rgba(26,43,31,0.06);">
+              <input type="checkbox" style="width:18px;height:18px;accent-color:#1FA971;"/>
+              <div style="flex:1;font-size:13.5px;font-weight:600;">Buxushaag — vorm snoeien</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;align-items:center;padding:12px 0 20px;border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -8px 20px rgba(26,43,31,0.12);">
+            <div style="font-size:11px;color:#9aa596;font-weight:700;">Huis</div><div style="font-size:11px;color:#9aa596;font-weight:700;">Planten</div>
+            <div style="width:52px;height:52px;border-radius:50%;background:#FFC629;position:relative;top:-22px;box-shadow:0 8px 16px rgba(255,198,41,0.5);"></div>
+            <div style="font-size:11px;color:#1FA971;font-weight:800;">Agenda</div><div style="font-size:11px;color:#9aa596;font-weight:700;">Profiel</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">07 · /locaties</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Locaties" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;padding:16px 20px;box-sizing:border-box;gap:12px;overflow:hidden;">
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;margin-bottom:4px;">Locaties</div>
+          <div style="background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+            <div style="font-weight:700;font-size:15px;">Achtertuin border noord</div>
+            <div style="font-size:12.5px;color:#8a9a8c;font-weight:600;display:flex;gap:6px;align-items:center;margin-top:2px;"><i style="width:8px;height:8px;border-radius:50%;background:#FF8A00;display:inline-block;"></i>zon · 4 planten · 2 open taken</div>
+          </div>
+          <div style="background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+            <div style="font-weight:700;font-size:15px;">Voortuin</div>
+            <div style="font-size:12.5px;color:#8a9a8c;font-weight:600;display:flex;gap:6px;align-items:center;margin-top:2px;"><i style="width:8px;height:8px;border-radius:50%;background:#1FA971;display:inline-block;"></i>halfschaduw · 2 planten · 1 open taak</div>
+          </div>
+          <div style="background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+            <div style="font-weight:700;font-size:15px;">Moestuinbak</div>
+            <div style="font-size:12.5px;color:#8a9a8c;font-weight:600;display:flex;gap:6px;align-items:center;margin-top:2px;"><i style="width:8px;height:8px;border-radius:50%;background:#FF8A00;display:inline-block;"></i>zon · 2 planten · 1 open taak</div>
+          </div>
+          <div style="flex:1;"></div>
+          <button style="width:100%;height:50px;border:2.5px dashed #E91E8C;border-radius:16px;background:#FCE8F3;color:#E91E8C;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14.5px;">+ Nieuwe locatie</button>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">08 · /instellingen</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Instellingen" hint-size="402,874">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;padding:16px 20px;box-sizing:border-box;gap:16px;overflow:hidden;">
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;">Instellingen</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:8px;">Weer</div>
+            <div style="background:#fff;border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+              <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:600;">Locatie voor weerdata</span><span style="font-size:13px;color:#8a9a8c;font-weight:700;">Utrecht</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:600;">Nachtvorst-alarm</span><div style="width:36px;height:20px;border-radius:10px;background:#1FA971;position:relative;"><div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;"></div></div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:600;">Droogte-waarschuwing</span><div style="width:36px;height:20px;border-radius:10px;background:#1FA971;position:relative;"><div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;"></div></div></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:8px;">Gegevens</div>
+            <button style="width:100%;background:#fff;border:none;border-radius:16px;padding:12px 14px;text-align:left;font-size:13.5px;font-weight:600;margin-bottom:8px;box-shadow:0 4px 10px rgba(26,43,31,0.06);">Taken opnieuw genereren</button>
+            <button style="width:100%;background:#fff;border:none;border-radius:16px;padding:12px 14px;text-align:left;font-size:13.5px;font-weight:600;box-shadow:0 4px 10px rgba(26,43,31,0.06);">Exporteren als JSON</button>
+          </div>
+          <div style="flex:1;"></div>
+          <button style="width:100%;background:none;border:none;text-align:left;font-size:13.5px;font-weight:700;color:#B0165C;padding:8px 0;">Uitloggen</button>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+
+  <sc-if value="{{ showDesktop }}" hint-placeholder-val="{{ true }}">
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:26px;margin:0 0 12px;">Desktop / tablet</h2>
+  <p style="font-size:14.5px;color:#6b7a6e;margin:0 0 24px;max-width:640px;">Zelfde mobiele lay-out, uitvergroot: onderste navigatie met verhoogde scan-knop blijft staan, kaarten en tekst schalen mee.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;margin-bottom:40px;">
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">/ (startscherm) — desktop</div>
+      <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 900 }}" height="{{ 700 }}" url="{{ desktopUrl }}" hint-size="900,700">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:600px;max-width:100%;flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:28px 0 16px;"><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:32px;">Deze maand 🌿</div></div>
+            <div style="margin-bottom:16px;padding:16px 18px;border-radius:18px;background:#FF8A00;color:#fff;display:flex;gap:12px;align-items:center;box-shadow:0 8px 16px rgba(255,138,0,0.3);">
+              <i style="width:10px;height:10px;border-radius:50%;background:#fff;flex-shrink:0;"></i>
+              <div style="font-size:15px;font-weight:600;"><strong>Nachtvorst binnen 48 uur.</strong> Haal kwetsbare planten binnen of dek ze af.</div>
+            </div>
+            <div style="font-size:13.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:12px;">Achtertuin border noord</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+              <div style="display:flex;gap:14px;align-items:center;background:#fff;border-radius:20px;padding:14px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+                <div style="width:64px;height:64px;flex-shrink:0;border-radius:18px;background:#1FA971;box-shadow:0 4px 10px rgba(31,169,113,0.3);"></div>
+                <div style="flex:1;min-width:0;"><div style="font-size:16px;font-weight:700;">Hortensia</div><div style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#6b7a6e;font-weight:600;"><i style="width:8px;height:8px;border-radius:50%;background:#E91E8C;display:inline-block;"></i>Snoeien</div></div>
+                <button style="width:42px;height:42px;border-radius:50%;border:none;background:#F1E6FA;flex-shrink:0;"></button>
+              </div>
+              <div style="display:flex;gap:14px;align-items:center;background:#fff;border-radius:20px;padding:14px;box-shadow:0 6px 14px rgba(26,43,31,0.08);">
+                <div style="width:64px;height:64px;flex-shrink:0;border-radius:18px;background:#FFC629;box-shadow:0 4px 10px rgba(255,198,41,0.3);"></div>
+                <div style="flex:1;min-width:0;"><div style="font-size:16px;font-weight:700;">Rozenstruik</div><div style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#6b7a6e;font-weight:600;"><i style="width:8px;height:8px;border-radius:50%;background:#FFC629;display:inline-block;"></i>Bemesten</div></div>
+                <button style="width:42px;height:42px;border-radius:50%;border:none;background:#F1E6FA;flex-shrink:0;"></button>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;align-items:center;gap:56px;padding:14px 0 20px;background:#fff;box-shadow:0 -8px 20px rgba(26,43,31,0.12);width:100%;">
+            <div style="font-size:12px;color:#1FA971;font-weight:800;">Huis</div><div style="font-size:12px;color:#9aa596;font-weight:700;">Planten</div>
+            <div style="width:52px;height:52px;border-radius:50%;background:#FFC629;position:relative;top:-20px;box-shadow:0 8px 16px rgba(255,198,41,0.5);"></div>
+            <div style="font-size:12px;color:#9aa596;font-weight:700;">Agenda</div><div style="font-size:12px;color:#9aa596;font-weight:700;">Profiel</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Nunito',monospace;font-size:12px;color:#8a8371;">/agenda — desktop</div>
+      <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 900 }}" height="{{ 700 }}" url="{{ desktopUrl }}" hint-size="900,700">
+        <div style="width:100%;height:100%;background:#F6FBEF;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:600px;max-width:100%;flex:1;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:28px 0 16px;"><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:32px;">Maart 2027</div></div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;font-size:12px;color:#9aa596;font-weight:700;text-align:center;margin-bottom:8px;">
+              <div>ma</div><div>di</div><div>wo</div><div>do</div><div>vr</div><div>za</div><div>zo</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:24px;font-weight:700;">
+              <div></div><div></div><div style="text-align:center;font-size:13.5px;padding:8px 0;">1</div><div style="text-align:center;font-size:13.5px;padding:8px 0;">2</div><div style="text-align:center;font-size:13.5px;padding:8px 0;position:relative;">3<i style="width:6px;height:6px;border-radius:50%;background:#E91E8C;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);"></i></div><div style="text-align:center;font-size:13.5px;padding:8px 0;">4</div><div style="text-align:center;font-size:13.5px;padding:8px 0;">5</div>
+              <div style="text-align:center;font-size:13.5px;padding:8px 0;">6</div><div style="text-align:center;font-size:13.5px;padding:8px 0;">7</div><div style="text-align:center;font-size:13.5px;padding:8px 0;background:#1FA971;color:#fff;border-radius:50%;">8</div><div style="text-align:center;font-size:13.5px;padding:8px 0;position:relative;">9<i style="width:6px;height:6px;border-radius:50%;background:#3E8EF7;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);"></i></div><div style="text-align:center;font-size:13.5px;padding:8px 0;">10</div><div style="text-align:center;font-size:13.5px;padding:8px 0;">11</div><div style="text-align:center;font-size:13.5px;padding:8px 0;position:relative;">12<i style="width:6px;height:6px;border-radius:50%;background:#FFC629;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);"></i></div>
+            </div>
+            <div style="font-size:13.5px;font-weight:700;letter-spacing:0.03em;color:#6b8a5f;text-transform:uppercase;margin-bottom:10px;">8 maart</div>
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:0 4px 10px rgba(26,43,31,0.06);">
+              <input type="checkbox" style="width:20px;height:20px;accent-color:#1FA971;"/><div style="flex:1;font-size:14.5px;font-weight:600;">Hortensia — snoeien</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;align-items:center;gap:56px;padding:14px 0 20px;background:#fff;box-shadow:0 -8px 20px rgba(26,43,31,0.12);width:100%;">
+            <div style="font-size:12px;color:#9aa596;font-weight:700;">Huis</div><div style="font-size:12px;color:#9aa596;font-weight:700;">Planten</div>
+            <div style="width:52px;height:52px;border-radius:50%;background:#FFC629;position:relative;top:-20px;box-shadow:0 8px 16px rgba(255,198,41,0.5);"></div>
+            <div style="font-size:12px;color:#1FA971;font-weight:800;">Agenda</div><div style="font-size:12px;color:#9aa596;font-weight:700;">Profiel</div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+  </sc-if>
+
+  <div style="max-width:820px;margin-top:24px;padding:24px;background:#fff;border-radius:20px;box-shadow:0 6px 18px rgba(26,43,31,0.08);">
+    <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;">Voor Claude Code</div>
+    <div style="font-size:14px;line-height:1.7;color:#3d4f42;">Nieuwe stijl: felle lime/paars/roze/geel op een frisse mintgroene basis, Baloo 2 (koppen) + Nunito (body), platte iconen zonder outline, verhoogde ronde scan-knop in de onderbalk als centrale actie voor "plant toevoegen". Het opvallende afvink-moment (bloem-animatie + kaart die wegschuift) uit §9 moet nog apart als interactie worden toegevoegd.</div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;appName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bloeiwijzer&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showUrgentBanner&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Startscherm&quot;},&quot;showDesktop&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      appName: this.props.appName ?? 'Bloeiwijzer',
+      showUrgentBanner: this.props.showUrgentBanner ?? true,
+      showDesktop: this.props.showDesktop ?? true,
+      desktopUrl: (this.props.appName ?? 'bloeiwijzer').toLowerCase() + '.app'
+    };
+  }
+}
+</script>
+</body>
+</html>

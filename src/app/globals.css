@@ -9,65 +9,70 @@
    ------------------------------------------------------------------ */
 
 :root {
-  /* Vlakken */
-  --paper: #fffbf2;          /* achtergrond van de app */
-  --paper-raised: #ffffff;   /* kaarten */
-  --paper-sunken: #f4efe1;   /* rustige vulling */
+  /* Vlakken
+     Ontwerp ververst 2026-09-06: felle lime/paars/roze/geel op een frisse
+     mintgroene basis, zie docs/ontwerp/bloeiwijzer-ontwerp.dc.html (herzien). */
+  --paper: #eaf6dc;           /* achtergrond van de app */
+  --paper-raised: #ffffff;    /* kaarten */
+  --paper-sunken: #f6fbef;    /* rustige vulling */
 
-  /* Tekst */
-  /* Het ontwerp gebruikt lichtere grijsgroenen (#8a9a8c, #9aa596). Die halen
-     op deze achtergrond geen AA-contrast, en §11 van de overdracht eist dat
-     wel. Deze tinten liggen in dezelfde familie maar komen alle vier boven
-     4,5:1 uit — zie de notitie in docs/ontwerp/AFWIJKINGEN.md. */
-  --ink: #23372b;        /* 12,3:1 */
-  --ink-soft: #4f5f52;   /*  6,6:1 */
-  --ink-quiet: #5b6b5d;  /*  5,5:1 */
-  --ink-faint: #657566;  /*  4,7:1 */
-  --ink-muted: #687868;  /*  4,5:1 */
+  /* Tekst
+     Zelfde methode als voorheen: de ontwerptinten halen geen AA-contrast op
+     deze achtergrond, dus deze ladder is herrekend voor #f6fbef/#eaf6dc.
+     Zie docs/ontwerp/AFWIJKINGEN.md. */
+  --ink: #1a2b1f;        /* 14,2:1 */
+  --ink-soft: #3d4f42;   /*  8,3:1 */
+  --ink-quiet: #55665a;  /*  5,8:1 */
+  --ink-faint: #647566;  /*  4,7:1 */
+  --ink-muted: #66766a;  /*  4,6:1 */
 
   /* Lijnen */
-  --line: #eee3cb;
-  --line-strong: #e4ddc9;
+  --line: #dcefc9;
+  --line-strong: #cfe6b3;
 
   /* Accenten */
-  --dahlia: #d6246e;         /* primaire actie */
-  --dahlia-dark: #b41e5c;
-  --dahlia-wash: #d6246e14;  /* zachte vulling achter een keuze */
-  --zinnia: #ff8a3d;         /* urgentie */
-  --zinnia-dark: #a8511a;
-  --leaf: #2f8f5b;           /* afgerond — als vlak, niet achter witte tekst */
-  --leaf-dark: #246d45;      /* wit hierop haalt 6,3:1 */
-  --cornflower: #4e7fd4;     /* water en weer */
-  --cornflower-dark: #33589b;
-  --wijnrood: #a13a5c;       /* uitloggen, verwijderen */
-  --lila: #7a5cd6;           /* vierde locatiekleur */
+  --dahlia: #e91e8c;         /* primaire actie, snoeien */
+  --dahlia-dark: #c4126f;    /* 5,7:1 wit — knopvulling met tekst */
+  --dahlia-wash: #e91e8c14;  /* zachte vulling achter een keuze */
+  --zinnia: #ff8a00;         /* urgentie, verpotten */
+  --zinnia-dark: #a85a00;
+  --leaf: #1fa971;           /* afgerond, oogsten — als vlak, niet achter witte tekst */
+  --leaf-dark: #0a5d3d;      /* wit hierop haalt 7,9:1 */
+  --cornflower: #3e8ef7;     /* water en weer */
+  --cornflower-dark: #2a6fd6;
+  --wijnrood: #b0165c;       /* uitloggen, verwijderen, ziektecontrole */
+  --lila: #6b2fb0;           /* winterbescherming, vijfde locatiekleur */
+  --yellow: #ffc629;         /* bemesten — altijd met donkere inkt, nooit als tekstkleur */
+  --yellow-dark: #8f5a00;
+  --lime: #a8e51a;           /* scanknop, delen — altijd met donkere inkt */
 
-  /* Pasteltegels. Wit op de volle kleuren haalt geen AA (leaf 3,9:1,
-     cornflower 3,6:1); een lichte tint met een donkere inkt uit dezelfde
-     familie is even kleurrijk en leest wel. */
-  --tint-dahlia: #ffd3e3;
-  --tint-zinnia: #ffe0c2;
-  --tint-leaf: #bfe6cd;
-  --tint-cornflower: #cfe0fb;
-  --tint-lila: #e2d8fb;
-  --op-dahlia: #8f1750;      /*  6,6:1 op de tint */
-  --op-zinnia: #7a3a0c;      /*  6,9:1 */
-  --op-leaf: #0f5133;        /*  8,1:1 */
-  --op-cornflower: #274a86;  /*  7,2:1 */
-  --op-lila: #452c9e;        /*  7,4:1 */
+  /* Pasteltegels. Wit op de volle kleuren haalt geen AA; een lichte tint met
+     een donkere inkt uit dezelfde familie is even kleurrijk en leest wel. */
+  --tint-dahlia: #fce8f3;
+  --tint-zinnia: #ffe8d2;
+  --tint-leaf: #d9f2e3;
+  --tint-cornflower: #dcebff;
+  --tint-lila: #f1e6fa;
+  --tint-yellow: #fff3d6;
+  --op-dahlia: #b0165c;      /*  5,8:1 op de tint */
+  --op-zinnia: #8a4a00;      /*  5,8:1 */
+  --op-leaf: #0f5133;        /*  7,9:1 */
+  --op-cornflower: #1b4b99;  /*  6,9:1 */
+  --op-lila: #4b2286;        /*  9,3:1 */
+  --op-yellow: #8f5a00;      /*  5,3:1 */
 
   /* Taaktypen — kleur is informatie, geen decoratie.
      Deze kleuren staan altijd op een bolletje of een balkje,
      nooit als tekstkleur: daar zou het contrast tekortschieten. */
-  --taak-snoeien: #d6246e;
-  --taak-bemesten: #ff8a3d;
-  --taak-water: #4e7fd4;
-  --taak-winterbescherming: #7fb8c4;
-  --taak-verpotten: #c17a4e;
-  --taak-ziektecontrole: #a13a5c;
-  --taak-oogsten: #2f8f5b;
-  --taak-delen: #0f7c78;
-  --taak-planten: #7a9e3c;
+  --taak-snoeien: #e91e8c;
+  --taak-bemesten: #ffc629;
+  --taak-water: #3e8ef7;
+  --taak-winterbescherming: #6b2fb0;
+  --taak-verpotten: #ff8a00;
+  --taak-ziektecontrole: #b0165c;
+  --taak-oogsten: #1fa971;
+  --taak-delen: #a8e51a;
+  --taak-planten: #4e9a3a;
   --taak-overig: #8a8371;
 
   /* Vorm */
@@ -136,8 +141,9 @@ body {
   line-height: 1.5;
 }
 
-/* Bloesem achter alles: een band bovenin die wegvloeit in het crème, met
-   twee zachte gloeden voor de warmte. Vast, dus hij schuift niet mee. */
+/* Twee zachte gloeden — lime en roze — die wegvloeien in het mintgroen.
+   Het nieuwe ontwerp is plat en fel, dus geen aquarelfoto meer op de
+   achtergrond; alleen een subtiele kleurwas. Vast, dus hij schuift niet mee. */
 body::before {
   content: '';
   position: fixed;
@@ -145,31 +151,13 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(90% 42% at 12% 0%, #ffd0e24d 0%, transparent 62%),
-    radial-gradient(80% 40% at 92% 8%, #ffdcbc59 0%, transparent 66%),
-    linear-gradient(
-      180deg,
-      #fffbf226 0%,
-      #fffbf280 34%,
-      #fffbf2e6 58%,
-      var(--paper) 76%
-    ),
-    url("/bloesem-klein.webp") 50% 0 / 100% auto no-repeat,
+    radial-gradient(90% 42% at 12% 0%, #a8e51a26 0%, transparent 62%),
+    radial-gradient(80% 40% at 92% 8%, #e91e8c1f 0%, transparent 66%),
     var(--paper);
 }
 
-@media (min-width: 760px) {
-  body::before {
-    background-image:
-      radial-gradient(70% 46% at 14% 0%, #ffd0e24d 0%, transparent 62%),
-      radial-gradient(60% 44% at 90% 6%, #ffdcbc59 0%, transparent 66%),
-      linear-gradient(180deg, #fffbf226 0%, #fffbf280 34%, #fffbf2e6 58%, var(--paper) 76%),
-      url("/bloesem.webp");
-  }
-}
-
 ::selection {
-  background: #d6246e33;
+  background: #e91e8c33;
 }
 
 /* Zichtbare toetsenbordfocus, overal. */
@@ -229,7 +217,7 @@ body::before {
   color: var(--ink-faint);
 }
 
-/* Inlog- en uitnodigingsscherm: laat de bloesem van de achtergrond staan. */
+/* Inlog- en uitnodigingsscherm: laat de kleurwas van de achtergrond staan. */
 .bw-bloemen {
   background: transparent;
 }
@@ -273,7 +261,7 @@ body::before {
   cursor: not-allowed;
 }
 .bw-btn-primary {
-  background: var(--dahlia);
+  background: var(--dahlia-dark);
   color: #fff;
 }
 .bw-btn-primary:hover:not(:disabled) {
@@ -313,7 +301,7 @@ body::before {
 .bw-btn-nieuw {
   background: transparent;
   border: 1.5px dashed var(--dahlia);
-  color: var(--dahlia);
+  color: var(--dahlia-dark);
 }
 .bw-btn-nieuw:hover:not(:disabled) {
   background: var(--dahlia-wash);
@@ -553,7 +541,7 @@ body::before {
   text-decoration: none;
 }
 .bw-weekdag-nu {
-  background: var(--dahlia);
+  background: var(--dahlia-dark);
   color: #fff;
   box-shadow: 0 3px 10px rgb(214 36 110 / 0.3);
 }
@@ -650,7 +638,7 @@ body::before {
   box-shadow: var(--shadow-nav);
 }
 .bw-nav-actief {
-  background: var(--dahlia);
+  background: var(--dahlia-dark);
   color: #fff;
   border-radius: var(--pill);
   padding-inline: 0.85rem;
@@ -740,7 +728,7 @@ dialog::backdrop {
 @media print {
   .bw-geen-print { display: none !important; }
   body { background: #fff; }
-  /* Geen bloesem op papier: dat kost inkt en leest niet beter. */
+  /* Geen kleurwas op papier: dat kost inkt en leest niet beter. */
   body::before { display: none; }
   .bw-labelvel {
     display: grid;
