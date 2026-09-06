@@ -12,7 +12,20 @@ interface PlantNetResponse {
       scientificNameWithoutAuthor?: string;
       commonNames?: string[];
     };
+    images?: {
+      author?: string;
+      license?: string;
+      url?: { o?: string; m?: string; s?: string };
+    }[];
   }[];
+}
+
+/** De naamsvermelding die bij een foto van PlantNet hoort. */
+function bronvermelding(image: { author?: string; license?: string }): string {
+  const delen = ['PlantNet'];
+  if (image.author) delen.push(image.author);
+  if (image.license) delen.push(image.license);
+  return delen.join(' · ');
 }
 
 /**
@@ -32,7 +45,7 @@ export async function identifyWithPlantNet(
     form.append('images', new Blob([new Uint8Array(bytes)], { type: contentType }), 'plant.jpg');
     form.append('organs', 'auto');
 
-    const url = `${ENDPOINT}?api-key=${encodeURIComponent(process.env.PLANTNET_API_KEY!)}&lang=nl&nb-results=5`;
+    const url = `${ENDPOINT}?api-key=${encodeURIComponent(process.env.PLANTNET_API_KEY!)}&lang=nl&nb-results=5&include-related-images=true`;
     const res = await fetch(url, {
       method: 'POST',
       body: form,
@@ -47,15 +60,20 @@ export async function identifyWithPlantNet(
     const data = (await res.json()) as PlantNetResponse;
     const candidates = (data.results ?? [])
       .slice(0, 5)
-      .map<PlantCandidate>((result) => ({
-        name:
-          result.species?.commonNames?.[0] ??
-          result.species?.scientificNameWithoutAuthor ??
-          'Onbekend',
-        scientificName: result.species?.scientificNameWithoutAuthor,
-        score: Math.max(0, Math.min(1, result.score ?? 0)),
-        source: 'plantnet',
-      }))
+      .map<PlantCandidate>((result) => {
+        const image = result.images?.find((i) => i.url?.m ?? i.url?.o ?? i.url?.s);
+        return {
+          name:
+            result.species?.commonNames?.[0] ??
+            result.species?.scientificNameWithoutAuthor ??
+            'Onbekend',
+          scientificName: result.species?.scientificNameWithoutAuthor,
+          score: Math.max(0, Math.min(1, result.score ?? 0)),
+          source: 'plantnet',
+          imageUrl: image ? (image.url!.m ?? image.url!.o ?? image.url!.s) : undefined,
+          credit: image ? bronvermelding(image) : undefined,
+        };
+      })
       .filter((c) => c.name !== 'Onbekend');
     return { candidates };
   } catch (error) {

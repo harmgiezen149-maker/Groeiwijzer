@@ -66,7 +66,7 @@ function Knop({
         accept="image/jpeg,image/png,image/webp"
         {...(camera ? { capture: 'environment' as const } : {})}
         disabled={disabled}
-        className="absolute -inset-0.5 h-[calc(100%+4px)] w-[calc(100%+4px)] cursor-pointer text-base opacity-0"
+        className="absolute -inset-0.5 cursor-pointer text-base opacity-0"
         onChange={(event) => {
           const file = event.target.files?.[0];
           // Leegmaken, anders komt dezelfde foto een tweede keer niet door.

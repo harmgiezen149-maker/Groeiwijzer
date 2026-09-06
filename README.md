@@ -137,6 +137,19 @@ onderhoudsvoorstel bij die foto. Samen in één verzoek liepen ze over de
 tijdslimiet van een serverfunctie; los blijft elke stap ruim binnen de tijd en
 ziet de gebruiker de soort al terwijl het voorstel nog loopt.
 
+Bij het bevestigen staan twee foto's naast elkaar: die van de gebruiker en een
+foto van de gevonden soort bij PlantNet. Zo is te zien of de herkenning klopt,
+en is te kiezen welke van de twee de plantfoto wordt. De foto van PlantNet
+blijft daar staan tot hij gekozen wordt; dan haalt `/api/plants/reference-photo`
+hem op en zet hem in de eigen opslag, met dezelfde controles als de URL-import.
+De naamsvermelding van de fotograaf gaat mee als bijschrift.
+
+Een stuk tuin in één keer: `/api/plants/scan` legt de foto aan Claude voor en
+krijgt een lijst met alles wat erop herkend is. De gebruiker loopt die lijst
+zelf langs — naam en soort zijn nog aan te passen — en voegt per plant toe of
+slaat over. Elke bevestiging is een eigen zorgprofiel plus een eigen plant, dus
+een misser bij de ene raakt de andere niet.
+
 Twee regels die overal gelden:
 
 1. **Elke serveractie begint met `assertMember(userId, gardenId)`.** Een
@@ -147,7 +160,7 @@ Twee regels die overal gelden:
 ### Schermen
 
 `/` deze maand · `/agenda` maandkalender · `/planten` en `/planten/[id]` ·
-`/planten/nieuw` (foto, link, zelf invullen) · `/locaties` · `/jaar/[jaar]` ·
+`/planten/nieuw` (foto, stuk tuin scannen, link, zelf invullen) · `/locaties` · `/jaar/[jaar]` ·
 `/labels` printvel · `/instellingen` · `/uitnodiging/[token]` ·
 `/q/[gardenId]/[labelCode]` na het scannen van een label.
 

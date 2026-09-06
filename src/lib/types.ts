@@ -80,6 +80,10 @@ export interface PlantCandidate {
   scientificName?: string;
   score: number;
   source: string;
+  /** Foto van deze soort bij de bron, om de match mee te controleren. */
+  imageUrl?: string;
+  /** Wie de foto maakte en onder welke licentie. */
+  credit?: string;
 }
 
 export interface Plant {

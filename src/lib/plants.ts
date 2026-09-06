@@ -43,7 +43,11 @@ export type NewPlant = Omit<
   'id' | 'createdAt' | 'updatedAt' | 'status' | 'labelCode'
 > & { status?: Plant['status'] };
 
-export async function createPlant(gardenId: string, input: NewPlant): Promise<Plant> {
+export async function createPlant(
+  gardenId: string,
+  input: NewPlant,
+  opties: { photoCaption?: string } = {},
+): Promise<Plant> {
   const count = Object.keys(await db().hgetall<Plant>(g.plants(gardenId))).length;
   if (count >= MAX_PLANTS_PER_GARDEN) {
     throw Object.assign(new Error(`Maximaal ${MAX_PLANTS_PER_GARDEN} planten per tuin.`), {
@@ -66,7 +70,11 @@ export async function createPlant(gardenId: string, input: NewPlant): Promise<Pl
   // De foto waarmee de plant binnenkwam hoort ook in het album, anders is hij
   // niet te wisselen of weg te halen.
   if (plant.photoUrl) {
-    await addPhoto(gardenId, plant.id, { url: plant.photoUrl, takenAt: now });
+    await addPhoto(gardenId, plant.id, {
+      url: plant.photoUrl,
+      takenAt: now,
+      caption: opties.photoCaption,
+    });
   }
   return plant;
 }

@@ -13,10 +13,8 @@ export default async function NieuwePlantPagina({
   const { garden } = await requireContext();
   const [locations, params] = await Promise.all([listLocations(garden.id), searchParams]);
 
-  const bron =
-    params.bron === 'url' || params.bron === 'handmatig' || params.bron === 'foto'
-      ? params.bron
-      : null;
+  const BRONNEN = ['foto', 'tuinfoto', 'url', 'handmatig'] as const;
+  const bron = BRONNEN.find((b) => b === params.bron) ?? null;
 
   return (
     <div className="flex flex-col gap-4">

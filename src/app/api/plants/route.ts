@@ -29,13 +29,20 @@ export const GET = withGarden(async (ctx, req) => {
 });
 
 export const POST = withGarden(async (ctx, req) => {
-  const { tasks, identification, ...rest } = parseOrThrow(plantInput, await readJson(req));
-  const plant = await createPlant(ctx.garden.id, {
-    ...rest,
-    identification: identification
-      ? { ...identification, confirmedBy: ctx.user.id }
-      : undefined,
-  });
+  const { tasks, identification, photoCaption, ...rest } = parseOrThrow(
+    plantInput,
+    await readJson(req),
+  );
+  const plant = await createPlant(
+    ctx.garden.id,
+    {
+      ...rest,
+      identification: identification
+        ? { ...identification, confirmedBy: ctx.user.id }
+        : undefined,
+    },
+    { photoCaption },
+  );
   const created = tasks?.length ? await createTasks(ctx.garden.id, plant.id, tasks) : [];
   await addLog(ctx.garden.id, {
     plantId: plant.id,

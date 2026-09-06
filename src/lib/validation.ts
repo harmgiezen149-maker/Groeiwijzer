@@ -79,6 +79,8 @@ const plantVelden = {
   cultivar: z.string().trim().max(80).optional(),
   category: z.enum(PLANT_CATEGORIES),
   photoUrl: z.string().trim().max(500).optional(),
+  /** Bronvermelding bij een foto die niet van de gebruiker zelf komt. */
+  photoCaption: z.string().trim().max(200).optional(),
   quantity: z.coerce.number().int().min(1).max(999),
   plantedAt: z.string().trim().max(10).optional(),
   hardiness: z.string().trim().max(120).optional(),

@@ -192,3 +192,48 @@ Daarom een derde manier: een zelfgekozen wachtwoord.
 Wat er niet is: een wachtwoord vergeten-mail. Die zou over dezelfde mail lopen
 die nu juist niet werkt. Kwijt betekent: de eigenaar nodigt opnieuw uit, of
 inloggen met Google.
+
+## Een foto ter controle, en een heel stuk tuin in één keer (september 2026)
+
+De overdracht kent bij §6.1 één foto: die van de gebruiker. Twee dingen zijn
+erbij gekomen.
+
+**Een tweede foto ter controle.** PlantNet levert bij elke kandidaat een foto
+van die soort. Die staat nu naast de eigen foto in de bevestigstap, met de
+naam van de kandidaat eronder. Zo hoeft de gebruiker niet op een naam te
+vertrouwen die hij misschien niet kent — hij ziet gewoon of het dezelfde plant
+is. Wie de foto van PlantNet mooier vindt dan zijn eigen kiekje, maakt die de
+plantfoto.
+
+- **De foto van de bron wordt pas opgehaald als hij gekozen wordt.** Anders
+  zou elke herkenning een upload kosten die meestal weggegooid wordt, én zou
+  het herkennen weer trager worden — precies het probleem dat de splitsing in
+  twee aanroepen net had opgelost.
+- **Hij komt wél in de eigen opslag.** Een adres bij een ander verdwijnt op een
+  dag; een plantfoto hoort in de eigen tuin te staan.
+- **De naamsvermelding gaat mee** als bijschrift bij de foto in het album:
+  PlantNet, de fotograaf en de licentie.
+- Bij elke kandidaat staat een miniatuur, zodat de juiste soort kiezen ook op
+  beeld kan in plaats van alleen op naam.
+
+**Een stuk tuin scannen.** Een vierde ingang naast foto, link en zelf invullen:
+één foto van een border, en de app noemt alles wat erop staat.
+
+- **De lijst is een voorstel, geen invoer.** Een foto van veraf zit er vaker
+  naast dan een close-up van één blad, dus niets wordt automatisch toegevoegd.
+  De gebruiker loopt de lijst langs, past naam of soort aan, en voegt per plant
+  toe of slaat over. Overslaan is terug te draaien.
+- **De zekerste bovenaan**, met het percentage en een plaatsaanduiding ("links
+  vooraan") erbij, zodat duidelijk is over welke plant het gaat.
+- **Per plant een eigen aanroep.** Elke bevestiging is een eigen zorgprofiel en
+  een eigen plant. Dat is trager dan alles in één keer, maar een misser bij de
+  ene plant laat de andere staan, en de gebruiker ziet meteen wat er gelukt is.
+- **Geen tuinfoto als plantfoto.** Dezelfde brede foto bij acht planten zegt
+  niets; een eigen foto per plant kan later op de plantpagina.
+- Lukt het zorgprofiel niet, dan komt de plant er kaal in. Taken zijn daarna
+  alsnog toe te voegen — beter dan de hele toevoeging laten mislukken.
+
+Verder is `w-[calc(100%+2.5rem)]` vervangen door `.bw-randloos`. Die
+Tailwind-klasse leverde ongeldige CSS op (calc heeft spaties om de `+` nodig),
+waardoor de brede foto's boven aan het scherm stilletjes niet tot de rand
+liepen.
